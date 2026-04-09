@@ -1,0 +1,673 @@
+html
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WHO 成癮治療評估架構互動導引</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1e3a8a;
+    --navy-light: #1d4ed8;
+    --navy-pale: #dbeafe;
+    --navy-dark: #1e2d5a;
+    --gold: #b45309;
+    --gold-light: #fbbf24;
+    --gold-pale: #fef3c7;
+    --slate: #64748b;
+    --slate-light: #f1f5f9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: #f8fafc;
+    color: #1e293b;
+    line-height: 1.7;
+  }
+  h1, h2, h3 { font-family: 'Noto Serif TC', serif; }
+
+  /* Nav */
+  nav {
+    background: var(--navy-dark);
+    position: sticky; top: 0; z-index: 100;
+    border-bottom: 2px solid var(--gold-light);
+  }
+  .nav-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.75rem 1.5rem;
+  }
+  .nav-brand { color: white; font-family: 'Noto Serif TC', serif; font-size: 0.95rem; font-weight: 600; }
+  .nav-brand span { color: var(--gold-light); }
+  .nav-links { display: flex; gap: 1.5rem; }
+  .nav-links a {
+    color: #cbd5e1; font-size: 0.82rem; text-decoration: none;
+    padding: 0.25rem 0; border-bottom: 1px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .nav-links a:hover { color: white; border-color: var(--gold-light); }
+  .hamburger { display: none; background: none; border: none; color: white; cursor: pointer; }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, #1e2d5a 0%, #1e3a8a 50%, #1d4ed8 100%);
+    padding: 5rem 1.5rem 4rem;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -50%; right: -20%;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute; bottom: -30%; left: -10%;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: rgba(251,191,36,0.04);
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 900px; margin: 0 auto; position: relative; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: rgba(251,191,36,0.15);
+    border: 1px solid rgba(251,191,36,0.3);
+    color: var(--gold-light); font-size: 0.75rem; font-weight: 500;
+    padding: 0.3rem 0.75rem; border-radius: 2rem; margin-bottom: 1.5rem;
+  }
+  .hero h1 { color: white; font-size: clamp(1.6rem, 4vw, 2.5rem); line-height: 1.3; margin-bottom: 1.25rem; }
+  .hero h1 span { color: var(--gold-light); }
+  .hero-sub { color: #93c5fd; font-size: 1rem; max-width: 680px; margin-bottom: 2.5rem; font-weight: 300; }
+  .hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem; }
+  .hero-card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 0.75rem;
+    padding: 1.25rem 1rem;
+    transition: background 0.2s;
+  }
+  .hero-card:hover { background: rgba(255,255,255,0.12); }
+  .hero-card-icon { color: var(--gold-light); margin-bottom: 0.5rem; }
+  .hero-card h3 { color: white; font-size: 0.9rem; font-family: 'Noto Sans TC', sans-serif; font-weight: 600; margin-bottom: 0.25rem; }
+  .hero-card p { color: #93c5fd; font-size: 0.78rem; line-height: 1.5; }
+
+  /* Section */
+  .section { padding: 4rem 1.5rem; }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: var(--navy-pale); color: var(--navy); font-size: 0.72rem; font-weight: 600;
+    padding: 0.25rem 0.7rem; border-radius: 2rem; text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 0.75rem;
+  }
+  .section-title { color: var(--navy-dark); font-size: clamp(1.35rem, 3vw, 1.8rem); margin-bottom: 0.5rem; }
+  .section-desc { color: var(--slate); font-size: 0.92rem; max-width: 640px; margin-bottom: 2.5rem; }
+
+  /* Logic Model */
+  #logic { background: white; }
+  .logic-flow {
+    display: flex; align-items: stretch; gap: 0;
+    overflow-x: auto; padding-bottom: 0.5rem;
+  }
+  .logic-step {
+    flex: 1; min-width: 170px;
+    cursor: pointer;
+    border-top: 3px solid transparent;
+    padding: 1.5rem 1rem 1.25rem;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .logic-step:not(:last-child)::after {
+    content: '';
+    position: absolute; right: -1px; top: 20%; bottom: 20%;
+    width: 1px; background: #e2e8f0;
+  }
+  .logic-step.active, .logic-step:hover { background: var(--navy-pale); }
+  .logic-step.active { border-top-color: var(--navy); }
+  .logic-step:hover:not(.active) { border-top-color: #93c5fd; }
+  .logic-num {
+    font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--slate); margin-bottom: 0.4rem;
+  }
+  .logic-step.active .logic-num { color: var(--navy); }
+  .logic-title {
+    font-size: 1rem; font-weight: 600; color: #334155; margin-bottom: 0.3rem;
+  }
+  .logic-step.active .logic-title { color: var(--navy); }
+  .logic-sub { font-size: 0.75rem; color: var(--slate); line-height: 1.4; }
+  .logic-detail {
+    margin-top: 1.5rem;
+    background: var(--navy-pale);
+    border-left: 4px solid var(--navy);
+    border-radius: 0 0.5rem 0.5rem 0;
+    padding: 1.5rem;
+    animation: fadeSlide 0.25s ease;
+  }
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .logic-detail-title { color: var(--navy); font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; }
+  .indicator-list { display: flex; flex-direction: column; gap: 0.5rem; }
+  .indicator-item {
+    display: flex; align-items: flex-start; gap: 0.6rem;
+    background: white; border-radius: 0.5rem;
+    padding: 0.6rem 0.85rem; font-size: 0.82rem; color: #334155;
+  }
+  .indicator-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--navy); flex-shrink: 0; margin-top: 6px;
+  }
+
+  /* Workbooks Stepper */
+  #workbooks { background: #f8fafc; }
+  .stepper-layout { display: grid; grid-template-columns: 260px 1fr; gap: 1.5rem; }
+  .stepper-nav { display: flex; flex-direction: column; gap: 0.35rem; }
+  .stepper-btn {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.8rem 1rem; border-radius: 0.6rem;
+    cursor: pointer; border: 1px solid transparent;
+    background: transparent; text-align: left;
+    transition: all 0.18s;
+  }
+  .stepper-btn:hover:not(.active) { background: white; border-color: #e2e8f0; }
+  .stepper-btn.active {
+    background: white; border-color: var(--navy);
+    box-shadow: 0 1px 8px rgba(30,58,138,0.1);
+  }
+  .stepper-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 700; flex-shrink: 0;
+    background: #e2e8f0; color: var(--slate);
+    transition: all 0.18s;
+  }
+  .stepper-btn.active .stepper-num { background: var(--navy); color: white; }
+  .stepper-btn-text { font-size: 0.82rem; color: #334155; font-weight: 500; }
+  .stepper-btn.active .stepper-btn-text { color: var(--navy); font-weight: 600; }
+  .stepper-btn-sub { font-size: 0.7rem; color: var(--slate); }
+
+  .workbook-card {
+    background: white; border-radius: 1rem;
+    border: 1px solid #e2e8f0;
+    padding: 2rem; min-height: 380px;
+    animation: fadeSlide 0.2s ease;
+  }
+  .wb-header { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem; }
+  .wb-num-badge {
+    width: 52px; height: 52px; border-radius: 0.6rem; flex-shrink: 0;
+    background: var(--navy); color: white;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .wb-num-badge .big { font-size: 1.1rem; font-weight: 700; font-family: 'Noto Serif TC', serif; }
+  .wb-num-badge .small { font-size: 0.55rem; color: #93c5fd; }
+  .wb-title { font-size: 1.25rem; color: var(--navy-dark); font-weight: 700; }
+  .wb-subtitle { font-size: 0.82rem; color: var(--slate); margin-top: 0.15rem; }
+  .wb-tag {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 2rem;
+    margin-top: 0.4rem;
+  }
+  .tag-plan { background: #dbeafe; color: #1e40af; }
+  .tag-implement { background: #d1fae5; color: #065f46; }
+  .tag-needs { background: #fce7f3; color: #9d174d; }
+  .tag-process { background: #ede9fe; color: #5b21b6; }
+  .tag-cost { background: #fef3c7; color: #92400e; }
+  .tag-client { background: #fee2e2; color: #991b1b; }
+  .tag-outcome { background: #e0f2fe; color: #075985; }
+  .tag-economic { background: #f0fdf4; color: #166534; }
+
+  .wb-section { margin-bottom: 1.25rem; }
+  .wb-section-title {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--slate); margin-bottom: 0.5rem;
+    border-bottom: 1px solid #f1f5f9; padding-bottom: 0.25rem;
+  }
+  .wb-desc { font-size: 0.88rem; color: #475569; line-height: 1.7; }
+  .wb-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .wb-pill {
+    font-size: 0.73rem; background: var(--slate-light); color: #475569;
+    padding: 0.2rem 0.6rem; border-radius: 2rem;
+  }
+  .wb-nav-btns { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
+  .btn-prev, .btn-next {
+    display: flex; align-items: center; gap: 0.4rem;
+    padding: 0.5rem 1rem; border-radius: 0.4rem; font-size: 0.82rem; cursor: pointer;
+    border: 1px solid; transition: all 0.15s;
+  }
+  .btn-prev { border-color: #e2e8f0; color: var(--slate); background: white; }
+  .btn-prev:hover { background: #f1f5f9; }
+  .btn-next { border-color: var(--navy); color: white; background: var(--navy); }
+  .btn-next:hover { background: #1d4ed8; }
+  .btn-prev:disabled, .btn-next:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* Quick Check */
+  #quickcheck { background: white; }
+  .qc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .qc-form { background: var(--slate-light); border-radius: 1rem; padding: 1.75rem; }
+  .qc-form h3 { color: var(--navy-dark); font-size: 1rem; margin-bottom: 0.25rem; }
+  .qc-form p { color: var(--slate); font-size: 0.82rem; margin-bottom: 1.25rem; }
+  .checkbox-group { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.25rem; }
+  .checkbox-item {
+    display: flex; align-items: center; gap: 0.65rem;
+    background: white; border-radius: 0.5rem; padding: 0.6rem 0.85rem;
+    cursor: pointer; border: 1px solid #e2e8f0; transition: all 0.15s;
+  }
+  .checkbox-item:hover { border-color: #93c5fd; }
+  .checkbox-item.selected { border-color: var(--navy); background: var(--navy-pale); }
+  .checkbox-item input { accent-color: var(--navy); width: 15px; height: 15px; }
+  .checkbox-label { font-size: 0.82rem; color: #334155; }
+  .qc-btn {
+    width: 100%; padding: 0.7rem; border-radius: 0.5rem;
+    background: var(--navy); color: white; font-size: 0.88rem; font-weight: 600;
+    border: none; cursor: pointer; transition: background 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  }
+  .qc-btn:hover { background: #1d4ed8; }
+
+  .qc-result { background: var(--slate-light); border-radius: 1rem; padding: 1.75rem; min-height: 300px; }
+  .qc-result-placeholder {
+    height: 100%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    color: var(--slate); gap: 0.75rem;
+  }
+  .qc-result-placeholder svg { opacity: 0.3; }
+  .qc-result-placeholder p { font-size: 0.85rem; }
+  .result-card {
+    background: white; border-radius: 0.75rem; padding: 1.25rem;
+    border-left: 4px solid var(--navy); margin-bottom: 0.85rem;
+    animation: fadeSlide 0.22s ease;
+  }
+  .result-card-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem; }
+  .result-priority {
+    font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.07em; padding: 0.15rem 0.5rem; border-radius: 2rem;
+  }
+  .priority-1 { background: #fee2e2; color: #991b1b; }
+  .priority-2 { background: #fef3c7; color: #92400e; }
+  .priority-3 { background: #dbeafe; color: #1e40af; }
+  .result-wb-name { font-size: 0.9rem; font-weight: 600; color: var(--navy-dark); }
+  .result-reason { font-size: 0.8rem; color: #475569; line-height: 1.5; }
+
+  /* Footer */
+  footer {
+    background: var(--navy-dark); color: #64748b;
+    padding: 2rem 1.5rem; text-align: center;
+    font-size: 0.78rem; border-top: 2px solid rgba(251,191,36,0.2);
+  }
+  footer strong { color: #94a3b8; }
+
+  /* Tooltip */
+  .tooltip { position: relative; display: inline-block; }
+  .tooltip .tip {
+    visibility: hidden; opacity: 0;
+    background: #1e293b; color: white; font-size: 0.72rem;
+    padding: 0.35rem 0.6rem; border-radius: 0.35rem;
+    position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+    white-space: nowrap; transition: opacity 0.15s; z-index: 50;
+    pointer-events: none;
+  }
+  .tooltip:hover .tip { visibility: visible; opacity: 1; }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .hamburger { display: block; }
+    .nav-links.open {
+      display: flex; flex-direction: column;
+      position: absolute; top: 100%; left: 0; right: 0;
+      background: var(--navy-dark); padding: 1rem 1.5rem; gap: 0.75rem;
+    }
+    .hero { padding: 3rem 1rem 2.5rem; }
+    .logic-flow { flex-direction: column; }
+    .logic-step::after { display: none; }
+    .stepper-layout { grid-template-columns: 1fr; }
+    .stepper-nav { flex-direction: row; flex-wrap: wrap; }
+    .stepper-btn { padding: 0.5rem 0.75rem; }
+    .stepper-btn-sub { display: none; }
+    .qc-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .wb-nav-btns { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <div class="nav-inner">
+    <div class="nav-brand">WHO <span>MSD/MSB</span> 成癮評估架構</div>
+    <div class="nav-links" id="nav-links">
+      <a href="#hero">首頁</a>
+      <a href="#logic">邏輯模式</a>
+      <a href="#workbooks">八大手冊</a>
+      <a href="#quickcheck">快速診斷</a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="選單">
+      <i data-lucide="menu" style="width:20px;height:20px;"></i>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">
+      <i data-lucide="shield-check" style="width:12px;height:12px;"></i>
+      WHO MSD/MSB Framework Workbook
+    </div>
+    <h1>
+      為何成癮防治計畫<br>
+      需要<span>嚴謹的評估架構</span>？
+    </h1>
+    <p class="hero-sub">
+      世界衛生組織心理衛生與物質濫用部門（MSD/MSB）提供系統化的評估工作手冊，
+      協助台灣成癮治療示範中心及相關機構建立具實證基礎的服務評估能力，
+      確保資源投入產生最大社會效益。
+    </p>
+    <div class="hero-grid">
+      <div class="hero-card">
+        <div class="hero-card-icon"><i data-lucide="target" style="width:20px;height:20px;"></i></div>
+        <h3>確保問責性</h3>
+        <p>透過客觀數據，向政策制定者與資助方展示計畫成效，強化公共信任。</p>
+      </div>
+      <div class="hero-card">
+        <div class="hero-card-icon"><i data-lucide="trending-up" style="width:20px;height:20px;"></i></div>
+        <h3>持續品質改善</h3>
+        <p>識別服務落差，系統性優化治療流程，提升用戶康復比率。</p>
+      </div>
+      <div class="hero-card">
+        <div class="hero-card-icon"><i data-lucide="book-open" style="width:20px;height:20px;"></i></div>
+        <h3>知識轉移</h3>
+        <p>建立本土評估文獻，推動跨機構學習與最佳實踐傳播。</p>
+      </div>
+      <div class="hero-card">
+        <div class="hero-card-icon"><i data-lucide="coins" style="width:20px;height:20px;"></i></div>
+        <h3>資源最適化</h3>
+        <p>成本效益分析確保有限公共衛生預算用於最具效能的介入方案。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOGIC MODEL -->
+<section class="section" id="logic">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="workflow" style="width:11px;height:11px;"></i> 評估核心架構</span>
+    <h2 class="section-title">邏輯模式探索器</h2>
+    <p class="section-desc">點擊任一階段，深入了解對應的評估指標定義與實務應用。</p>
+
+    <div class="logic-flow" role="tablist">
+      <div class="logic-step active" onclick="showLogic(0)" role="tab" tabindex="0">
+        <div class="logic-num">第一階段</div>
+        <div class="logic-title">投入<br><small style="font-size:0.7em;color:#64748b;">Inputs</small></div>
+        <div class="logic-sub">資源、人力與基礎設施</div>
+      </div>
+      <div class="logic-step" onclick="showLogic(1)" role="tab" tabindex="0">
+        <div class="logic-num">第二階段</div>
+        <div class="logic-title">活動<br><small style="font-size:0.7em;color:#64748b;">Activities</small></div>
+        <div class="logic-sub">服務流程與介入方案</div>
+      </div>
+      <div class="logic-step" onclick="showLogic(2)" role="tab" tabindex="0">
+        <div class="logic-num">第三階段</div>
+        <div class="logic-title">產出<br><small style="font-size:0.7em;color:#64748b;">Outputs</small></div>
+        <div class="logic-sub">直接可量化之服務成果</div>
+      </div>
+      <div class="logic-step" onclick="showLogic(3)" role="tab" tabindex="0">
+        <div class="logic-num">第四階段</div>
+        <div class="logic-title">結果<br><small style="font-size:0.7em;color:#64748b;">Outcomes</small></div>
+        <div class="logic-sub">長期健康與社會效益</div>
+      </div>
+    </div>
+
+    <div class="logic-detail" id="logic-detail"></div>
+  </div>
+</section>
+
+<!-- WORKBOOKS STEPPER -->
+<section class="section" id="workbooks">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="book-marked" style="width:11px;height:11px;"></i> 系統化評估工具</span>
+    <h2 class="section-title">八大工作手冊導覽</h2>
+    <p class="section-desc">WHO MSD/MSB 架構涵蓋評估週期的完整八本工作手冊，依計畫推進階段循序運用。</p>
+
+    <div class="stepper-layout">
+      <div class="stepper-nav" id="stepper-nav"></div>
+      <div id="workbook-card"></div>
+    </div>
+  </div>
+</section>
+
+<!-- QUICK CHECK -->
+<section class="section" id="quickcheck">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="stethoscope" style="width:11px;height:11px;"></i> 快速診斷工具</span>
+    <h2 class="section-title">我該優先閱讀哪一本？</h2>
+    <p class="section-desc">勾選您目前的計畫狀況，系統將自動推薦最適合的工作手冊。</p>
+
+    <div class="qc-grid">
+      <div class="qc-form">
+        <h3>計畫現況評估</h3>
+        <p>請勾選所有符合您目前情境的選項</p>
+        <div class="checkbox-group" id="checkbox-group"></div>
+        <button class="qc-btn" onclick="runQuickCheck()">
+          <i data-lucide="search" style="width:15px;height:15px;"></i>
+          分析並推薦手冊
+        </button>
+      </div>
+      <div class="qc-result">
+        <div class="qc-result-placeholder" id="qc-placeholder">
+          <i data-lucide="clipboard-list" style="width:40px;height:40px;"></i>
+          <p>勾選左側選項後，顯示推薦路徑</p>
+        </div>
+        <div id="qc-output" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>WHO MSD/MSB Framework Workbook 數位化導引</strong></p>
+  <p style="margin-top:0.5rem;opacity:0.6;">
+    本工具僅供學術與政策研究參考。請搭配 WHO 原始工作手冊使用。<br>
+    Taiwan Mental Health and Addiction Policy Translation Center (TMAP) 應用實習
+  </p>
+</footer>
+
+<script>
+  // 1. 邏輯模式數據
+  const logicData = [
+    {
+      title: "投入階段 (Inputs) 評估",
+      items: ["醫療與心理衛生人力配置", "經費預算撥付進度", "治療場域設施與硬體設備", "藥物與衛材供應鏈穩定度"]
+    },
+    {
+      title: "活動階段 (Activities) 評估",
+      items: ["門診與住院治療流程執行率", "心理諮商與團體治療開課數", "外展服務與社區聯繫頻率", "個案管理追蹤機制的落實"]
+    },
+    {
+      title: "產出階段 (Outputs) 評估",
+      items: ["完成治療計畫之個案數", "尿液篩檢執行次數與結果", "轉介至社會福利系統的人次", "家屬衛教活動的參與人數"]
+    },
+    {
+      title: "結果階段 (Outcomes) 評估",
+      items: ["個案物質使用頻率下降率", "社會功能與就業率改善程度", "刑事再犯率之長期追蹤", "整體公共衛生醫療支出的節省"]
+    }
+  ];
+
+  // 2. 八大手冊數據
+  const workbooks = [
+    { id: 1, tag: "tag-plan", title: "規劃評估", sub: "Planning", desc: "確立評估目標、利害關係人與資源分配。這是所有評估工序的起點。", pills: ["評估問卷設計", "建立評估團隊", "定義核心問題"] },
+    { id: 2, tag: "tag-implement", title: "執行評估", sub: "Implementation", desc: "如何實際蒐集數據，確保資料的品質與信效度。", pills: ["數據管理", "品質控制", "倫理守則"] },
+    { id: 3, tag: "tag-needs", title: "需求評估", sub: "Needs", desc: "了解目標族群的特徵與需求，確保計畫方向正確。", pills: ["社區需求分析", "差距分析", "優先順序設定"] },
+    { id: 4, tag: "tag-process", title: "過程評估", sub: "Process", desc: "檢核計畫是否按原定流程執行，識別執行的障礙。", pills: ["流程監測", "執行保真度", "障礙識別"] },
+    { id: 5, tag: "tag-cost", title: "成本效益", sub: "Cost-effectiveness", desc: "計算每達成一個成效單位所需的成本。", pills: ["單位成本計算", "資源耗用分析", "效率對比"] },
+    { id: 6, tag: "tag-client", title: "用戶滿意度", sub: "Satisfaction", desc: "從個案視角評估服務的可近性與尊重程度。", pills: ["量表設計", "主觀體驗", "服務障礙回饋"] },
+    { id: 7, tag: "tag-outcome", title: "成效評估", sub: "Outcome", desc: "測量治療計畫對個案健康與行為的具體改變。", pills: ["治療成效", "復發率追蹤", "健康相關生活品質"] },
+    { id: 8, tag: "tag-economic", title: "經濟評估", sub: "Economic", desc: "宏觀視角的社會投資報酬率（SROI）分析。", pills: ["社會成本節省", "長期經濟效益", "預算分配影響"] }
+  ];
+
+  // 3. 快速診斷題項
+  const qcOptions = [
+    { id: 'q1', text: '我正在撰寫新的計畫書，還不確定如何設定指標', wb: [1, 3] },
+    { id: 'q2', text: '計畫已經執行一段時間，我想知道流程是否有瑕疵', wb: [4] },
+    { id: 'q3', text: '預算快用完了，我需要向長官證明這筆錢花得值得', wb: [5, 8] },
+    { id: 'q4', text: '個案留不住，我想知道他們對治療環境的真實想法', wb: [6] },
+    { id: 'q5', text: '我需要硬數據來證明治療後個案的再犯率有下降', wb: [7, 2] }
+  ];
+
+  // 渲染邏輯
+  let currentLogic = 0;
+  let currentWb = 0;
+
+  function showLogic(idx) {
+    currentLogic = idx;
+    const steps = document.querySelectorAll('.logic-step');
+    steps.forEach((s, i) => s.classList.toggle('active', i === idx));
+    
+    const detail = document.getElementById('logic-detail');
+    const data = logicData[idx];
+    detail.innerHTML = `
+      <div class="logic-detail-title">${data.title}</div>
+      <div class="indicator-list">
+        ${data.items.map(item => `
+          <div class="indicator-item">
+            <div class="indicator-dot"></div>
+            ${item}
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function renderStepper() {
+    const nav = document.getElementById('stepper-nav');
+    nav.innerHTML = workbooks.map((wb, i) => `
+      <button class="stepper-btn ${i === currentWb ? 'active' : ''}" onclick="showWb(${i})">
+        <div class="stepper-num">${wb.id}</div>
+        <div>
+          <div class="stepper-btn-text">${wb.title}</div>
+          <div class="stepper-btn-sub">${wb.sub}</div>
+        </div>
+      </button>
+    `).join('');
+
+    const card = document.getElementById('workbook-card');
+    const wb = workbooks[currentWb];
+    card.innerHTML = `
+      <div class="workbook-card">
+        <div class="wb-header">
+          <div class="wb-num-badge">
+            <div class="small">WB</div>
+            <div class="big">${wb.id}</div>
+          </div>
+          <div>
+            <div class="wb-title">${wb.title} <span class="text-slate-400 text-sm font-normal">/ ${wb.sub}</span></div>
+            <span class="wb-tag ${wb.tag}">核心手冊</span>
+          </div>
+        </div>
+        <div class="wb-section">
+          <div class="wb-section-title">手冊目標</div>
+          <p class="wb-desc">${wb.desc}</p>
+        </div>
+        <div class="wb-section">
+          <div class="wb-section-title">關鍵盤點項目</div>
+          <div class="wb-pills">
+            ${wb.pills.map(p => `<span class="wb-pill">${p}</span>`).join('')}
+          </div>
+        </div>
+        <div class="wb-nav-btns">
+          <button class="btn-prev" onclick="showWb(${currentWb-1})" ${currentWb === 0 ? 'disabled' : ''}>
+            <i data-lucide="chevron-left" style="width:14px;height:14px;"></i> 前一章
+          </button>
+          <button class="btn-next" onclick="showWb(${currentWb+1})" ${currentWb === workbooks.length-1 ? 'disabled' : ''}>
+            下一章 <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
+          </button>
+        </div>
+      </div>
+    `;
+    lucide.createIcons();
+  }
+
+  function showWb(idx) {
+    if (idx < 0 || idx >= workbooks.length) return;
+    currentWb = idx;
+    renderStepper();
+  }
+
+  function initQuickCheck() {
+    const group = document.getElementById('checkbox-group');
+    group.innerHTML = qcOptions.map(opt => `
+      <label class="checkbox-item" id="label-${opt.id}">
+        <input type="checkbox" value="${opt.id}" onchange="toggleQcStyle('${opt.id}')">
+        <span class="checkbox-label">${opt.text}</span>
+      </label>
+    `).join('');
+  }
+
+  function toggleQcStyle(id) {
+    const label = document.getElementById(`label-${id}`);
+    label.classList.toggle('selected');
+  }
+
+  function runQuickCheck() {
+    const checked = Array.from(document.querySelectorAll('#checkbox-group input:checked')).map(i => i.value);
+    const placeholder = document.getElementById('qc-placeholder');
+    const output = document.getElementById('qc-output');
+
+    if (checked.length === 0) {
+      alert('請至少勾選一項現況');
+      return;
+    }
+
+    placeholder.style.display = 'none';
+    output.style.display = 'block';
+
+    const recommendedIds = new Set();
+    checked.forEach(id => {
+      const opt = qcOptions.find(o => o.id === id);
+      opt.wb.forEach(wbId => recommendedIds.add(wbId));
+    });
+
+    output.innerHTML = `
+      <h4 style="font-size:0.9rem; font-weight:600; margin-bottom:1rem; color:var(--navy-dark);">根據診斷，建議優先參閱：</h4>
+      ${Array.from(recommendedIds).map((wbId, index) => {
+        const wb = workbooks.find(w => w.id === wbId);
+        return `
+          <div class="result-card">
+            <div class="result-card-header">
+              <span class="result-priority priority-${Math.min(index + 1, 3)}">優先序 ${index + 1}</span>
+              <span class="result-wb-name">Workbook ${wb.id}: ${wb.title}</span>
+            </div>
+            <p class="result-reason">此手冊包含針對您勾選問題的標準化評估工序與指標清單。</p>
+          </div>
+        `;
+      }).join('')}
+    `;
+  }
+
+  // 初始化
+  window.onload = () => {
+    lucide.createIcons();
+    showLogic(0);
+    renderStepper();
+    initQuickCheck();
+    
+    // 漢堡選單邏輯
+    document.getElementById('hamburger').onclick = () => {
+      document.getElementById('nav-links').classList.toggle('open');
+    };
+  };
+</script>
+</body>
+</html>
