@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workbook 1 評估規劃 - WHO 成癮治療評估架構</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root {
+    --navy: #1e3a8a;
+    --navy-light: #1d4ed8;
+    --navy-pale: #dbeafe;
+    --navy-dark: #1e2d5a;
+    --gold: #b45309;
+    --gold-light: #fbbf24;
+    --gold-pale: #fef3c7;
+    --slate: #64748b;
+    --slate-light: #f1f5f9;
+    --green: #059669;
+    --green-pale: #d1fae5;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: #f0f4fb;
+    color: #1e293b;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+  h1, h2, h3 { font-family: 'Noto Serif TC', serif; }
+
+  /* ── NAV ── */
+  nav {
+    background: var(--navy-dark);
+    position: sticky; top: 0; z-index: 200;
+    border-bottom: 2px solid var(--gold-light);
+    box-shadow: 0 2px 20px rgba(0,0,0,.3);
+  }
+  .nav-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .75rem 1.5rem;
+  }
+  .nav-brand { color: white; font-family: 'Noto Serif TC', serif; font-size: .95rem; font-weight: 600; }
+  .nav-brand span { color: var(--gold-light); }
+  .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+  .nav-progress {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .7rem; color: #93c5fd; font-family: 'DM Mono', monospace;
+  }
+  .nav-progress-bar {
+    width: 100px; height: 4px; background: rgba(255,255,255,.15); border-radius: 2px; overflow: hidden;
+  }
+  .nav-progress-fill {
+    height: 100%; background: var(--gold-light); border-radius: 2px;
+    transition: width .4s ease; width: 0%;
+  }
+  .btn-return {
+    color: white; font-size: 0.8rem; text-decoration: none; font-weight: 500;
+    padding: 0.35rem 0.8rem; border-radius: 2rem;
+    border: 1px solid rgba(255,255,255,0.3); transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+  }
+  .btn-return:hover { background: rgba(255,255,255,0.1); border-color: white; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #1e2d5a 0%, #1e3a8a 50%, #1d4ed8 100%);
+    padding: 5rem 1.5rem 4rem;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 70% 30%, rgba(251,191,36,.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 80%, rgba(29,78,216,.3) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .hero-orb {
+    position: absolute; border-radius: 50%; pointer-events: none;
+    animation: floatOrb 8s ease-in-out infinite;
+  }
+  .hero-orb-1 { width: 300px; height: 300px; background: rgba(251,191,36,.04); top: -80px; right: -60px; animation-delay: 0s; }
+  .hero-orb-2 { width: 200px; height: 200px; background: rgba(29,78,216,.12); bottom: -50px; left: 10%; animation-delay: 3s; }
+  @keyframes floatOrb {
+    0%,100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-20px) scale(1.05); }
+  }
+  .hero-inner { max-width: 900px; margin: 0 auto; position: relative; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: rgba(251,191,36,.15);
+    border: 1px solid rgba(251,191,36,.3);
+    color: var(--gold-light); font-size: .75rem; font-weight: 500;
+    padding: .3rem .75rem; border-radius: 2rem; margin-bottom: 1.5rem;
+    animation: fadeDown .6s ease both;
+  }
+  .hero h1 {
+    color: white; font-size: clamp(1.7rem, 4vw, 2.6rem); line-height: 1.3; margin-bottom: 1.25rem;
+    animation: fadeDown .7s ease .1s both;
+  }
+  .hero h1 span { color: var(--gold-light); }
+  .hero-sub {
+    color: #93c5fd; font-size: .95rem; max-width: 750px; margin-bottom: 2rem;
+    font-weight: 300; line-height: 1.8;
+    animation: fadeDown .8s ease .2s both;
+  }
+  .hero-stats {
+    display: flex; gap: 2rem; flex-wrap: wrap;
+    animation: fadeDown .9s ease .35s both;
+  }
+  .hero-stat {
+    display: flex; flex-direction: column;
+    border-left: 2px solid rgba(251,191,36,.4); padding-left: 1rem;
+  }
+  .hero-stat-num { font-size: 1.6rem; font-weight: 700; color: var(--gold-light); font-family: 'DM Mono', monospace; }
+  .hero-stat-label { font-size: .72rem; color: #93c5fd; }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SECTIONS ── */
+  .section { padding: 4rem 1.5rem; }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--navy-pale); color: var(--navy); font-size: .72rem; font-weight: 600;
+    padding: .25rem .7rem; border-radius: 2rem; text-transform: uppercase; letter-spacing: .06em;
+    margin-bottom: .75rem;
+  }
+  .section-title { color: var(--navy-dark); font-size: clamp(1.35rem, 3vw, 1.8rem); margin-bottom: .5rem; }
+  .section-desc { color: var(--slate); font-size: .92rem; max-width: 640px; margin-bottom: 2.5rem; }
+
+  /* ── STEPPER ── */
+  .stepper-layout { display: grid; grid-template-columns: 280px 1fr; gap: 1.5rem; align-items: start; }
+  .stepper-nav { display: flex; flex-direction: column; gap: .3rem; position: sticky; top: 80px; }
+  .stepper-btn {
+    display: flex; align-items: center; gap: .75rem;
+    padding: .75rem 1rem; border-radius: .6rem;
+    cursor: pointer; border: 1px solid transparent;
+    background: transparent; text-align: left;
+    transition: all .2s; position: relative; overflow: hidden;
+  }
+  .stepper-btn::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(30,58,138,.06) 0%, transparent 100%);
+    opacity: 0; transition: opacity .2s;
+  }
+  .stepper-btn:hover:not(.active)::after { opacity: 1; }
+  .stepper-btn:hover:not(.active) { background: white; border-color: #e2e8f0; transform: translateX(3px); }
+  .stepper-btn.active {
+    background: white; border-color: var(--navy);
+    box-shadow: 0 2px 12px rgba(30,58,138,.15); transform: translateX(4px);
+  }
+  .stepper-num {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .7rem; font-weight: 700; flex-shrink: 0;
+    background: #e2e8f0; color: var(--slate);
+    transition: all .25s; font-family: 'DM Mono', monospace;
+  }
+  .stepper-btn.done .stepper-num { background: var(--green); color: white; }
+  .stepper-btn.active .stepper-num { background: var(--navy); color: white; }
+  .stepper-btn-text { font-size: .84rem; color: #334155; font-weight: 500; }
+  .stepper-btn.active .stepper-btn-text { color: var(--navy); font-weight: 600; }
+  .stepper-btn-sub { font-size: .68rem; color: var(--slate); margin-top: 1px; }
+
+  /* ── CARD ── */
+  .workbook-card {
+    background: white; border-radius: 1rem;
+    border: 1px solid #e2e8f0;
+    padding: 2.5rem; min-height: 400px;
+  }
+  .wb-header { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.75rem; }
+  .wb-num-badge {
+    width: 60px; height: 60px; border-radius: .7rem; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    color: white;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(30,58,138,.25);
+  }
+  .wb-num-badge .big { font-size: 1.3rem; font-weight: 700; font-family: 'DM Mono', monospace; }
+  .wb-num-badge .small { font-size: .55rem; color: #93c5fd; letter-spacing: .05em; }
+  .wb-title { font-size: 1.3rem; color: var(--navy-dark); font-weight: 700; }
+  .wb-subtitle { font-size: .82rem; color: var(--slate); margin-top: .25rem; font-style: italic; }
+  .wb-tag {
+    display: inline-flex; align-items: center; gap: .3rem;
+    font-size: .7rem; font-weight: 600; padding: .2rem .6rem; border-radius: 2rem;
+    margin-top: .5rem;
+  }
+  .tag-plan { background: #dbeafe; color: #1e40af; }
+
+  .wb-section { margin-bottom: 1.5rem; }
+  .wb-section-title {
+    font-size: .73rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--slate); margin-bottom: .65rem;
+    border-bottom: 1px solid #f1f5f9; padding-bottom: .3rem;
+    display: flex; align-items: center; gap: .4rem;
+  }
+  .wb-desc { font-size: .9rem; color: #475569; line-height: 1.8; }
+
+  /* checklist items */
+  .checklist { display: flex; flex-direction: column; gap: .45rem; margin-top: .75rem; }
+  .check-item {
+    display: flex; align-items: flex-start; gap: .65rem;
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: .5rem;
+    padding: .7rem 1rem; font-size: .85rem; color: #334155;
+    cursor: pointer; transition: all .2s; user-select: none;
+  }
+  .check-item:hover { background: var(--navy-pale); border-color: #bfdbfe; }
+  .check-item.checked { background: var(--green-pale); border-color: #6ee7b7; color: #065f46; }
+  .check-icon {
+    width: 18px; height: 18px; border-radius: 50%; border: 2px solid #cbd5e1;
+    flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center;
+    transition: all .2s; font-size: .6rem; color: transparent;
+  }
+  .check-item.checked .check-icon {
+    background: var(--green); border-color: var(--green); color: white;
+  }
+  .check-text { flex: 1; }
+
+  /* progress indicator in card */
+  .card-progress {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .72rem; color: var(--slate); margin-bottom: 1rem;
+    font-family: 'DM Mono', monospace;
+  }
+  .card-progress-bar {
+    flex: 1; height: 3px; background: #e2e8f0; border-radius: 2px; overflow: hidden;
+  }
+  .card-progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--green), #34d399);
+    border-radius: 2px; transition: width .4s ease;
+  }
+
+  .wb-nav-btns { display: flex; gap: .75rem; margin-top: 2rem; border-top: 1px solid #f1f5f9; padding-top: 1.5rem; align-items: center; }
+  .btn-prev, .btn-next {
+    display: inline-flex; align-items: center; gap: .4rem;
+    padding: .55rem 1.25rem; border-radius: .5rem; font-size: .85rem; cursor: pointer;
+    border: 1px solid; transition: all .18s; font-weight: 500;
+  }
+  .btn-prev { border-color: #e2e8f0; color: var(--slate); background: white; }
+  .btn-prev:hover:not(:disabled) { background: #f1f5f9; }
+  .btn-next { border-color: var(--navy); color: white; background: var(--navy); }
+  .btn-next:hover:not(:disabled) { background: var(--navy-light); box-shadow: 0 4px 12px rgba(30,58,138,.3); }
+  .btn-prev:disabled, .btn-next:disabled { opacity: .35; cursor: not-allowed; }
+  .btn-step-label { margin-left: auto; font-size: .72rem; color: var(--slate); font-family: 'DM Mono', monospace; }
+  
+  .btn-report { background: var(--gold-light); border-color: var(--gold); color: var(--navy-dark); font-weight: 700; }
+  .btn-report:hover { background: var(--gold); color: white; box-shadow: 0 4px 12px rgba(180,83,9,.25); }
+
+  /* ── REPORT / RADAR SECTION ── */
+  .report-section { background: white; display: none; }
+  .report-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 2.5rem; align-items: center; margin-top: 2rem; }
+  .radar-container { position: relative; width: 100%; max-width: 450px; margin: 0 auto; aspect-ratio: 1; }
+  .advice-box { background: #f8fafc; border-radius: 1rem; padding: 2rem; border: 1px solid #e2e8f0; }
+  .advice-item { background: white; border-left: 4px solid var(--gold-light); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .advice-item strong { color: var(--navy-dark); font-size: 0.9rem; display: block; margin-bottom: 0.3rem;}
+  .advice-item p { font-size: 0.85rem; color: #475569; margin: 0;}
+  .advice-success { border-left-color: var(--green); }
+
+  /* ── INSTRUMENTS ── */
+  .instruments-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+  .instrument-card {
+    background: white; border-radius: .85rem; padding: 1.75rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    transition: all .25s; cursor: default; position: relative; overflow: hidden;
+  }
+  .instrument-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--gold-light), #f59e0b);
+  }
+  .instrument-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,.1); transform: translateY(-3px); }
+  .instrument-icon { font-size: 1.5rem; margin-bottom: .75rem; }
+  .instrument-name { font-size: 1rem; font-weight: 700; color: var(--navy-dark); margin-bottom: .5rem; }
+  .instrument-desc { font-size: .85rem; color: #475569; line-height: 1.7; }
+  .instrument-domains { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1rem; }
+  .domain-tag {
+    font-size: .68rem; font-weight: 600; padding: .18rem .55rem; border-radius: 2rem;
+    background: var(--navy-pale); color: var(--navy);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy-dark); color: #64748b;
+    padding: 2.5rem 1.5rem; text-align: center;
+    font-size: .8rem; border-top: 2px solid rgba(251,191,36,.2);
+  }
+  footer strong { color: #94a3b8; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 999;
+    background: var(--navy-dark); color: white;
+    padding: .75rem 1.25rem; border-radius: .6rem;
+    font-size: .85rem; box-shadow: 0 4px 20px rgba(0,0,0,.3);
+    transform: translateY(100px); opacity: 0;
+    transition: all .3s cubic-bezier(.34,1.56,.64,1);
+    pointer-events: none; display: flex; align-items: center; gap: .5rem;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast-icon { font-size: 1rem; }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(24px); transition: all .55s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    .stepper-layout { grid-template-columns: 1fr; }
+    .stepper-nav { position: static; flex-direction: row; flex-wrap: wrap; gap: .4rem; }
+    .stepper-btn { flex: 1; min-width: 130px; transform: none !important; }
+    .hero-stats { gap: 1rem; }
+    .nav-progress { display: none; }
+    .report-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="main-nav">
+  <div class="nav-inner">
+    <div class="nav-brand">WHO <span>成癮醫療服務</span> 評估架構</div>
+    <div class="nav-right">
+      <div class="nav-progress">
+        <span id="nav-step-label">步驟 1/8</span>
+        <div class="nav-progress-bar">
+          <div class="nav-progress-fill" id="nav-progress-fill"></div>
+        </div>
+      </div>
+      <a href="WHO_MSD_MSB_Guide_13_developing.html" class="btn-return">← 返回主頁</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">📖 Workbook 1: Planning Evaluations</div>
+    <h1>
+      第一階段：建構穩固的<br>
+      <span>評估規劃基石</span>
+    </h1>
+    <p class="hero-sub">
+      本手冊（Workbook 1）是整個 WHO 評估框架手冊系列的基礎，描述了規劃評估的逐步方法。這些步驟涵蓋從決定誰將參與評估，到定義研究問題和決定數據收集方法的完整流程。<br><br>
+      本指南專為政策評估組與第一線工作者設計，旨在確保資源受到最有效的利用，並確保評估結果能實質輔助治療模式的決策與優化。
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-num">8</span>
+        <span class="hero-stat-label">規劃步驟</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">8</span>
+        <span class="hero-stat-label">系列手冊</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">2</span>
+        <span class="hero-stat-label">測量工具</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="steps" style="background:#f0f4fb;">
+  <div class="section-inner">
+    <span class="section-label">🗂 The 8 Steps</span>
+    <h2 class="section-title reveal">評估規劃的八大步驟</h2>
+    <p class="section-desc reveal">點擊左側步驟瀏覽各階段執行重點。勾選清單項目以追蹤完成進度，最後可產出您的規劃診斷報告。</p>
+
+    <div class="stepper-layout">
+      <div class="stepper-nav" id="step-nav"></div>
+      <div id="step-content"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section report-section" id="report-section">
+  <div class="section-inner">
+    <span class="section-label">📊 Diagnosis Report</span>
+    <h2 class="section-title">規劃階段診斷雷達圖與建議</h2>
+    <p class="section-desc">根據您在上方八大步驟中勾選的關鍵檢核項目，系統已為您產出視覺化的完成度雷達圖，並提供後續實務建議。</p>
+
+    <div class="report-grid">
+      <div class="radar-container">
+        <canvas id="radarChart"></canvas>
+      </div>
+      <div class="advice-box" id="advice-content">
+        </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="background:#f8fafc;" id="instruments">
+  <div class="section-inner">
+    <span class="section-label">📋 Instruments</span>
+    <h2 class="section-title reveal">附錄：核心測量與問卷工具</h2>
+    <p class="section-desc reveal">手冊附錄中提供了多種標準化工具，可用於成效與生活品質的測量，在推動政策或介入方案的比較時非常實用。</p>
+
+    <div class="instruments-grid reveal">
+      <div class="instrument-card">
+        <div class="instrument-icon">🌐</div>
+        <div class="instrument-name">WHOQOL-BREF</div>
+        <div class="instrument-desc">
+          世界衛生組織生活品質問卷簡明版，共 26 題，可產生四個領域的品質評分。適用於跨文化比較研究，評估個案在生理、心理、社會與環境等面向的主觀健康狀態。
+        </div>
+        <div class="instrument-domains">
+          <span class="domain-tag">生理健康</span>
+          <span class="domain-tag">心理層面</span>
+          <span class="domain-tag">社會關係</span>
+          <span class="domain-tag">環境</span>
+          <span class="domain-tag">26 題</span>
+        </div>
+      </div>
+      <div class="instrument-card">
+        <div class="instrument-icon">📊</div>
+        <div class="instrument-name">EUROQOL EQ-5D</div>
+        <div class="instrument-desc">
+          包含可計算品質調整壽命年（QALY）的評分系統。透過扣減係數法從滿分 1.000 計算出總分，廣泛應用於衛生經濟學研究與治療方案比較。
+        </div>
+        <div class="instrument-domains">
+          <span class="domain-tag">行動力</span>
+          <span class="domain-tag">自我照顧</span>
+          <span class="domain-tag">日常活動</span>
+          <span class="domain-tag">疼痛</span>
+          <span class="domain-tag">焦慮/憂鬱</span>
+          <span class="domain-tag">QALY 計算</span>
+        </div>
+      </div>
+      <div class="instrument-card">
+        <div class="instrument-icon">🧪</div>
+        <div class="instrument-name">Maudsley Addiction Profile (MAP)</div>
+        <div class="instrument-desc">
+          由英國 Maudsley 醫院研發，簡短的訪談式問卷（約 12 分鐘完成），適用於藥物與酒精使用者的治療成效評估。具良好的內容效度與測試-重測信度。
+        </div>
+        <div class="instrument-domains">
+          <span class="domain-tag">物質使用</span>
+          <span class="domain-tag">危險行為</span>
+          <span class="domain-tag">身體健康</span>
+          <span class="domain-tag">社會功能</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>WHO MSD/MSB Framework Workbook 1 數位化導引</strong></p>
+  <p style="margin-top:.5rem;opacity:.6;">
+    本工具僅供學術與政策研究參考。<br>
+    Taiwan Mental Health and Addiction Policy Translation Center (TMAP)
+  </p>
+</footer>
+
+<div class="toast" id="toast">
+  <span class="toast-icon">✅</span>
+  <span id="toast-msg">已標記完成！</span>
+</div>
+
+<script>
+/* ──────────────────────────────────────
+   DATA
+─────────────────────────────────────── */
+const stepsData = [
+  {
+    id: 1,
+    title: "決定評估參與者",
+    sub: "Decide who will be involved",
+    desc: "一個重要的第一步是確定並會見您的評估規劃「合作夥伴」。各方夥伴擁有獨特的經驗和視角，能夠強化整體評估的深度與廣度。讓多元利害關係人加入不僅帶來豐富視角，也能提升評估結果的公信力。",
+    points: [
+      "治療師或臨床醫師——熟悉臨床情境與個案需求",
+      "計畫管理者或行政人員——掌握資源配置與運作邏輯",
+      "研究人員——提供統計與方法論支持",
+      "政府或資助機構代表——確保評估符合政策方向",
+      "有意願參與的個案——使當事人聲音被納入"
+    ]
+  },
+  {
+    id: 2,
+    title: "評估您的評估資源",
+    sub: "Assess your evaluation resources",
+    desc: "評估需要財務／物資資源、專業知識資源和時間資源三個維度。即使資源有限，仍可進行高品質的評估——關鍵在於誠實評估自身能力，並選擇與現有資源相符的評估範疇。",
+    points: [
+      "財務資源：確認是否有內部或外部資金支持",
+      "物資資源：電腦、問卷印刷設備等硬體需求",
+      "專業資源：團隊中是否有具備評估經驗的成員",
+      "時間資源：各成員每週可投入的工作時數",
+      "必要時可考慮聘請評估顧問以補強不足"
+    ]
+  },
+  {
+    id: 3,
+    title: "描述您的評估計畫",
+    sub: "Describe your programme for evaluation",
+    desc: "建立一個「計畫邏輯模型」是這個步驟的核心任務。這個模型將資源、活動、短期成果和長期成果串聯成一個邏輯鏈，幫助團隊看清計畫運作的基本假設，並為後續的評估問題設定奠定基礎。",
+    points: [
+      "清楚列出計畫所需的人力、財務與設備資源",
+      "詳細描述計畫的核心活動（如個別諮商、衛教課程）",
+      "設定可量測的短期成果目標（如戒斷成功率）",
+      "訂定有意義的長期成果指標（如社會功能改善）",
+      "識別可能產生的正面或負面副作用"
+    ]
+  },
+  {
+    id: 4,
+    title: "確認並排序評估需求",
+    sub: "Identify and prioritise evaluation needs",
+    desc: "不同的利害關係人對評估的期待可能大相徑庭——行政主管可能關心成本效率，臨床人員更在意治療效果。這個步驟需要廣泛蒐集各方意見，整合後在資源許可範圍內確定最優先回答的問題。",
+    points: [
+      "個別請各夥伴列出最想了解的評估議題",
+      "小組討論，找出共識與分歧",
+      "透過面訪、電話或問卷蒐集其他關鍵人士的意見",
+      "考量可用資源後，排定評估需求的優先順序",
+      "若資源不足，返回此步驟重新調整優先順序"
+    ]
+  },
+  {
+    id: 5,
+    title: "定義您的評估問題",
+    sub: "Define your evaluation questions",
+    desc: "計畫邏輯模型是生成評估問題的最佳工具。在這個步驟中，需要將廣泛的關切轉化為具體、可測量的研究問題。問題應涵蓋個案特徵、服務提供流程、滿意度及成效等不同面向。",
+    points: [
+      "以計畫邏輯模型為出發點，廣泛發想問題",
+      "評估每個問題的可行性與重要性",
+      "與夥伴討論，選出最具優先性的問題",
+      "與評估結果的預期使用者確認問題方向",
+      "不確定評估類型時，先完成此步驟再參閱專門手冊"
+    ]
+  },
+  {
+    id: 6,
+    title: "決定您的研究測量指標",
+    sub: "Determine your research measures",
+    desc: "若不認真對待測量問題，任何關於計畫的主張都將難以令人信服。本步驟涵蓋量化與質性測量的選擇、測量尺度的判斷（名目、序位、等距、比率），以及現有工具的評估與選用。",
+    points: [
+      "理解指標（Indicator）與變項（Variable）的差異",
+      "判斷量化或質性測量哪種更適合您的問題",
+      "確認所選測量工具的信度（Reliability）",
+      "確認所選測量工具的效度（Validity）",
+      "盡量使用已驗證的現有工具，避免從頭設計",
+      "選擇適當的資料收集方式：問卷、訪談、焦點團體或紀錄回顧"
+    ]
+  },
+  {
+    id: 7,
+    title: "準備資料蒐集計畫",
+    sub: "Prepare a data collection plan",
+    desc: "資料蒐集計畫需要確定「何時」向「誰」收集哪些資料。包含設定合適的時間框架（流程評估通常為 6–12 個月，成效評估可能需要 2–5 年），以及制定樣本選取策略以確保推論的代表性。",
+    points: [
+      "確認評估類型，對應參閱手冊 3–8 的詳細指引",
+      "設定資料收集的起迄時間與里程碑",
+      "選擇合適的抽樣策略（隨機、分層或整群抽樣）",
+      "估算所需樣本量，確保研究具足夠統計檢定力",
+      "建立資料管理與保密機制，保護個案隱私"
+    ]
+  },
+  {
+    id: 8,
+    title: "確保研究資源充足",
+    sub: "Ensure your research resources are sufficient",
+    desc: "在最後這個步驟，需要整合所有前期規劃成果，形成一份完整的書面評估計畫。這份計畫應清楚列明人力配置、薪資與非薪資支出，以及時間需求。如果資源仍不充足，需返回步驟 4 重新調整範疇。",
+    points: [
+      "盤點完成評估所需的所有人力資源",
+      "估算顧問費、問卷印製等非薪資成本",
+      "確認每位參與者的時間投入是否切實可行",
+      "將所有決定整合成一份書面評估計畫",
+      "若資源不足，返回步驟 4 縮小評估範疇"
+    ]
+  }
+];
+
+/* ──────────────────────────────────────
+   STATE
+─────────────────────────────────────── */
+let currentStep = 0;
+const checked = stepsData.map(s => s.points.map(() => false));
+let radarChartInstance = null; // 用來存儲圖表實例以供後續銷毀/重繪
+
+/* ──────────────────────────────────────
+   HELPERS
+─────────────────────────────────────── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function updateNavProgress() {
+  const pct = ((currentStep + 1) / stepsData.length) * 100;
+  document.getElementById('nav-progress-fill').style.width = pct + '%';
+  document.getElementById('nav-step-label').textContent = `步驟 ${currentStep + 1}/${stepsData.length}`;
+}
+
+function isDone(stepIdx) {
+  return checked[stepIdx].every(Boolean);
+}
+
+/* ──────────────────────────────────────
+   RENDER NAV
+─────────────────────────────────────── */
+function renderStepperNav() {
+  const nav = document.getElementById('step-nav');
+  nav.innerHTML = stepsData.map((step, i) => {
+    const done = isDone(i);
+    const cls = i === currentStep ? 'active' : done ? 'done' : '';
+    const icon = done ? '✓' : step.id;
+    return `
+      <button class="stepper-btn ${cls}" onclick="showStep(${i})">
+        <div class="stepper-num">${icon}</div>
+        <div>
+          <div class="stepper-btn-text">${step.title}</div>
+          <div class="stepper-btn-sub">${step.sub}</div>
+        </div>
+      </button>`;
+  }).join('');
+}
+
+/* ──────────────────────────────────────
+   RENDER CARD
+─────────────────────────────────────── */
+function renderCard() {
+  const step = stepsData[currentStep];
+  const doneCount = checked[currentStep].filter(Boolean).length;
+  const total = step.points.length;
+  const pct = total > 0 ? Math.round(doneCount / total * 100) : 0;
+
+  const checklistHtml = step.points.map((p, i) => {
+    const isChecked = checked[currentStep][i];
+    return `
+      <div class="check-item ${isChecked ? 'checked' : ''}" onclick="toggleCheck(${currentStep}, ${i})">
+        <div class="check-icon">${isChecked ? '✓' : ''}</div>
+        <span class="check-text">${p}</span>
+      </div>`;
+  }).join('');
+
+  // 如果到了最後一步，按鈕切換為「產生診斷報告」
+  const nextBtnHtml = currentStep === stepsData.length - 1 
+    ? `<button class="btn-next btn-report" onclick="generateReport()">📊 產生規劃診斷報告</button>`
+    : `<button class="btn-next" onclick="showStep(${currentStep + 1})">下一步 →</button>`;
+
+  document.getElementById('step-content').innerHTML = `
+    <div class="workbook-card" id="wb-card">
+      <div class="wb-header">
+        <div class="wb-num-badge">
+          <div class="small">STEP</div>
+          <div class="big">${step.id}</div>
+        </div>
+        <div>
+          <div class="wb-title">${step.title}</div>
+          <div class="wb-subtitle">${step.sub}</div>
+          <span class="wb-tag tag-plan">規劃核心階段</span>
+        </div>
+      </div>
+
+      <div class="card-progress">
+        <span>${doneCount}/${total} 項已完成</span>
+        <div class="card-progress-bar">
+          <div class="card-progress-fill" style="width:${pct}%"></div>
+        </div>
+        <span>${pct}%</span>
+      </div>
+
+      <div class="wb-section">
+        <div class="wb-section-title">💡 執行重點</div>
+        <p class="wb-desc">${step.desc}</p>
+      </div>
+
+      <div class="wb-section">
+        <div class="wb-section-title">✅ 關鍵檢核清單（點擊勾選）</div>
+        <div class="checklist">${checklistHtml}</div>
+      </div>
+
+      <div class="wb-nav-btns">
+        <button class="btn-prev" onclick="showStep(${currentStep - 1})" ${currentStep === 0 ? 'disabled' : ''}>
+          ← 上一步
+        </button>
+        ${nextBtnHtml}
+        <span class="btn-step-label">${currentStep + 1} / ${stepsData.length}</span>
+      </div>
+    </div>`;
+}
+
+/* ──────────────────────────────────────
+   INTERACTIONS
+─────────────────────────────────────── */
+function toggleCheck(stepIdx, itemIdx) {
+  checked[stepIdx][itemIdx] = !checked[stepIdx][itemIdx];
+  const wasAll = isDone(stepIdx);
+  renderCard();
+  renderStepperNav();
+  if (wasAll) showToast(`步驟 ${stepIdx + 1} 全部完成 🎉`);
+}
+
+function showStep(idx) {
+  if (idx < 0 || idx >= stepsData.length) return;
+  currentStep = idx;
+  renderStepperNav();
+  renderCard();
+  updateNavProgress();
+  if (window.innerWidth <= 768) {
+    document.getElementById('step-content').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+/* ──────────────────────────────────────
+   RADAR CHART & REPORT GENERATION
+─────────────────────────────────────── */
+function generateReport() {
+  const reportSection = document.getElementById('report-section');
+  reportSection.style.display = 'block';
+  
+  // 讓畫面平滑滾動到報告區
+  setTimeout(() => {
+    reportSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+
+  // 計算每個步驟的完成度百分比
+  const scores = checked.map(stepChecks => {
+    const total = stepChecks.length;
+    const done = stepChecks.filter(Boolean).length;
+    return total === 0 ? 0 : Math.round((done / total) * 100);
+  });
+
+  // 準備圖表資料
+  const ctx = document.getElementById('radarChart').getContext('2d');
+  
+  // 若已有圖表實例則先銷毀，避免重疊重繪
+  if (radarChartInstance) {
+    radarChartInstance.destroy();
+  }
+
+  radarChartInstance = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: [
+        '1.參與者', '2.評估資源', '3.計畫描述', '4.評估需求', 
+        '5.評估問題', '6.測量指標', '7.資料蒐集', '8.研究資源'
+      ],
+      datasets: [{
+        label: '步驟完成度 (%)',
+        data: scores,
+        backgroundColor: 'rgba(30, 58, 138, 0.15)', // Navy pale
+        borderColor: 'rgba(30, 58, 138, 0.8)',      // Navy
+        pointBackgroundColor: 'rgba(251, 191, 36, 1)', // Gold
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgba(251, 191, 36, 1)'
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        r: {
+          angleLines: { color: 'rgba(0, 0, 0, 0.05)' },
+          grid: { color: 'rgba(0, 0, 0, 0.05)' },
+          pointLabels: {
+            font: { family: "'Noto Sans TC', sans-serif", size: 12, weight: '600' },
+            color: '#475569'
+          },
+          ticks: {
+            stepSize: 20, min: 0, max: 100, backdropColor: 'transparent',
+            font: { size: 10 }
+          }
+        }
+      },
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
+
+  // 產生動態建議邏輯
+  const adviceContent = document.getElementById('advice-content');
+  let adviceHtml = `<h3 style="color: var(--navy-dark); font-size: 1.1rem; margin-bottom: 1.25rem;">系統診斷分析</h3>`;
+  
+  // 找出未達 100% 的步驟
+  const lowScores = scores.map((score, index) => ({ score, index })).filter(item => item.score < 100);
+
+  if (lowScores.length === 0) {
+    adviceHtml += `
+      <div class="advice-item advice-success">
+        <strong>✨ 完美規劃，準備就緒！</strong>
+        <p>您的評估規劃已經非常完整，八個步驟的關鍵要素皆已到位。這代表您已經具備極佳的基礎，可以安心推進到「Workbook 2: 執行評估」階段，將規劃化為具體行動。</p>
+      </div>`;
+  } else {
+    adviceHtml += `
+      <p style="font-size:0.9rem; color:var(--slate); margin-bottom:1rem;">
+        您目前還有 <strong>${lowScores.length}</strong> 個維度尚未完全落實。根據您的勾選狀況，系統優先提供以下實務建議：
+      </p>`;
+    
+    // 預設的對應建議庫
+    const adviceTexts = [
+      "未完全確認利害關係人，可能導致評估結果缺乏共識。建議盡快辦理前導會議，邀請關鍵代表（如臨床人員、政策端）參與。",
+      "資源盤點存在缺口，可能會在後續執行時面臨經費或人力的瓶頸。請重新檢視預算，必要時可縮小評估規模以符合現狀。",
+      "計畫邏輯模型仍有缺漏。若未釐清短期與長期成效目標，後續將無法對應合適的指標。請嘗試畫出資源、活動與結果的關聯圖。",
+      "評估需求的優先順序不明確。當資源有限時，請務必與主管或資助方確認，優先選擇對決策最有幫助的 1-2 個核心問題。",
+      "具體的評估問題尚待收斂。請確保問題具有「可測量性」，避免大而無當，這將直接影響您問卷的設計方向。",
+      "測量工具（信效度或指標）尚未完全確認。建議優先考慮附錄中的標準化工具（如 WHOQOL 或 MAP），避免耗費過多時間重新開發。",
+      "資料蒐集計畫尚未完備。未規劃好的抽樣與時間軸會嚴重影響數據品質。請明確訂定各階段要發放問卷或調閱紀錄的時間點。",
+      "最終研究資源的書面化未完成。缺乏白紙黑字的計畫書將難以說服決策者或資助方，請將前七步的成果統整成正式文件。"
+    ];
+
+    // 針對分數最低的項目給予建議 (最多顯示 3 條，避免資訊超載)
+    let count = 0;
+    lowScores.sort((a, b) => a.score - b.score).forEach(item => {
+      if (count >= 3) return; 
+      count++;
+      const stepName = stepsData[item.index].title;
+      adviceHtml += `
+        <div class="advice-item">
+          <strong>需補強：${item.index + 1}. ${stepName} (完成度 ${item.score}%)</strong>
+          <p>${adviceTexts[item.index]}</p>
+        </div>`;
+    });
+  }
+
+  adviceContent.innerHTML = adviceHtml;
+}
+
+/* ──────────────────────────────────────
+   SCROLL REVEAL
+─────────────────────────────────────── */
+function initReveal() {
+  const els = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+  }, { threshold: .12 });
+  els.forEach(el => obs.observe(el));
+}
+
+/* ──────────────────────────────────────
+   INIT
+─────────────────────────────────────── */
+window.onload = () => {
+  renderStepperNav();
+  renderCard();
+  updateNavProgress();
+  initReveal();
+};
+</script>
+</body>
+</html>
