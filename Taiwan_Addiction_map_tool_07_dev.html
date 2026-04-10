@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TMAP 醫療供需分析平台 (完整圖例與自定義版)</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { font-family: "Microsoft JhengHei", sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; background: #f4f7f6; }
+        
+        /* 頂部導覽 */
+        header { 
+            background: #1a2a6c; color: white; padding: 12px 25px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3); z-index: 1001; 
+        }
+        .header-controls { display: flex; gap: 20px; align-items: center; font-size: 0.85rem; }
+
+        /* 主區域 */
+        main { display: flex; flex: 1; overflow: hidden; }
+        
+        /* 左側輸入面板 */
+        #input-panel { width: 380px; background: white; border-right: 1px solid #ddd; display: flex; flex-direction: column; box-shadow: 2px 0 5px rgba(0,0,0,0.05); }
+        #panel-inner { padding: 20px; overflow-y: auto; flex: 1; }
+        .panel-section { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+        .panel-footer { padding: 15px; background: #fafafa; border-top: 1px solid #eee; }
+
+        .input-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .input-group label { font-size: 0.9rem; font-weight: bold; }
+        .input-group input { width: 120px; padding: 6px; border: 1px solid #ccc; border-radius: 4px; text-align: right; }
+
+        /* 右側地圖 */
+        #map-container { flex: 1; position: relative; }
+        #map { height: 100%; width: 100%; background: #fff; }
+
+        /* 按鈕與標籤 */
+        .btn { padding: 10px 15px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s; }
+        .btn-update { background: #28a745; color: white; font-size: 1rem; }
+        .btn-download { background: #ffc107; color: #212529; width: auto; }
+        .status-tag { font-size: 0.7rem; padding: 3px 6px; border-radius: 4px; margin-left: 10px; }
+
+        /* 圖例樣式 (加強版) */
+        .legend { background: white; padding: 12px; line-height: 22px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.1); font-size: 0.85rem; min-width: 150px; }
+        .legend h4 { margin: 0 0 8px 0; font-size: 0.9rem; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .legend i { width: 18px; height: 18px; float: left; margin-right: 10px; opacity: 0.8; border: 1px solid #fff; }
+        .bubble-sample { display: inline-block; background: rgba(0, 123, 255, 0.7); border: 1px solid white; border-radius: 50%; margin-right: 10px; vertical-align: middle; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="display:flex; align-items:center;">
+        <h2 style="margin:0; font-size:1.3rem;">成癮醫療供需分析平台</h2>
+        <span id="loadStatus" class="status-tag" style="background:#dc3545;">圖資未載入</span>
+    </div>
+    <div class="header-controls">
+        <div>
+            疊加醫院量能 (CSV): <input type="file" id="clinicFile" accept=".csv" style="background:rgba(255,255,255,0.1); padding:4px;">
+        </div>
+        <button class="btn btn-download" onclick="downloadMap()">📥 下載成果 PNG</button>
+    </div>
+</header>
+
+<main>
+    <div id="input-panel">
+        <div id="panel-inner">
+            <div class="panel-section" style="background: #eef2ff; padding: 15px; border-radius: 8px; border: 1px solid #d1dbff;">
+                <label style="font-weight:bold; display:block; margin-bottom:8px; color:#1a2a6c;">📊 數據類別名稱</label>
+                <input type="text" id="dataLabel" value="毒品人口需求" placeholder="例如：個案人數" style="width:100%; padding:8px; box-sizing:border-box; border:1px solid #1a2a6c; border-radius:4px;">
+            </div>
+
+            <h3 style="margin-top:0; color:#1a2a6c;">各縣市數值輸入</h3>
+            <div id="inputs-list"></div>
+        </div>
+        <div class="panel-footer">
+            <button class="btn btn-update" onclick="applyChoropleth()">🔄 更新地圖與圖例</button>
+            <div id="cors-warning" style="display:none; color:#d9534f; font-size:0.75rem; margin-top:10px; border:1px dashed red; padding:5px;">
+                ⚠️ 自動讀取失敗。請點此手動載入圖資：<br>
+                <input type="file" id="backupFile" accept=".json" style="width:100%; margin-top:5px;">
+            </div>
+        </div>
+    </div>
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+
+<script>
+// --- 1. 基礎參數設定 ---
+const counties = ["基隆市", "臺北市", "新北市", "桃園市", "新竹市", "新竹縣", "苗栗縣", "臺中市", "彰化縣", "南投縣", "雲林縣", "嘉義市", "嘉義縣", "臺南市", "高雄市", "屏東縣", "宜蘭縣", "花蓮縣", "臺東縣", "澎湖縣", "金門縣", "連江縣"];
+const MasterList = [
+  { "name": "台北榮民總醫院", "lat": 25.1209, "lng": 121.5197 },
+  { "name": "衛生福利部桃園療養院", "lat": 24.9785, "lng": 121.2725 },
+  { "name": "衛生福利部草屯療養院", "lat": 23.9744, "lng": 120.6970 },
+  { "name": "高雄市立凱旋醫院", "lat": 22.6231, "lng": 120.3235 },
+  { "name": "衛生福利部花蓮醫院", "lat": 23.9772, "lng": 121.6094 }
+];
+const grades = [100, 500, 1000, 2000, 5000];
+const colors = ['#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A', '#BD0026'];
+const defaultFill = '#f0f0f0';
+
+// --- 2. 初始化地圖 ---
+const map = L.map('map').setView([23.6, 121.0], 7);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: 'CartoDB' }).addTo(map);
+
+let countyLayer;
+let clinicLayer = L.layerGroup().addTo(map);
+let colorLegend = L.control({position: 'bottomright'});
+let bubbleLegend = L.control({position: 'bottomleft'});
+
+// 生成輸入列表
+const inputList = document.getElementById('inputs-list');
+counties.forEach(c => {
+    inputList.innerHTML += `<div class="county-row"><label>${c}</label><input type="number" id="v-${c}" value="0"></div>`;
+});
+
+// --- 3. 自動讀取圖資 ---
+async function autoLoad() {
+    try {
+        const res = await fetch('./twCounty2010.geo.json');
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        setupCountyLayer(data);
+    } catch {
+        document.getElementById('cors-warning').style.display = 'block';
+    }
+}
+function setupCountyLayer(data) {
+    if (countyLayer) map.removeLayer(countyLayer);
+    countyLayer = L.geoJson(data, {
+        style: { weight: 1.5, color: 'white', fillOpacity: 0.6, fillColor: defaultFill }
+    }).addTo(map);
+    const tag = document.getElementById('loadStatus');
+    tag.innerHTML = "圖資已載入"; tag.style.background = "#28a745";
+}
+document.getElementById('backupFile').addEventListener('change', e => {
+    const r = new FileReader();
+    r.onload = ev => setupCountyLayer(JSON.parse(ev.target.result));
+    r.readAsText(e.target.files[0]);
+});
+autoLoad();
+
+// --- 4. 核心邏輯：確定更新 ---
+function applyChoropleth() {
+    if (!countyLayer) return alert("請先載入圖資！");
+    const dataName = document.getElementById('dataLabel').value || "數值";
+    
+    countyLayer.eachLayer(layer => {
+        let name = layer.feature.properties.COUNTYNAME.replace('台', '臺').trim();
+        const val = parseInt(document.getElementById(`v-${name}`)?.value || 0);
+
+        if (val > 0) {
+            layer.setStyle({ fillColor: getHeatColor(val), fillOpacity: 0.85 });
+            layer.bindTooltip(`<b>${name}</b><br>${dataName}: ${val}`, { sticky: true });
+        } else {
+            layer.setStyle({ fillColor: defaultFill, fillOpacity: 0.6 });
+            layer.unbindTooltip();
+        }
+    });
+
+    // 更新圖例標題
+    updateLegends(dataName);
+}
+
+function getHeatColor(d) {
+    for (let i = grades.length - 1; i >= 0; i--) { if (d >= grades[i]) return colors[i]; }
+    return colors[0];
+}
+
+// --- 5. 圖例管理 ---
+function updateLegends(dataName) {
+    // 移除舊圖例
+    colorLegend.remove(map);
+    bubbleLegend.remove(map);
+
+    // 重新加入顏色圖例 (需求端)
+    colorLegend.onAdd = function() {
+        const div = L.DomUtil.create('div', 'legend');
+        div.innerHTML = `<h4>${dataName} (分級)</h4>`;
+        div.innerHTML += `<i style="background:${defaultFill}"></i> 0 / 無數據<br>`;
+        for (let i = 0; i < grades.length; i++) {
+            div.innerHTML += `<i style="background:${colors[i]}"></i> ${grades[i]}${grades[i+1] ? '&ndash;'+grades[i+1] : '+'}<br>`;
+        }
+        return div;
+    };
+    colorLegend.addTo(map);
+
+    // 如果有醫院資料，則顯示氣泡圖例 (供給端)
+    bubbleLegend.onAdd = function() {
+        const div = L.DomUtil.create('div', 'legend');
+        div.innerHTML = `<h4>院所服務量能</h4>`;
+        [50, 150, 300].forEach(v => {
+            const r = Math.sqrt(v) * 2.5;
+            div.innerHTML += `<div><span class="bubble-sample" style="width:${r*2}px; height:${r*2}px;"></span>${v} 人</div>`;
+        });
+        return div;
+    };
+    bubbleLegend.addTo(map);
+}
+
+// --- 6. 處理醫院 CSV ---
+document.getElementById('clinicFile').addEventListener('change', function(e) {
+    Papa.parse(e.target.files[0], {
+        header: true,
+        complete: function(results) {
+            clinicLayer.clearLayers();
+            results.data.forEach(row => {
+                const n = row.院所名稱?.trim() || "";
+                const inst = MasterList.find(m => m.name.includes(n) || n.includes(m.name));
+                const num = parseInt(row.人數);
+                if (inst && !isNaN(num)) {
+                    L.circleMarker([inst.lat, inst.lng], {
+                        radius: Math.sqrt(num) * 2.5,
+                        fillColor: "#007bff", color: "#fff", weight: 2, fillOpacity: 0.8
+                    }).addTo(clinicLayer).bindPopup(`<b>${inst.name}</b><br>服務量: ${num} 人`);
+                }
+            });
+            updateLegends(document.getElementById('dataLabel').value);
+        }
+    });
+});
+
+// --- 7. 下載成品 ---
+function downloadMap() {
+    const mapEl = document.getElementById('map');
+    alert("正在生成高畫質 PNG，請稍候...");
+    domtoimage.toPng(mapEl, { quality: 1, bgcolor: '#ffffff' }).then(url => {
+        const a = document.createElement('a');
+        const fileName = document.getElementById('dataLabel').value || "分析報告";
+        a.download = `TMAP-${fileName}.png`;
+        a.href = url;
+        a.click();
+    });
+}
+
+// 啟動時先畫一次空圖例
+updateLegends("數據類別");
+</script>
+</body>
+</html>
