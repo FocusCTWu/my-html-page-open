@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>成癮醫療量能視覺化 (含圖例與表格)</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { font-family: "Microsoft JhengHei", sans-serif; margin: 20px; }
+        #map { height: 600px; width: 100%; border-radius: 8px; border: 1px solid #ccc; }
+        .controls { padding: 15px; background: #f8f9fa; margin-bottom: 10px; border-radius: 8px; }
+        
+        /* 圖例樣式 */
+        .info.legend {
+            padding: 10px;
+            background: white;
+            background: rgba(255,255,255,0.9);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+            line-height: 24px;
+        }
+        .legend-item { display: flex; align-items: center; margin-bottom: 5px; }
+        .legend-circle {
+            background: rgba(255, 193, 7, 0.8);
+            border: 1px solid #000;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        /* 表格樣式 */
+        .table-container { margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #007bff; color: white; cursor: pointer; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        tr:hover { background-color: #ddd; }
+        .rank-high { font-weight: bold; color: #d9534f; }
+    </style>
+</head>
+<body>
+
+<div class="controls">
+    <h3>成癮醫療服務量能分析工具</h3>
+    <label>1. 上傳 CSV 檔案: </label>
+    <input type="file" id="csvFile" accept=".csv" />
+</div>
+
+<div id="map"></div>
+
+<div class="table-container">
+    <h3>院所服務量能清單 (由高至低排序)</h3>
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>排名</th>
+                <th>院所名稱</th>
+                <th>維持治療人數</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            </tbody>
+    </table>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+<script>
+const MasterList = [
+  { "name": "台北榮民總醫院", "lat": 25.1209, "lng": 121.5197 },
+  { "name": "衛生福利部桃園療養院", "lat": 24.9785, "lng": 121.2725 },
+  { "name": "衛生福利部草屯療養院", "lat": 23.9744, "lng": 120.6970 },
+  { "name": "高雄市立凱旋醫院", "lat": 22.6231, "lng": 120.3235 },
+  { "name": "衛生福利部花蓮醫院", "lat": 23.9772, "lng": 121.6094 }
+];
+
+// 初始化地圖 (改用 CartoDB 避免 403 錯誤)
+const map = L.map('map').setView([23.6, 121.0], 7);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; CartoDB'
+}).addTo(map);
+
+// 加入圖例 (Legend)
+const legend = L.control({position: 'bottomleft'});
+legend.onAdd = function (map) {
+    const div = L.DomUtil.create('div', 'info legend');
+    const grades = [50, 150, 300]; // 圖例顯示的人數等級
+    div.innerHTML = '<strong>量能圖例 (人數)</strong><br>';
+    
+    grades.forEach(g => {
+        const r = Math.sqrt(g) * 2; // 與地圖上的計算邏輯一致
+        div.innerHTML += `
+            <div class="legend-item">
+                <span class="legend-circle" style="width: ${r*2}px; height: ${r*2}px;"></span>
+                <span>${g} 人</span>
+            </div>`;
+    });
+    return div;
+};
+legend.addTo(map);
+
+document.getElementById('csvFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+            processAndDisplay(results.data);
+        }
+    });
+});
+
+function processAndDisplay(data) {
+    // 1. 清除地圖舊標記
+    map.eachLayer((layer) => {
+        if (layer instanceof L.CircleMarker) map.removeLayer(layer);
+    });
+
+    // 2. 準備資料與排序
+    let displayData = [];
+    data.forEach(row => {
+        const rawName = row.院所名稱 ? String(row.院所名稱).trim().replace(/[\s\uFEFF\xA0]/g, '') : "";
+        const count = parseInt(row.人數);
+        const inst = MasterList.find(m => m.name.includes(rawName) || rawName.includes(m.name.replace(/[\s]/g, '')));
+
+        if (inst && !isNaN(count)) {
+            displayData.push({ name: inst.name, count: count, lat: inst.lat, lng: inst.lng });
+            
+            // 繪製圓圈 (黃色/橘色)
+            L.circleMarker([inst.lat, inst.lng], {
+                radius: Math.sqrt(count) * 2,
+                fillColor: "#ffc107", // 鮮艷的黃色
+                color: "#000",
+                weight: 1,
+                fillOpacity: 0.7
+            })
+            .addTo(map)
+            .bindPopup(`<b>${inst.name}</b><br>人數: ${count}`);
+        }
+    });
+
+    // 3. 排序資料 (依人數由多至少)
+    displayData.sort((a, b) => b.count - a.count);
+
+    // 4. 更新表格
+    const tableBody = document.getElementById('tableBody');
+    tableBody.innerHTML = "";
+    displayData.forEach((item, index) => {
+        const row = `<tr>
+            <td>${index + 1}</td>
+            <td class="${index < 3 ? 'rank-high' : ''}">${item.name}</td>
+            <td>${item.count}</td>
+        </tr>`;
+        tableBody.innerHTML += row;
+    });
+}
+</script>
+</body>
+</html>
