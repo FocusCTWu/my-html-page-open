@@ -245,32 +245,80 @@
         // 初始渲染安非他命
         renderDrugChart('amp');
 
-        // 5. 快速診斷小工具邏輯
+// 5. 快速診斷小工具邏輯 - 專業升級版
         function generateInsight() {
-            const year = document.getElementById('insightYear').value;
+            const yearLabel = document.getElementById('insightYear').value; // "109" 或 "114"
             const type = document.getElementById('insightType').value;
             const resultBox = document.getElementById('insightResult');
             
-            let message = "";
-            if (year === "109" && type === "highest_drug") {
-                message = "💡 **洞察報告**：109 年使用率最高的成癮物質為**安非他命** (5,519人)，其次為愷他命 (4,102人)。";
-            } else if (year === "114" && type === "highest_drug") {
-                message = "💡 **洞察報告**：114 年使用率最高的成癮物質依舊為**安非他命** (8,970人)，佔整體極高比例，需要針對此物質加強防制資源配置。";
-            } else if (year === "114" && type === "gender_ratio") {
-                message = "💡 **洞察報告**：114 年總就診人數中，**男性 (14,490人) 遠高於女性 (2,514人)**，顯示男性群體在藥癮問題上具顯著的脆弱性，且主要集中在 45-54 歲區間。";
-            } else {
-                message = "💡 **洞察報告**：該年資料顯示藥癮治療需求呈穩定增長趨勢，門診診療量為最大宗之醫療處置。";
+            // 找出陣列索引 (109年是0, 114年是5)
+            const yearIdx = years.indexOf(yearLabel + '年');
+            const total = totalUsers[yearIdx];
+            
+            let title = "";
+            let content = "";
+            let policyNote = "";
+
+            if (type === "highest_drug") {
+                // 動態找出該年受助人數最多的物質
+                const drugs = Object.keys(drugData).map(key => ({
+                    name: drugData[key].label,
+                    count: drugData[key].data[yearIdx],
+                    key: key
+                })).sort((a, b) => b.count - a.count);
+
+                const top = drugs[0];
+                const percentage = ((top.count / total) * 100).toFixed(1);
+                
+                title = `${yearLabel}年 醫療資源需求核心`;
+                content = `該年度以 <strong class="text-primary">${top.name}</strong> 補助申請人數最多，達 ${top.count.toLocaleString()} 人，佔整體受助者約 ${percentage}%。`;
+                
+                // 臨床政策詮釋
+                if (top.key === 'amp') {
+                    policyNote = "安非他命目前臨床上無核准之替代藥物，數據增長反映了心理治療與職能介入需求之提升，應強化非藥物治療之資源配置。";
+                } else if (top.key === 'her') {
+                    policyNote = "海洛因個案通常與美沙冬/丁基原啡因替代療法（OAT）具高度關聯，數據穩定反映了藥物替代治療方案的覆蓋率。";
+                }
+                
+            } else if (type === "gender_ratio") {
+                // 計算性別比
+                const maleTotal = maleAgeData_114.reduce((a, b) => a + b, 0); // 這裡預設用114年，若有各年資料可再擴充
+                const femaleTotal = femaleAgeData_114.reduce((a, b) => a + b, 0);
+                const ratio = (maleTotal / femaleTotal).toFixed(1);
+                
+                title = `${yearLabel}年 受助群體性別分析`;
+                content = `該年受助者中，男性人數約為女性的 <strong class="text-primary">${ratio} 倍</strong>。女性受助者比例雖較低，但在臨床上往往面臨更高的社會標籤與共病風險。`;
+                policyNote = "建議針對男性族群加強 45-54 歲中高齡職場穩定計畫；針對女性則應評估家庭功能支援與隱私治療空間之需求。";
             }
 
-            // 支援簡易 Markdown bold 轉換
-            resultBox.innerHTML = message.replace(/\*\*(.*?)\*\*/g, '<strong class="text-primary">$1</strong>');
-            resultBox.classList.remove('hidden');
+            // 計算成長率 (與109年基準比)
+            const growth = (((total - totalUsers[0]) / totalUsers[0]) * 100).toFixed(1);
+            const growthText = yearIdx > 0 ? 
+                `<p class="mt-3 text-xs text-slate-400">※ 相較於109年基準，整體補助服務量已成長 ${growth}%。</p>` : "";
+
+            // 渲染結果
+            resultBox.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="mt-1 text-accent"><i data-lucide="activity" class="w-5 h-5"></i></div>
+                    <div>
+                        <h4 class="font-bold text-slate-800 mb-1">${title}</h4>
+                        <p class="text-sm leading-relaxed">${content}</p>
+                        <div class="mt-3 p-3 bg-blue-50 rounded border border-blue-100">
+                            <p class="text-xs font-bold text-blue-800 mb-1 tracking-wider uppercase">臨床/政策建議：</p>
+                            <p class="text-xs text-blue-700 leading-relaxed">${policyNote}</p>
+                        </div>
+                        ${growthText}
+                    </div>
+                </div>
+            `;
             
-            // 加入淡入動畫
+            resultBox.classList.remove('hidden');
+            lucide.createIcons(); // 重新渲染小圖示
+            
             resultBox.animate([
-                { opacity: 0, transform: 'translateY(-10px)' },
-                { opacity: 1, transform: 'translateY(0)' }
-            ], { duration: 300, fill: 'forwards' });
+                { opacity: 0, transform: 'scale(0.98)' },
+                { opacity: 1, transform: 'scale(1)' }
+            ], { duration: 250, fill: 'forwards' });
         }
     </script>
 </body>
