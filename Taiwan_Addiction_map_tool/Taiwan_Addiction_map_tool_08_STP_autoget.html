@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TMAP 成癮醫療供需分析平台 - 強效資料修復版</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root { --tm-navy: #1a2a6c; --tm-green: #28a745; --tm-gold: #ffc107; --tm-light: #f8f9fa; }
+        body { font-family: "Microsoft JhengHei", sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; background: #f4f7f6; }
+        header { background: var(--tm-navy); color: white; padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; z-index: 1100; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        .status-badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: bold; }
+        main { display: flex; flex: 1; overflow: hidden; }
+        #sidebar { width: 380px; background: white; border-right: 1px solid #ddd; display: flex; flex-direction: column; }
+        .scroll-area { padding: 20px; overflow-y: auto; flex: 1; }
+        .step-item { margin-bottom: 25px; }
+        .step-header { display: flex; align-items: center; margin-bottom: 12px; }
+        .step-num { background: var(--tm-navy); color: white; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; font-size: 12px; margin-right: 10px; }
+        .step-title { font-weight: bold; color: var(--tm-navy); border-bottom: 2px solid #eee; flex: 1; padding-bottom: 3px; }
+        .fallback-box { display: none; background: #fff3cd; padding: 12px; border-radius: 6px; border: 1px solid #ffeeba; margin-top: 10px; font-size: 0.8rem; }
+        .summary-box { background: #e9ecef; padding: 10px; border-radius: 6px; margin-left: 32px; font-size: 0.85rem; }
+        .summary-row { display: flex; justify-content: space-between; border-bottom: 1px solid #dee2e6; padding: 4px 0; }
+        .county-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.9rem; margin-left: 32px; }
+        .county-row input { width: 100px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; text-align: right; }
+        #map { height: 100%; width: 100%; flex: 1; }
+        .legend { background: white; padding: 12px; line-height: 22px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.1); font-size: 0.85rem; }
+        .legend i { width: 18px; height: 18px; float: left; margin-right: 10px; opacity: 0.8; }
+        select { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+<header>
+    <div style="display:flex; align-items:center; gap:15px;">
+        <h2 style="margin:0; font-size:1.2rem;">TMAP 成癮醫療分析 (自動修復版)</h2>
+        <span id="mapStatus" class="status-badge" style="background:#6c757d; color:white;">偵測中...</span>
+    </div>
+    <button style="background:var(--tm-gold); border:none; padding:6px 15px; border-radius:4px; cursor:pointer;" onclick="downloadMap()">📥 下載 PNG</button>
+</header>
+<main>
+    <div id="sidebar">
+        <div class="scroll-area">
+            <div class="step-item">
+                <div class="step-header"><span class="step-num">0</span><span class="step-title">檔案狀態</span></div>
+                <div style="margin-left:32px; font-size:0.85rem;">
+                    <div id="statusGeo">⏳ 圖資: 等待中</div>
+                    <div id="statusCsv">⏳ 數據: 等待中</div>
+                    <div id="fallbackUI" class="fallback-box">
+                        <strong>無法自動讀取？請手動選取：</strong><br>
+                        圖資 JSON: <input type="file" id="manualGeo" accept=".json" style="width:100%"><br>
+                        數據 CSV: <input type="file" id="manualCsv" accept=".csv" style="width:100%">
+                    </div>
+                </div>
+            </div>
+            <div class="step-item">
+                <div class="step-header"><span class="step-num">1</span><span class="step-title">選擇數據欄位</span></div>
+                <div style="margin-left:32px;"><select id="fieldSelector" onchange="updateDataByField()" disabled><option>請載入 CSV...</option></select></div>
+            </div>
+            <div class="step-item">
+                <div class="step-header"><span class="step-num">2</span><span class="step-title">統計總覽</span></div>
+                <div class="summary-box" id="summaryPanel">尚未讀取數據</div>
+            </div>
+            <div class="step-item">
+                <div class="step-header"><span class="step-num">3</span><span class="step-title">各縣市數據驗證</span></div>
+                <div id="countyInputs"></div>
+            </div>
+        </div>
+        <div style="padding:15px; background:#f8f9fa; border-top:1px solid #eee;">
+            <button style="width:100%; padding:12px; background:var(--tm-green); color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;" onclick="applyChoropleth()">🚀 更新地圖顯示</button>
+        </div>
+    </div>
+    <div id="map"></div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+
+<script>
+const counties = ["基隆市", "臺北市", "新北市", "桃園市", "新竹市", "新竹縣", "苗栗縣", "臺中市", "彰化縣", "南投縣", "雲林縣", "嘉義市", "嘉義縣", "臺南市", "高雄市", "屏東縣", "宜蘭縣", "花蓮縣", "臺東縣", "澎湖縣", "金門縣", "連江縣"];
+const defGrades = [0, 50, 200, 1000, 3000, 5000];
+const defColors = ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A', '#BD0026'];
+let rawCsvData = [], countyLayer, colorLegend = L.control({position: 'bottomright'});
+let isGeoLoaded = false, isCsvLoaded = false;
+
+// 1. 初始化 UI：縣市輸入框
+const cBox = document.getElementById('countyInputs');
+counties.forEach(c => { cBox.innerHTML += `<div class="county-row"><label>${c}</label><input type="number" id="v-${c}" value="0"></div>`; });
+
+// 2. 初始化地圖
+const map = L.map('map').setView([23.6, 121.0], 7);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+// 3. 核心工具：強效數值轉換
+function parseNum(str) {
+    if (str === null || str === undefined || str === '') return 0;
+    const clean = str.toString().replace(/,/g, '').replace(/[\s\u00A0]+/g, '').trim();
+    if (clean === '-' || clean === '') return 0;
+    const num = parseFloat(clean);
+    return isNaN(num) ? 0 : num;
+}
+
+// 4. 核心工具：CSV 解析配置（確保自動/手動邏輯一致）
+const csvConfig = {
+    header: true,
+    skipEmptyLines: true,
+    transformHeader: h => h.replace(/^\uFEFF/, '').replace(/[\s\u00A0]+/g, ' ').trim(),
+    complete: d => { processParsedData(d); isCsvLoaded = true; updateStatus('Csv', true); checkUI(); }
+};
+
+// 5. 數據處理：將 CSV 數據映射到 UI
+function processParsedData(results) {
+    rawCsvData = results.data;
+    const selector = document.getElementById('fieldSelector');
+    selector.disabled = false; selector.innerHTML = '';
+    
+    const keys = results.meta.fields;
+    // 預設尋找包含「負責機關」的欄位
+    const agencyKey = keys.find(k => k.includes('負責機關')) || keys.find(k => k.includes('機關')) || keys[1];
+    selector.dataset.agencyKey = agencyKey;
+
+    keys.forEach((f, i) => {
+        // 跳過前兩個欄位（通常是期間與機關）
+        if (i > 1) { 
+            const opt = document.createElement('option');
+            opt.value = f; opt.textContent = f; selector.appendChild(opt);
+        }
+    });
+    updateDataByField();
+}
+
+function updateDataByField() {
+    const field = document.getElementById('fieldSelector').value;
+    const agencyKey = document.getElementById('fieldSelector').dataset.agencyKey;
+    if (!field || rawCsvData.length === 0) return;
+
+    let totalVal = 0, countySum = 0;
+
+    // 匹配「機關別總計」
+    const totalRow = rawCsvData.find(d => {
+        const name = (d[agencyKey] || "").replace(/[\s\u00A0]+/g, '').trim();
+        return name === "機關別總計";
+    });
+    totalVal = parseNum(totalRow ? totalRow[field] : 0);
+
+    // 匹配 22 縣市
+    counties.forEach(c => {
+        const targetCounty = c.replace(/台/g, '臺');
+        const row = rawCsvData.find(d => {
+            const csvAgency = (d[agencyKey] || "").replace(/台/g, '臺').replace(/[\s\u00A0]+/g, '').trim();
+            return csvAgency === targetCounty;
+        });
+
+        const val = row ? parseNum(row[field]) : 0;
+        document.getElementById(`v-${c}`).value = val;
+        countySum += val;
+    });
+
+    const otherVal = Math.max(0, totalVal - countySum);
+    document.getElementById('summaryPanel').innerHTML = `
+        <div class="summary-row"><span>機關別總計:</span><strong>${totalVal.toLocaleString()}</strong></div>
+        <div class="summary-row"><span>22 縣市小計:</span><strong>${countySum.toLocaleString()}</strong></div>
+        <div class="summary-row" style="color: #d9534f"><span>中央及其他(含署所屬):</span><strong>${otherVal.toLocaleString()}</strong></div>
+    `;
+    applyChoropleth();
+}
+
+// 6. 地圖著色邏輯
+function applyChoropleth() {
+    if (!countyLayer) return;
+    const fieldName = document.getElementById('fieldSelector').value;
+    countyLayer.eachLayer(layer => {
+        const geoName = layer.feature.properties.COUNTYNAME.replace(/台/g, '臺').replace(/[縣市]$/, '');
+        const target = counties.find(c => c.replace(/台/g, '臺').replace(/[縣市]$/, '') === geoName);
+        const val = parseFloat(document.getElementById(`v-${target}`)?.value || 0);
+        
+        if (val > 0) {
+            let color = defColors[0];
+            for(let i=5; i>=0; i--) { if(val >= defGrades[i]) { color = defColors[i]; break; } }
+            layer.setStyle({ fillColor: color, fillOpacity: 0.85, color: '#fff', weight: 1.5 });
+            layer.bindTooltip(`<b>${target}</b><br>${fieldName}: ${val.toLocaleString()}`, { sticky: true });
+        } else {
+            layer.setStyle({ fillColor: '#eee', fillOpacity: 0.4 });
+        }
+    });
+    drawLegend(fieldName);
+}
+
+function drawLegend(label) {
+    colorLegend.remove(map);
+    colorLegend.onAdd = () => {
+        const div = L.DomUtil.create('div', 'legend');
+        div.innerHTML = `<strong>${label}</strong><br>`;
+        defGrades.forEach((v, i) => { div.innerHTML += `<i style="background:${defColors[i]}"></i> ${v.toLocaleString()}+<br>`; });
+        return div;
+    };
+    colorLegend.addTo(map);
+}
+
+// 7. 檔案加載與初始化
+async function init() {
+    // 載入 GeoJSON
+    try {
+        const res = await fetch('./twCounty2010.geo.json');
+        if (!res.ok) throw new Error();
+        renderGeoJson(await res.json());
+        isGeoLoaded = true; updateStatus('Geo', true);
+    } catch (e) { updateStatus('Geo', false); }
+
+    // 載入 CSV
+    try {
+        const res = await fetch('./taiwan114_drug_offense_statistics_by_schedule.csv');
+        if (!res.ok) throw new Error();
+        const text = await res.text();
+        Papa.parse(text, csvConfig);
+    } catch (e) { updateStatus('Csv', false); }
+    checkUI();
+}
+
+function renderGeoJson(data) {
+    if (countyLayer) map.removeLayer(countyLayer);
+    countyLayer = L.geoJson(data, { style: { weight: 1.5, color: 'white', fillOpacity: 0.6, fillColor: '#eee' } }).addTo(map);
+}
+
+function updateStatus(type, ok) {
+    const el = document.getElementById('status' + type);
+    el.innerHTML = (ok ? '✅' : '❌') + (type === 'Geo' ? ' 圖資: ' : ' 數據: ') + (ok ? '載入成功' : '自動載入失敗');
+    el.style.color = ok ? 'green' : 'red';
+}
+
+function checkUI() {
+    const ok = isGeoLoaded && isCsvLoaded;
+    document.getElementById('mapStatus').innerHTML = ok ? '系統就緒' : '待命/錯誤';
+    document.getElementById('mapStatus').style.background = ok ? '#28a745' : '#dc3545';
+    document.getElementById('fallbackUI').style.display = ok ? 'none' : 'block';
+}
+
+// 8. 手動上傳處理
+document.getElementById('manualGeo').onchange = e => {
+    const r = new FileReader();
+    r.onload = ev => { renderGeoJson(JSON.parse(ev.target.result)); isGeoLoaded = true; updateStatus('Geo', true); checkUI(); };
+    r.readAsText(e.target.files[0]);
+};
+document.getElementById('manualCsv').onchange = e => {
+    Papa.parse(e.target.files[0], csvConfig);
+};
+
+function downloadMap() {
+    domtoimage.toPng(document.getElementById('map')).then(url => {
+        const a = document.createElement('a'); a.download = 'TMAP_Analysis.png'; a.href = url; a.click();
+    });
+}
+
+init();
+</script>
+</body>
+</html>
