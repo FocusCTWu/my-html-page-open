@@ -2,323 +2,433 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>台灣藥癮統計視覺化儀表板</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>台灣藥癮統計視覺化儀表板 | TMAP 政策分析組</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#1e3a8a', // 深藍色學術氛圍
+                        primary: '#1e3a8a',
                         secondary: '#3b82f6',
-                        accent: '#0ea5e9'
+                        accent: '#10b981',
+                        surface: '#f8fafc'
                     }
                 }
             }
         }
     </script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f8fafc; }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        .tab-active { border-bottom: 2px solid #1e3a8a; color: #1e3a8a; font-weight: bold; }
-        .tab-inactive { color: #64748b; }
-        canvas { max-height: 350px; }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
+        .tab-btn.active { border-bottom: 3px solid #1e3a8a; color: #1e3a8a; font-weight: bold; background-color: #eff6ff; }
+        .heatmap-cell { transition: all 0.2s ease; cursor: default; }
+        .heatmap-cell:hover { border: 2px solid #1e293b; z-index: 10; position: relative; transform: scale(1.05); }
+        .glass-header { background: rgba(30, 58, 138, 0.95); backdrop-filter: blur(8px); }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="text-slate-800 antialiased">
+<body class="text-slate-800 antialiased flex flex-col min-h-screen overflow-x-hidden">
 
-    <header class="bg-primary text-white py-16 px-6 shadow-lg relative overflow-hidden">
-        <div class="max-w-6xl mx-auto relative z-10">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4 flex items-center gap-3">
-                <i data-lucide="activity"></i> 台灣藥癮統計視覺化儀表板
-            </h1>
-            <p class="text-lg md:text-xl text-blue-200 mb-6 max-w-3xl leading-relaxed">
-                透過資料監測成癮趨勢，協助公共衛生領域進行「治療模式規劃」、「資源配置」與「政策監測」。本儀表板整合 109–114 年藥癮治療費用補助方案執行成果，提供多維度的流行病學視覺化分析。
-            </p>
-            <div class="flex gap-4">
-                <span class="bg-blue-800/50 px-4 py-2 rounded-full text-sm font-medium border border-blue-400/30">#公衛教育</span>
-                <span class="bg-blue-800/50 px-4 py-2 rounded-full text-sm font-medium border border-blue-400/30">#數據驅動決策</span>
+    <header class="glass-header text-white shadow-xl relative z-50 w-full">
+        <div class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div class="space-y-2">
+                    <h1 class="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-3">
+                        <i data-lucide="shield-check" class="text-blue-400 shrink-0"></i>
+                        <span>台灣藥癮統計視覺化儀表板</span>
+                    </h1>
+                    <p class="text-xs sm:text-sm text-blue-200 max-w-3xl leading-relaxed font-light">
+                        本系統彙整「藥癮治療費用補助方案」執行成果，反映醫療資源利用與補助政策覆蓋狀況。
+                        旨在協助 **TMAP 政策分析組** 進行多維度趨勢監測與資源配比研究。
+                    </p>
+                </div>
+                <div class="hidden lg:block opacity-20 shrink-0">
+                    <i data-lucide="bar-chart-3" class="w-20 h-20"></i>
+                </div>
             </div>
         </div>
-        <div class="absolute -top-24 -right-24 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-6 py-10 space-y-12">
+    <div class="bg-amber-50 border-b border-amber-200 w-full" id="data-status-bar">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between text-xs sm:text-sm text-amber-800 font-medium">
+            <span class="flex items-center gap-2" id="status-text">
+                <i data-lucide="loader-2" class="animate-spin w-4 h-4 shrink-0"></i> 
+                正在加載資料夾內 Drug_Addiction_Dashboard_data.csv ...
+            </span>
+            <input type="file" id="csv-upload" accept=".csv" class="hidden" />
+            <button id="upload-btn" class="hidden shrink-0 bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg transition-all shadow-sm">
+                手動選取 CSV
+            </button>
+        </div>
+    </div>
 
-        <section class="glass-card rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200 transition-all hover:shadow-md">
-            <h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
-                <i data-lucide="trending-up"></i> 年度趨勢板 (109-114年)
+    <main id="dashboard-content" class="flex-grow max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 hidden w-full opacity-0 transition-opacity duration-700">
+        
+        <section class="mb-10 w-full">
+            <h2 class="text-lg sm:text-xl font-bold text-primary mb-4 border-l-4 border-primary pl-3 flex items-center gap-2">
+                <i data-lucide="trending-up" class="w-5 h-5"></i> 補助方案歷年總體趨勢 (109-114)
             </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                    <h3 class="text-center text-sm font-semibold text-slate-600 mb-2">歷年藥癮治療總人數趨勢</h3>
-                    <canvas id="trendChart"></canvas>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
+                <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 min-w-0">
+                    <h3 class="text-xs sm:text-sm font-semibold text-slate-500 mb-4 text-center">歷年補助總人數與性別結構</h3>
+                    <div class="relative h-64 w-full"><canvas id="trendChart"></canvas></div>
                 </div>
-                <div>
-                    <h3 class="text-center text-sm font-semibold text-slate-600 mb-2">114年年齡與性別分布 (堆疊圖)</h3>
-                    <canvas id="ageGenderChart"></canvas>
+                <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 min-w-0">
+                    <h3 class="text-xs sm:text-sm font-semibold text-slate-500 mb-4 text-center">各年度補助個案年齡分布</h3>
+                    <div class="relative h-64 w-full"><canvas id="ageTrendChart"></canvas></div>
                 </div>
             </div>
         </section>
 
-        <section class="glass-card rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200 transition-all hover:shadow-md">
-            <h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
-                <i data-lucide="microscope"></i> 主要成癮物質分析
-            </h2>
-            
-            <div class="flex border-b border-slate-200 mb-6 gap-6">
-                <button onclick="switchDrugTab('amp')" id="tab-amp" class="pb-3 tab-active text-lg transition-colors">安非他命</button>
-                <button onclick="switchDrugTab('ket')" id="tab-ket" class="pb-3 tab-inactive text-lg transition-colors hover:text-primary">愷他命</button>
-                <button onclick="switchDrugTab('her')" id="tab-her" class="pb-3 tab-inactive text-lg transition-colors hover:text-primary">海洛因</button>
+        <section class="mb-8 w-full">
+            <div class="bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-lg border-l-8 border-secondary flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sticky top-4 z-40 ring-1 ring-slate-200">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="calendar-days" class="w-6 h-6 text-secondary shrink-0"></i>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-800" id="current-year-display">年度分析詳情</h2>
+                </div>
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <label class="font-bold text-slate-500 text-xs sm:text-sm whitespace-nowrap">切換檢視年度：</label>
+                    <select id="global-year-select" class="bg-slate-100 border-none text-primary rounded-xl px-4 py-2 text-sm font-black focus:ring-2 focus:ring-secondary outline-none cursor-pointer flex-grow sm:flex-grow-0 transition-all hover:bg-slate-200"></select>
+                </div>
             </div>
 
-            <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                <h3 id="drugChartTitle" class="text-center text-sm font-semibold text-slate-600 mb-2">各物質年度人數變化</h3>
-                <canvas id="drugChart"></canvas>
-            </div>
-        </section>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 w-full">
+                <div class="lg:col-span-1 bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 min-w-0">
+                    <h3 class="text-sm font-bold text-slate-700 mb-5 text-center flex items-center justify-center gap-2">
+                        <i data-lucide="users" class="w-4 h-4 text-secondary"></i> 年齡 × 性別 熱力分布
+                    </h3>
+                    <div id="accurate-heatmap-container" class="w-full text-sm min-w-[240px]"></div>
+                    <p class="text-[10px] text-slate-400 mt-4 text-center italic">反映該年度補助資源在各人口學群組的分配飽和度</p>
+                </div>
 
-        <section>
-            <h2 class="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
-                <i data-lucide="stethoscope"></i> 114年醫療處置服務量分析
-            </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:-translate-y-1 transition-transform duration-300 border-t-4 border-t-primary">
-                    <div class="text-primary mb-3"><i data-lucide="pill" class="w-8 h-8"></i></div>
-                    <h3 class="text-lg font-bold text-slate-700">藥癮門診診療</h3>
-                    <p class="text-3xl font-black text-slate-800 my-2">12,655 <span class="text-sm font-normal text-slate-500">人數</span></p>
-                    <p class="text-sm text-slate-500">總人次: 87,224</p>
-                </div>
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:-translate-y-1 transition-transform duration-300 border-t-4 border-t-secondary">
-                    <div class="text-secondary mb-3"><i data-lucide="brain" class="w-8 h-8"></i></div>
-                    <h3 class="text-lg font-bold text-slate-700">藥癮心理治療</h3>
-                    <p class="text-3xl font-black text-slate-800 my-2">1,927 <span class="text-sm font-normal text-slate-500">人數</span></p>
-                    <p class="text-sm text-slate-500">總人次: 8,583</p>
-                </div>
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:-translate-y-1 transition-transform duration-300 border-t-4 border-t-teal-500">
-                    <div class="text-teal-500 mb-3"><i data-lucide="users" class="w-8 h-8"></i></div>
-                    <h3 class="text-lg font-bold text-slate-700">藥癮家族治療</h3>
-                    <p class="text-3xl font-black text-slate-800 my-2">192 <span class="text-sm font-normal text-slate-500">人數</span></p>
-                    <p class="text-sm text-slate-500">總人次: 213</p>
-                </div>
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:-translate-y-1 transition-transform duration-300 border-t-4 border-t-orange-500">
-                    <div class="text-orange-500 mb-3"><i data-lucide="briefcase-medical" class="w-8 h-8"></i></div>
-                    <h3 class="text-lg font-bold text-slate-700">藥癮職能治療</h3>
-                    <p class="text-3xl font-black text-slate-800 my-2">923 <span class="text-sm font-normal text-slate-500">人數</span></p>
-                    <p class="text-sm text-slate-500">總人次: 5,678</p>
+                <div class="lg:col-span-2 bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 min-w-0">
+                    <h3 class="text-sm font-bold text-slate-700 mb-5 text-center flex items-center justify-center gap-2">
+                        <i data-lucide="stethoscope" class="w-4 h-4 text-secondary"></i> 醫療處置服務利用分析
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="treatment-cards"></div>
                 </div>
             </div>
         </section>
 
-        <section class="bg-primary/5 rounded-2xl p-6 md:p-8 border border-primary/20">
-            <h2 class="text-2xl font-bold text-primary mb-4 flex items-center gap-2">
-                <i data-lucide="lightbulb"></i> 快速診斷小工具 (Insights)
+        <section class="mb-8 w-full">
+            <h2 class="text-lg sm:text-xl font-bold text-primary mb-4 border-l-4 border-primary pl-3 flex items-center gap-2">
+                <i data-lucide="pill" class="w-5 h-5"></i> 主要成癮物質之補助剖析
             </h2>
-            <div class="flex flex-col md:flex-row gap-4 items-center">
-                <select id="insightYear" class="w-full md:w-1/3 p-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary">
-                    <option value="109">109年</option>
-                    <option value="114" selected>114年</option>
-                </select>
-                <select id="insightType" class="w-full md:w-1/3 p-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary">
-                    <option value="highest_drug">最高使用率物質</option>
-                    <option value="gender_ratio">男女比例差距</option>
-                </select>
-                <button onclick="generateInsight()" class="w-full md:w-1/3 bg-primary hover:bg-blue-800 text-white font-bold py-3 px-6 rounded-lg transition-colors">
-                    產生洞察
-                </button>
-            </div>
-            <div id="insightResult" class="mt-6 p-4 bg-white rounded-lg border-l-4 border-accent text-slate-700 hidden">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden w-full">
+                <div class="flex border-b border-slate-200 bg-slate-50 overflow-x-auto scrollbar-hide whitespace-nowrap" id="drug-tabs">
+                    <button class="tab-btn active px-8 py-4 text-sm font-bold transition-all" data-drug="海洛因">海洛因</button>
+                    <button class="tab-btn px-8 py-4 text-sm font-bold transition-all" data-drug="安非他命">安非他命</button>
+                    <button class="tab-btn px-8 py-4 text-sm font-bold transition-all" data-drug="愷他命">愷他命</button>
+                    <button class="tab-btn px-8 py-4 text-sm font-bold transition-all" data-drug="其他">其他</button>
                 </div>
+                
+                <div class="p-5 sm:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8 w-full">
+                    <div class="lg:col-span-2 min-w-0">
+                        <h3 class="text-sm font-semibold text-slate-500 mb-4 text-center" id="drug-line-title">載入中...</h3>
+                        <div class="relative h-64 w-full"><canvas id="drugTrendChart"></canvas></div>
+                    </div>
+                    <div class="lg:col-span-1 min-w-0 flex flex-col items-center">
+                        <h3 class="text-sm font-bold text-slate-700 mb-4 text-center w-full border-b border-slate-100 pb-3" id="drug-pie-title">載入中...</h3>
+                        <div class="relative h-56 w-full flex justify-center"><canvas id="drugGenderChart"></canvas></div>
+                        <p class="text-[10px] text-slate-400 mt-4 text-center">* 性別比為單一年度數據，與上方年度選擇連動</p>
+                    </div>
+                </div>
+            </div>
         </section>
 
+        <section class="mb-12 w-full">
+            <div class="bg-slate-900 text-white rounded-3xl shadow-2xl p-6 sm:p-8 relative overflow-hidden border border-slate-700">
+                <div class="absolute right-[-20px] top-[-20px] opacity-5"><i data-lucide="brain-circuit" class="w-64 h-64"></i></div>
+                <div class="relative z-10">
+                    <h2 class="text-xl sm:text-2xl font-bold mb-6 flex items-center gap-3">
+                        <i data-lucide="lightbulb" class="w-8 h-8 text-amber-400 shrink-0"></i> 補助方案執行洞察報告
+                    </h2>
+                    <div class="flex flex-col sm:flex-row gap-4 mb-6 items-stretch sm:items-center bg-slate-800/50 p-4 rounded-2xl">
+                        <div class="flex items-center gap-3 flex-grow">
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-widest shrink-0">年份</label>
+                            <select id="insight-year" class="bg-slate-700 text-white border-none rounded-xl p-2.5 text-sm w-full outline-none focus:ring-2 focus:ring-amber-400"></select>
+                        </div>
+                        <div class="flex items-center gap-3 flex-grow">
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-widest shrink-0">物質</label>
+                            <select id="insight-drug" class="bg-slate-700 text-white border-none rounded-xl p-2.5 text-sm w-full outline-none focus:ring-2 focus:ring-amber-400">
+                                <option value="海洛因">海洛因</option>
+                                <option value="安非他命">安非他命</option>
+                                <option value="愷他命">愷他命</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+                        <button id="calc-insight-btn" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-black px-6 py-2.5 rounded-xl transition-all shadow-lg active:scale-95 shrink-0">
+                            產生報告
+                        </button>
+                    </div>
+                    <div id="insight-result" class="bg-slate-950/60 p-5 sm:p-6 rounded-2xl border border-slate-800 hidden">
+                        <div id="insight-text" class="text-[14px] sm:text-[16px] leading-relaxed break-words font-light"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
-    <footer class="bg-slate-900 text-slate-400 py-6 text-center text-sm">
-        <p>資料來源：藥癮治療費用補助方案執行成果統計 (擷取自使用者提供之圖表 109-114 年)</p>
-        <p class="mt-1">Designed by Public Health Education Designer</p>
+    <footer class="bg-[#020617] text-slate-500 py-12 mt-auto border-t border-slate-900 w-full">
+        <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+                <div class="space-y-4">
+                    <h3 class="text-slate-200 font-bold text-sm flex items-center gap-2">
+                        <i data-lucide="database" class="w-4 h-4 text-blue-500"></i> 資料來源與版權聲明
+                    </h3>
+                    <div class="text-xs space-y-2 leading-relaxed">
+                        <p>主責機關：<span class="text-slate-400">衛生福利部 心理健康司</span></p>
+                        <p>資料集名稱：<span class="text-slate-400">藥癮治療費用補助方案執行成果統計 (109-114年度)</span></p>
+                        <p class="text-slate-600 italic">
+                            ※ 聲明：本數據代表進入「醫療補助體系」之個案人數，受各成癮物質治療模式差異（如海洛因替代治療）影響。
+                            數據增加可能代表醫療需求釋放或補助覆蓋率提升，不應直接等同於社區盛行率波動。
+                        </p>
+                    </div>
+                </div>
+                <div class="flex flex-col md:items-end space-y-4">
+                    <h3 class="text-slate-200 font-bold text-sm flex items-center gap-2">
+                        <i data-lucide="code" class="w-4 h-4 text-accent"></i> 技術研發與分析團隊
+                    </h3>
+                    <div class="text-right">
+                        <p class="text-sm text-slate-300 font-medium">TMAP 政策分析組</p>
+                        <p class="text-lg font-black text-white tracking-tighter">王聲昌團隊</p>
+                        <p class="text-[10px] text-slate-600 mt-8 tracking-widest">&copy; 2026 TMAP POLICY ANALYSIS GROUP. ALL RIGHTS RESERVED.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </footer>
 
     <script>
-        // 初始化 Lucide Icons
+        // 初始化 Lucide 圖標
         lucide.createIcons();
 
-        // 核心資料庫 (自提供圖片精簡擷取)
-        const years = ['109年', '110年', '111年', '112年', '113年', '114年'];
-        const totalUsers = [10648, 13238, 13884, 13939, 15621, 17005];
-        
-        // 年齡與性別資料 (以114年為代表)
-        const ageLabels = ['未滿18歲', '18-24歲', '25-34歲', '35-44歲', '45-54歲', '55-64歲', '65歲以上'];
-        const maleAgeData_114 = [73, 424, 1658, 3358, 5689, 2776, 512];
-        const femaleAgeData_114 = [30, 98, 339, 837, 953, 229, 28];
+        let dashboardData = [];
+        let currentYear = '';
+        let currentDrug = '海洛因';
 
-        // 藥物資料
-        const drugData = {
-            'amp': { label: '安非他命', data: [5519, 6209, 6785, 7421, 8923, 8970], color: 'rgba(59, 130, 246, 1)' },
-            'ket': { label: '愷他命', data: [4102, 6199, 6270, 5660, 5491, 6584], color: 'rgba(14, 165, 233, 1)' },
-            'her': { label: '海洛因', data: [146, 206, 265, 321, 435, 540], color: 'rgba(30, 58, 138, 1)' }
+        // 圖表實例容器
+        let charts = {
+            trend: null,
+            ageTrend: null,
+            drugTrend: null,
+            drugGender: null
         };
 
-        // 1. 年度趨勢折線圖
-        const ctxTrend = document.getElementById('trendChart').getContext('2d');
-        new Chart(ctxTrend, {
-            type: 'line',
-            data: {
-                labels: years,
-                datasets: [{
-                    label: '總人數',
-                    data: totalUsers,
-                    borderColor: '#1e3a8a',
-                    backgroundColor: 'rgba(30, 58, 138, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: '#1e3a8a',
-                    pointRadius: 4
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
+        const ageGroups = ['未滿18歲', '18-24歲', '25-34歲', '35-44歲', '45-54歲', '55-64歲', '65歲以上'];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCSV();
+
+            document.getElementById('upload-btn').onclick = () => document.getElementById('csv-upload').click();
+            document.getElementById('csv-upload').onchange = (e) => {
+                if (e.target.files[0]) Papa.parse(e.target.files[0], { header: true, skipEmptyLines: true, complete: res => initDashboard(res.data) });
+            };
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentDrug = e.target.dataset.drug;
+                    refreshDrugPanel();
+                };
+            });
+
+            document.getElementById('global-year-select').onchange = e => switchYear(e.target.value);
+            document.getElementById('calc-insight-btn').onclick = generateReport;
         });
 
-        // 2. 年齡金字塔/堆疊圖 (114年)
-        const ctxAge = document.getElementById('ageGenderChart').getContext('2d');
-        new Chart(ctxAge, {
-            type: 'bar',
-            data: {
-                labels: ageLabels,
-                datasets: [
-                    { label: '男性', data: maleAgeData_114, backgroundColor: '#3b82f6' },
-                    { label: '女性', data: femaleAgeData_114, backgroundColor: '#f43f5e' }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: { stacked: true },
-                    y: { stacked: true }
-                }
-            }
-        });
+        function loadCSV() {
+            fetch('Drug_Addiction_Dashboard_data.csv')
+                .then(res => { if (!res.ok) throw new Error(); return res.text(); })
+                .then(text => Papa.parse(text, { header: true, skipEmptyLines: true, complete: res => initDashboard(res.data) }))
+                .catch(() => {
+                    document.getElementById('status-text').innerHTML = `<i data-lucide="alert-triangle" class="text-red-500 w-4 h-4"></i> <span>本地讀取受阻，請手動載入 CSV 檔案</span>`;
+                    document.getElementById('upload-btn').classList.remove('hidden');
+                    lucide.createIcons();
+                });
+        }
 
-        // 3. 藥物 Tabs 與圖表邏輯
-        let currentDrugChart = null;
-        const ctxDrug = document.getElementById('drugChart').getContext('2d');
+        function initDashboard(data) {
+            // 核心修正：嚴格過濾空行與空格，確保 X 軸不留白
+            dashboardData = data
+                .filter(row => row['年度'] && row['年度'].trim() !== '')
+                .sort((a, b) => parseInt(a['年度']) - parseInt(b['年度']));
+            
+            if(!dashboardData.length) return alert("資料讀取失敗，請檢查 CSV 格式。");
 
-        function renderDrugChart(drugKey) {
-            if (currentDrugChart) currentDrugChart.destroy();
-            const config = drugData[drugKey];
-            currentDrugChart = new Chart(ctxDrug, {
+            document.getElementById('data-status-bar').style.display = 'none';
+            const yearSelect = document.getElementById('global-year-select');
+            const insightYearSelect = document.getElementById('insight-year');
+            yearSelect.innerHTML = insightYearSelect.innerHTML = '';
+            
+            dashboardData.forEach(row => {
+                yearSelect.add(new Option(row['年度'] + ' 年', row['年度']));
+                insightYearSelect.add(new Option(row['年度'] + ' 年', row['年度']));
+            });
+
+            currentYear = dashboardData[dashboardData.length - 1]['年度'];
+            yearSelect.value = insightYearSelect.value = currentYear;
+
+            const content = document.getElementById('dashboard-content');
+            content.classList.replace('hidden', 'block');
+            void content.offsetWidth;
+            content.classList.replace('opacity-0', 'opacity-100');
+
+            renderHistoricalCharts();
+            switchYear(currentYear);
+        }
+
+        function renderHistoricalCharts() {
+            const labels = dashboardData.map(d => d['年度'] + '年');
+            const totals = dashboardData.map(d => parseInt(d['總計人數'] || 0));
+            const male = dashboardData.map(d => parseInt(d['總計人數-男'] || 0));
+            const female = dashboardData.map(d => parseInt(d['總計人數-女'] || 0));
+
+            const opts = {
+                responsive: true, maintainAspectRatio: false,
+                scales: { x: { grid: { display: false }, offset: true } },
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true } } }
+            };
+
+            const ctx1 = document.getElementById('trendChart').getContext('2d');
+            charts.trend = new Chart(ctx1, {
                 type: 'bar',
                 data: {
-                    labels: years,
-                    datasets: [{
-                        label: config.label + ' 使用人數',
-                        data: config.data,
-                        backgroundColor: config.color,
-                        borderRadius: 4
-                    }]
+                    labels,
+                    datasets: [
+                        { type: 'line', label: '總補助人數', data: totals, borderColor: '#1e3a8a', borderWidth: 3, pointRadius: 4, fill: false, tension: 0.3 },
+                        { label: '男性', data: male, backgroundColor: 'rgba(59, 130, 246, 0.7)', stack: 'S1' },
+                        { label: '女性', data: female, backgroundColor: 'rgba(244, 114, 182, 0.7)', stack: 'S1' }
+                    ]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: opts
+            });
+
+            const palette = ['#e0f2fe', '#bae6fd', '#7dd3fc', '#38bdf8', '#0ea5e9', '#0284c7', '#0369a1'];
+            const ageDatasets = ageGroups.map((age, i) => ({
+                label: age, data: dashboardData.map(d => parseInt(d[`年齡-${age}-總計`] || 0)),
+                backgroundColor: palette[i], stack: 'AgeStack'
+            }));
+
+            const ctx2 = document.getElementById('ageTrendChart').getContext('2d');
+            charts.ageTrend = new Chart(ctx2, {
+                type: 'bar', data: { labels, datasets: ageDatasets }, options: opts
             });
         }
 
-        function switchDrugTab(drugKey) {
-            // Update UI
-            ['amp', 'ket', 'her'].forEach(key => {
-                const tab = document.getElementById(`tab-${key}`);
-                if (key === drugKey) {
-                    tab.classList.replace('tab-inactive', 'tab-active');
-                    tab.classList.remove('hover:text-primary');
-                } else {
-                    tab.classList.replace('tab-active', 'tab-inactive');
-                    tab.classList.add('hover:text-primary');
-                }
-            });
-            // Update Chart
-            renderDrugChart(drugKey);
+        function switchYear(year) {
+            currentYear = year;
+            document.getElementById('current-year-display').innerText = `${year}年度 分析詳情`;
+            const row = dashboardData.find(d => d['年度'] === year);
+            if (!row) return;
+
+            renderHeatmap(row);
+            renderTreatment(row);
+            refreshDrugPanel();
         }
-        
-        // 初始渲染安非他命
-        renderDrugChart('amp');
 
-// 5. 快速診斷小工具邏輯 - 專業升級版
-        function generateInsight() {
-            const yearLabel = document.getElementById('insightYear').value; // "109" 或 "114"
-            const type = document.getElementById('insightType').value;
-            const resultBox = document.getElementById('insightResult');
-            
-            // 找出陣列索引 (109年是0, 114年是5)
-            const yearIdx = years.indexOf(yearLabel + '年');
-            const total = totalUsers[yearIdx];
-            
-            let title = "";
-            let content = "";
-            let policyNote = "";
+        function renderHeatmap(row) {
+            const container = document.getElementById('accurate-heatmap-container');
+            let max = 0;
+            const matrix = ageGroups.map(age => {
+                const m = parseInt(row[`年齡-${age}-男`] || 0);
+                const f = parseInt(row[`年齡-${age}-女`] || 0);
+                max = Math.max(max, m, f);
+                return { age, m, f };
+            });
 
-            if (type === "highest_drug") {
-                // 動態找出該年受助人數最多的物質
-                const drugs = Object.keys(drugData).map(key => ({
-                    name: drugData[key].label,
-                    count: drugData[key].data[yearIdx],
-                    key: key
-                })).sort((a, b) => b.count - a.count);
+            let html = `<div class="flex flex-col gap-1.5 w-full"><div class="flex text-center mb-2"><div class="w-16 sm:w-20 shrink-0"></div><div class="flex-1 text-[10px] font-black text-blue-600 uppercase tracking-tighter">Male</div><div class="flex-1 text-[10px] font-black text-pink-500 uppercase tracking-tighter">Female</div></div>`;
+            matrix.forEach(c => {
+                const mAlpha = max === 0 ? 0.1 : Math.max(c.m / max, 0.05);
+                const fAlpha = max === 0 ? 0.1 : Math.max(c.f / max, 0.05);
+                html += `<div class="flex items-center"><div class="w-16 sm:w-20 text-right pr-2 text-slate-500 text-[10px] font-bold shrink-0 leading-none">${c.age}</div><div class="flex-1 h-10 heatmap-cell mx-0.5 rounded-md flex items-center justify-center text-white text-[11px] font-black" style="background-color: rgba(29, 78, 216, ${mAlpha});">${c.m || '-'}</div><div class="flex-1 h-10 heatmap-cell mx-0.5 rounded-md flex items-center justify-center text-white text-[11px] font-black" style="background-color: rgba(219, 39, 119, ${fAlpha});">${c.f || '-'}</div></div>`;
+            });
+            container.innerHTML = html + `</div>`;
+        }
 
-                const top = drugs[0];
-                const percentage = ((top.count / total) * 100).toFixed(1);
-                
-                title = `${yearLabel}年 醫療資源需求核心`;
-                content = `該年度以 <strong class="text-primary">${top.name}</strong> 補助申請人數最多，達 ${top.count.toLocaleString()} 人，佔整體受助者約 ${percentage}%。`;
-                
-                // 臨床政策詮釋
-                if (top.key === 'amp') {
-                    policyNote = "安非他命目前臨床上無核准之替代藥物，數據增長反映了心理治療與職能介入需求之提升，應強化非藥物治療之資源配置。";
-                } else if (top.key === 'her') {
-                    policyNote = "海洛因個案通常與美沙冬/丁基原啡因替代療法（OAT）具高度關聯，數據穩定反映了藥物替代治療方案的覆蓋率。";
-                }
-                
-            } else if (type === "gender_ratio") {
-                // 計算性別比
-                const maleTotal = maleAgeData_114.reduce((a, b) => a + b, 0); // 這裡預設用114年，若有各年資料可再擴充
-                const femaleTotal = femaleAgeData_114.reduce((a, b) => a + b, 0);
-                const ratio = (maleTotal / femaleTotal).toFixed(1);
-                
-                title = `${yearLabel}年 受助群體性別分析`;
-                content = `該年受助者中，男性人數約為女性的 <strong class="text-primary">${ratio} 倍</strong>。女性受助者比例雖較低，但在臨床上往往面臨更高的社會標籤與共病風險。`;
-                policyNote = "建議針對男性族群加強 45-54 歲中高齡職場穩定計畫；針對女性則應評估家庭功能支援與隱私治療空間之需求。";
-            }
+        function renderTreatment(row) {
+            const container = document.getElementById('treatment-cards');
+            const items = [
+                { t: '門診診療', k: '藥癮門診診療-人數', i: 'activity', c: 'text-blue-600', b: 'bg-blue-50' },
+                { t: '心理治療', k: '藥癮心理治療-人數', i: 'brain-circuit', c: 'text-purple-600', b: 'bg-purple-50' },
+                { t: '家族治療', k: '藥癮家族治療-人數', i: 'users-2', c: 'text-orange-600', b: 'bg-orange-50' },
+                { t: '職能治療', k: '藥癮職能治療-人數', i: 'hammer', c: 'text-emerald-600', b: 'bg-emerald-50' }
+            ];
+            container.innerHTML = items.map(c => {
+                const v = parseInt(row[`醫療處置-${c.k}-總計`] || 0).toLocaleString();
+                return `<div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex flex-col justify-center transition-all hover:bg-white hover:shadow-md"><div class="flex items-center gap-3 mb-2"><div class="p-2 rounded-xl ${c.b} ${c.c}"><i data-lucide="${c.i}" class="w-4 h-4"></i></div><h3 class="font-bold text-slate-700 text-xs">${c.t}</h3></div><div class="text-2xl font-black text-slate-800 ml-10">${v} <span class="text-[10px] font-medium text-slate-400">人</span></div></div>`;
+            }).join('');
+            lucide.createIcons();
+        }
 
-            // 計算成長率 (與109年基準比)
-            const growth = (((total - totalUsers[0]) / totalUsers[0]) * 100).toFixed(1);
-            const growthText = yearIdx > 0 ? 
-                `<p class="mt-3 text-xs text-slate-400">※ 相較於109年基準，整體補助服務量已成長 ${growth}%。</p>` : "";
+        function refreshDrugPanel() {
+            // 動態更新標題，明確標註年份與物質
+            document.getElementById('drug-line-title').innerText = `${currentDrug} 歷年補助人數變化趨勢`;
+            document.getElementById('drug-pie-title').innerText = `${currentYear}年 ${currentDrug} 性別比例`;
 
-            // 渲染結果
-            resultBox.innerHTML = `
-                <div class="flex items-start gap-3">
-                    <div class="mt-1 text-accent"><i data-lucide="activity" class="w-5 h-5"></i></div>
-                    <div>
-                        <h4 class="font-bold text-slate-800 mb-1">${title}</h4>
-                        <p class="text-sm leading-relaxed">${content}</p>
-                        <div class="mt-3 p-3 bg-blue-50 rounded border border-blue-100">
-                            <p class="text-xs font-bold text-blue-800 mb-1 tracking-wider uppercase">臨床/政策建議：</p>
-                            <p class="text-xs text-blue-700 leading-relaxed">${policyNote}</p>
-                        </div>
-                        ${growthText}
+            const labels = dashboardData.map(d => d['年度'] + '年');
+            const dataLine = dashboardData.map(d => parseInt(d[`主要成癮物質-${currentDrug}-總計`] || 0));
+
+            if (charts.drugTrend) charts.drugTrend.destroy();
+            charts.drugTrend = new Chart(document.getElementById('drugTrendChart').getContext('2d'), {
+                type: 'line', data: { labels, datasets: [{ label: '補助人數', data: dataLine, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.05)', fill: true, tension: 0.4, borderWidth: 3, pointRadius: 4 }]},
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { offset: false } }, plugins: { legend: { display: false } } }
+            });
+
+            const row = dashboardData.find(d => d['年度'] === currentYear);
+            const m = parseInt(row[`主要成癮物質-${currentDrug}-男`] || 0);
+            const f = parseInt(row[`主要成癮物質-${currentDrug}-女`] || 0);
+
+            if (charts.drugGender) charts.drugGender.destroy();
+            charts.drugGender = new Chart(document.getElementById('drugGenderChart').getContext('2d'), {
+                type: 'doughnut', data: { labels: ['男性', '女性'], datasets: [{ data: [m, f], backgroundColor: ['#3b82f6', '#ec4899'], hoverOffset: 4, borderWidth: 0 }]},
+                options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } } }
+            });
+        }
+
+        function generateReport() {
+            const year = document.getElementById('insight-year').value;
+            const drug = document.getElementById('insight-drug').value;
+            const row = dashboardData.find(d => d['年度'] === year);
+            if(!row) return;
+
+            let maxAge = '', maxVal = 0;
+            ageGroups.forEach(age => {
+                const val = parseInt(row[`年齡-${age}-總計`] || 0);
+                if(val > maxVal) { maxVal = val; maxAge = age; }
+            });
+
+            const count = parseInt(row[`主要成癮物質-${drug}-總計`] || 0);
+            let note = drug === "海洛因" ? 
+                "該物質具備成熟的藥物替代治療(OAT)方案，數據高度穩定，反映了長期的藥物維持治療覆蓋率。" : 
+                "目前臨床缺乏特效替代藥物，數據主要反映心理諮商、職能重建與相關門診診療的資源配置需求。";
+
+            document.getElementById('insight-text').innerHTML = `
+                <div class="space-y-4">
+                    <p class="text-slate-200">在 <span class="text-amber-400 font-black">${year}年</span> 執行成果中，以 <span class="text-amber-400 font-black">${drug}</span> 為主訴求之補助個案共 <span class="bg-amber-400/20 px-2 py-0.5 rounded text-amber-400 font-bold">${count.toLocaleString()}</span> 人。</p>
+                    <div class="bg-slate-800/80 p-4 rounded-xl border-l-4 border-amber-500">
+                        <span class="text-[10px] font-black text-amber-500 uppercase tracking-widest block mb-1">臨床處置邏輯：</span>
+                        <p class="text-sm text-slate-300">${note}</p>
                     </div>
+                    <p class="text-sm text-slate-400 leading-relaxed italic border-t border-slate-800 pt-4">
+                        觀察人口結構，該年度資源利用量集中於 <span class="text-slate-200 font-bold underline decoration-amber-500/50">${maxAge}</span>。
+                        此趨勢提示 **TMAP 政策小組**，應針對此特定年齡段加強「${drug}」補助方案的醫療可近性與回診追蹤機制。
+                    </p>
                 </div>
             `;
-            
-            resultBox.classList.remove('hidden');
-            lucide.createIcons(); // 重新渲染小圖示
-            
-            resultBox.animate([
-                { opacity: 0, transform: 'scale(0.98)' },
-                { opacity: 1, transform: 'scale(1)' }
-            ], { duration: 250, fill: 'forwards' });
+            document.getElementById('insight-result').classList.remove('hidden');
         }
     </script>
 </body>
