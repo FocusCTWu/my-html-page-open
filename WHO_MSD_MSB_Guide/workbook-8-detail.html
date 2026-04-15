@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workbook 8 經濟評估 - WHO 成癮治療評估架構</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  :root {
+    /* Workbook 8 主題色：岩灰 (分析/專業) 與 琥珀金 (價值/經濟) */
+    --slate-900: #0f172a;
+    --slate-800: #1e293b;
+    --slate-700: #334155;
+    --slate-100: #f1f5f9;
+    --slate-50:  #f8fafc;
+    
+    --amber-600: #d97706;
+    --amber-500: #f59e0b;
+    --amber-400: #fbbf24;
+    --amber-100: #fef3c7;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--slate-50); 
+    color: var(--slate-800);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+  h1, h2, h3 { font-family: 'Noto Serif TC', serif; }
+
+  /* ── NAV ── */
+  nav {
+    background: var(--slate-900);
+    position: sticky; top: 0; z-index: 200;
+    border-bottom: 2px solid var(--amber-500);
+    box-shadow: 0 2px 20px rgba(0,0,0,.3);
+  }
+  .nav-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .75rem 1.5rem;
+  }
+  .nav-brand { color: white; font-family: 'Noto Serif TC', serif; font-size: .95rem; font-weight: 600; }
+  .nav-brand span { color: var(--amber-400); }
+  .btn-return {
+    color: white; font-size: 0.8rem; text-decoration: none; font-weight: 500;
+    padding: 0.35rem 0.8rem; border-radius: 2rem;
+    border: 1px solid rgba(255,255,255,0.3); transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+  }
+  .btn-return:hover { background: rgba(255,255,255,0.1); border-color: white; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #020617 0%, #0f172a 50%, #451a03 100%);
+    padding: 5rem 1.5rem 4rem;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(245,158,11,.15) 0%, transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(148,163,184,.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 900px; margin: 0 auto; position: relative; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: rgba(245,158,11,.15);
+    border: 1px solid rgba(245,158,11,.3);
+    color: var(--amber-400); font-size: .75rem; font-weight: 500;
+    padding: .3rem .75rem; border-radius: 2rem; margin-bottom: 1.5rem;
+    animation: fadeDown .6s ease both;
+  }
+  .hero h1 {
+    color: white; font-size: clamp(1.7rem, 4vw, 2.6rem); line-height: 1.3; margin-bottom: 1.25rem;
+    animation: fadeDown .7s ease .1s both;
+  }
+  .hero h1 span { color: var(--amber-500); }
+  .hero-sub {
+    color: #cbd5e1; font-size: .95rem; max-width: 780px; margin-bottom: 2rem;
+    font-weight: 300; line-height: 1.8;
+    animation: fadeDown .8s ease .2s both;
+  }
+  .hero-stats {
+    display: flex; gap: 2rem; flex-wrap: wrap;
+    animation: fadeDown .9s ease .35s both;
+  }
+  .hero-stat {
+    display: flex; flex-direction: column;
+    border-left: 2px solid rgba(245,158,11,.4); padding-left: 1rem;
+  }
+  .hero-stat-num { font-size: 1.6rem; font-weight: 700; color: var(--amber-400); font-family: 'DM Mono', monospace; }
+  .hero-stat-label { font-size: .72rem; color: #94a3b8; }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SECTIONS ── */
+  .section { padding: 4.5rem 1.5rem; }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--amber-100); color: var(--amber-600); font-size: .72rem; font-weight: 600;
+    padding: .25rem .7rem; border-radius: 2rem; text-transform: uppercase; letter-spacing: .06em;
+    margin-bottom: .75rem;
+  }
+  .section-title { color: var(--slate-900); font-size: clamp(1.35rem, 3vw, 1.8rem); margin-bottom: .5rem; }
+  .section-desc { color: var(--slate-700); font-size: .92rem; max-width: 640px; margin-bottom: 2.5rem; }
+
+  /* ── 互動 1: 四大經濟模型 ── */
+  .model-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+  .model-card {
+    background: white; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 2rem;
+    transition: all 0.3s; cursor: pointer; position: relative; overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  }
+  .model-card::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+    background: var(--amber-500); transform: scaleY(0); transition: transform 0.3s; transform-origin: bottom;
+  }
+  .model-card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px rgba(0,0,0,0.05); border-color: var(--amber-400); }
+  .model-card:hover::before { transform: scaleY(1); }
+  .model-icon { width: 48px; height: 48px; background: var(--slate-100); color: var(--slate-800); border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; transition: all 0.3s; }
+  .model-card:hover .model-icon { background: var(--amber-100); color: var(--amber-600); }
+  .model-abbr { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--amber-600); font-weight: 700; margin-bottom: 0.2rem; }
+  .model-title { font-size: 1.1rem; font-weight: 700; color: var(--slate-900); margin-bottom: 0.75rem; }
+  .model-desc { font-size: 0.85rem; color: var(--slate-700); line-height: 1.6; }
+
+  /* ── 互動 2: ICER 模擬器與跨瀏覽器滑桿 (CROSS-BROWSER SLIDER FIX) ── */
+  .icer-layout {
+    display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem; background: white;
+    padding: 2.5rem; border-radius: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  }
+  .icer-controls { display: flex; flex-direction: column; gap: 1.5rem; justify-content: center; }
+  .slider-group { background: var(--slate-50); padding: 1.5rem; border-radius: 1rem; border: 1px solid #e2e8f0; }
+  .slider-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600; color: var(--slate-800); }
+  .slider-val { font-family: 'DM Mono', monospace; color: var(--amber-600); font-size: 1.1rem;}
+  
+  /* 針對所有瀏覽器的拉條外觀重置與優化 */
+  input[type=range] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 100%;
+    background: transparent;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  input[type=range]:focus { outline: none; }
+  
+  /* WebKit (Chrome, Safari, Edge) 軌道與滑塊 */
+  input[type=range]::-webkit-slider-runnable-track {
+    width: 100%; height: 8px; cursor: pointer; background: #cbd5e1; border-radius: 4px;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 26px; width: 26px; border-radius: 50%; background: var(--amber-500); 
+    cursor: pointer; margin-top: -9px; border: 4px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    transition: transform 0.1s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+  
+  /* Firefox 軌道與滑塊 */
+  input[type=range]::-moz-range-track {
+    width: 100%; height: 8px; cursor: pointer; background: #cbd5e1; border-radius: 4px; border: none;
+  }
+  input[type=range]::-moz-range-thumb {
+    height: 26px; width: 26px; border-radius: 50%; background: var(--amber-500); 
+    cursor: pointer; border: 4px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    transition: transform 0.1s;
+  }
+  input[type=range]::-moz-range-thumb:hover { transform: scale(1.1); }
+
+  .icer-result-box {
+    margin-top: 1rem; padding: 1.5rem; border-radius: 1rem; text-align: center; transition: all 0.3s;
+    background: var(--slate-900); color: white;
+  }
+  .icer-label { font-size: 0.85rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+  .icer-value { font-size: 2rem; font-weight: 700; font-family: 'DM Mono', monospace; color: var(--amber-400); margin-bottom: 0.5rem; }
+  .icer-status { font-size: 0.9rem; font-weight: 600; padding: 0.3rem 1rem; border-radius: 2rem; display: inline-block; }
+  
+  .status-dominant { background: rgba(20, 184, 166, 0.2); color: #2dd4bf; }
+  .status-dominated { background: rgba(244, 63, 94, 0.2); color: #fb7185; }
+  .status-tradeoff { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+
+  .chart-container { position: relative; height: 100%; min-height: 350px; width: 100%; }
+
+  /* ── 互動 3: QALY 動態計算儀 ── */
+  .qaly-wrap { background: white; border-radius: 1.5rem; padding: 2.5rem; border: 1px solid #e2e8f0; }
+  .qaly-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+  .qaly-visualizer { position: relative; height: 250px; border-left: 3px solid var(--slate-800); border-bottom: 3px solid var(--slate-800); display: flex; align-items: flex-end; padding-left: 2px;}
+  .qaly-perfect-box {
+    position: absolute; bottom: 0; left: 2px; height: 100%; width: 100%;
+    border: 2px dashed #cbd5e1; background: transparent; z-index: 1;
+  }
+  .qaly-actual-box {
+    position: absolute; bottom: 0; left: 2px;
+    background: linear-gradient(135deg, var(--amber-400), var(--amber-600));
+    opacity: 0.85; z-index: 2; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .qaly-actual-text { color: white; font-weight: 700; font-size: 1.4rem; text-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+  .axis-label-y { position: absolute; left: -50px; top: 50%; transform: translateY(-50%) rotate(-90deg); font-size: 0.85rem; font-weight: 600; color: var(--slate-700); }
+  .axis-label-x { position: absolute; bottom: -35px; left: 50%; transform: translateX(-50%); font-size: 0.85rem; font-weight: 600; color: var(--slate-700); }
+
+  /* ── 互動 4: CHECKLIST & RADAR ── */
+  .diag-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; align-items: center; }
+  .checklist { display: flex; flex-direction: column; gap: 0.75rem; }
+  .check-item {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem;
+    padding: 1rem 1.25rem; cursor: pointer; transition: all 0.2s;
+  }
+  .check-item:hover { border-color: var(--amber-400); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+  .check-item.checked { background: var(--amber-100); border-color: var(--amber-500); }
+  .check-icon {
+    width: 22px; height: 22px; border-radius: 4px; border: 2px solid #cbd5e1;
+    display: flex; align-items: center; justify-content: center; margin-top: 2px;
+    transition: all 0.2s; color: transparent; flex-shrink: 0;
+  }
+  .check-item.checked .check-icon { background: var(--amber-500); border-color: var(--amber-500); color: white; }
+  .check-content { flex: 1; }
+  .check-title { font-size: 0.95rem; font-weight: 600; color: var(--slate-900); margin-bottom: 0.25rem; }
+  .check-desc { font-size: 0.8rem; color: var(--slate-700); }
+  
+  .radar-wrap { background: white; border-radius: 1rem; padding: 2rem; border: 1px solid #e2e8f0; aspect-ratio: 1; position: relative; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--slate-900); color: #94a3b8;
+    padding: 2.5rem 1.5rem; text-align: center;
+    font-size: .8rem; border-top: 2px solid var(--amber-600);
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(24px); transition: all .55s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    .icer-layout { grid-template-columns: 1fr; }
+    .qaly-layout { grid-template-columns: 1fr; gap: 4rem; }
+    .diag-layout { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="main-nav">
+  <div class="nav-inner">
+    <div class="nav-brand">WHO <span>成癮醫療服務</span> 評估架構</div>
+    <div class="nav-right">
+      <a href="WHO_MSD_MSB_Guide_13_developing.html" class="btn-return"><i data-lucide="arrow-left" style="width:16px;height:16px;"></i> 返回主頁</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">⚖️ Workbook 8: Economic Evaluations</div>
+    <h1>
+      第八階段：經濟評估<br>
+      <span>衡量醫療投資的真實價值</span>
+    </h1>
+    <p class="hero-sub">
+      當資源有限時，我們不僅需要知道「治療是否有效」，更需要知道「它是否物有所值 (Value for Money)」。經濟評估結合了「成本分析」與「成效分析」，透過嚴謹的模型比較不同介入方案的投入產出比，為政策制定者提供資源配置的最強實證依據。
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-num">4</span>
+        <span class="hero-stat-label">經濟評估模型</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">ICER</span>
+        <span class="hero-stat-label">增量成本效果比</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">QALY</span>
+        <span class="hero-stat-label">品質調整壽命年</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="models">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="layers" style="width:14px;height:14px;"></i> Evaluation Models</span>
+    <h2 class="section-title reveal">四大衛生經濟學評估模型</h2>
+    <p class="section-desc reveal">根據您所掌握的「效果資料」類型，經濟評估可分為以下四種主要設計。它們都能比較兩項以上的方案，差異在於如何衡量「產出」。</p>
+
+    <div class="model-grid reveal">
+      <div class="model-card">
+        <div class="model-icon"><i data-lucide="minimize-2"></i></div>
+        <div class="model-abbr">CMA</div>
+        <h3 class="model-title">成本最小化分析</h3>
+        <p class="model-desc"><strong>Cost-Minimization Analysis</strong><br>當已有科學鐵證顯示兩種介入方案的「成效完全相同」時，只需單純比較哪一種方案的總成本較低。實務上在成癮治療中較少見。</p>
+      </div>
+      <div class="model-card">
+        <div class="model-icon"><i data-lucide="bar-chart"></i></div>
+        <div class="model-abbr">CEA</div>
+        <h3 class="model-title">成本效果分析</h3>
+        <p class="model-desc"><strong>Cost-Effectiveness Analysis</strong><br>成效以「自然/臨床單位」衡量（如：增加的無毒品天數、避免的急診次數）。常用於比較目標相同的兩種成癮治療方案。</p>
+      </div>
+      <div class="model-card">
+        <div class="model-icon"><i data-lucide="activity"></i></div>
+        <div class="model-abbr">CUA</div>
+        <h3 class="model-title">成本效用分析</h3>
+        <p class="model-desc"><strong>Cost-Utility Analysis</strong><br>將成效轉換為標準化的「品質調整壽命年 (QALYs)」。這是衛生經濟學的黃金標準，因為它能跨科別（如：將戒毒中心與癌症治療）進行資源分配比較。</p>
+      </div>
+      <div class="model-card">
+        <div class="model-icon"><i data-lucide="coins"></i></div>
+        <div class="model-abbr">CBA</div>
+        <h3 class="model-title">成本效益分析</h3>
+        <p class="model-desc"><strong>Cost-Benefit Analysis</strong><br>將所有投入的成本與產出的成效「全部轉換為金錢價值」。例如：治療花費 vs. 減少犯罪所省下的社會成本。直觀但將生命/健康定價具爭議性。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="icer" style="background:white;">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="mouse-pointer-click" style="width:14px;height:14px;"></i> Interactive ICER Plane</span>
+    <h2 class="section-title reveal">成本效果平面與 ICER 模擬器</h2>
+    <p class="section-desc reveal">增量成本效果比 (ICER) 是指「每增加一單位效果，需要額外花費多少成本」。拖曳下方滑桿設定新方案與舊方案的差異，觀察散佈點在四象限的落點意涵。</p>
+
+    <div class="icer-layout reveal">
+      <div class="icer-controls">
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>成本差異 (Δ Cost)</span>
+            <span class="slider-val" id="val-cost">+$500</span>
+          </div>
+          <p style="font-size:0.85rem; color:var(--slate-700); margin-bottom:0.5rem;">新方案比舊方案貴或便宜多少？</p>
+          <input type="range" id="slider-cost" min="-1000" max="1000" step="50" value="500" oninput="updateICER()">
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>效果差異 (Δ Effect)</span>
+            <span class="slider-val" id="val-effect">+2.0 QALYs</span>
+          </div>
+          <p style="font-size:0.85rem; color:var(--slate-700); margin-bottom:0.5rem;">新方案比舊方案多或少多少健康效益？</p>
+          <input type="range" id="slider-effect" min="-5" max="5" step="0.5" value="2" oninput="updateICER()">
+        </div>
+
+        <div class="icer-result-box" id="icer-box">
+          <div class="icer-label">增量成本效果比 (ICER)</div>
+          <div class="icer-value" id="icer-display">$250 / QALY</div>
+          <div class="icer-status" id="icer-status">需與支付意願(WTP)比較</div>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <canvas id="icerChart"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="qaly" style="background:var(--slate-50);">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="heart-pulse" style="width:14px;height:14px;"></i> QALY Visualizer</span>
+    <h2 class="section-title reveal">品質調整壽命年 (QALY) 原理</h2>
+    <p class="section-desc reveal">QALY 結合了「生存長度 (量)」與「生活品質 (質)」。完美健康的一年 = 1 QALY；死亡 = 0。調整下方參數，查看實體色塊面積 (QALY) 的變化。</p>
+
+    <div class="qaly-wrap reveal">
+      <div class="qaly-layout">
+        <div>
+          <div class="slider-group" style="margin-bottom:1.5rem; background:white;">
+            <div class="slider-header">
+              <span>延長壽命年數 (Life Years)</span>
+              <span class="slider-val" id="val-years">10 年</span>
+            </div>
+            <input type="range" id="slider-years" min="1" max="20" step="1" value="10" oninput="updateQALY()">
+          </div>
+          
+          <div class="slider-group" style="background:white;">
+            <div class="slider-header">
+              <span>健康效用值 (Utility Weight)</span>
+              <span class="slider-val" id="val-utility">0.6</span>
+            </div>
+            <p style="font-size:0.8rem; color:var(--slate-700); margin-bottom:0.5rem;">(1.0=完美健康, 0.0=死亡。成癮期間常介於0.4~0.7)</p>
+            <input type="range" id="slider-utility" min="0" max="1" step="0.05" value="0.6" oninput="updateQALY()">
+          </div>
+        </div>
+
+        <div class="qaly-visualizer">
+          <span class="axis-label-y">生活品質 (Utility) 0.0 - 1.0</span>
+          <span class="axis-label-x">壽命長度 (Years)</span>
+          <div class="qaly-perfect-box">
+            <span style="position:absolute; top:10px; right:10px; font-size:0.75rem; color:#94a3b8; font-weight:600;">虛線框 = 完美健康狀態</span>
+          </div>
+          <div class="qaly-actual-box" id="qaly-area">
+            <span class="qaly-actual-text" id="qaly-total">6.0 QALYs</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="diagnostics" style="background:white;">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="target" style="width:14px;height:14px;"></i> Readiness Diagnostics</span>
+    <h2 class="section-title reveal">經濟評估：研究準備度自我診斷</h2>
+    <p class="section-desc reveal">經濟評估需要建立在穩固的財務與成效數據之上。勾選您的團隊目前已達成的準備事項，右側雷達圖將為您的「經濟評估準備度」進行診斷。</p>
+
+    <div class="diag-layout reveal">
+      <div class="checklist">
+        <div class="check-item" onclick="toggleDiag(0)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">成本追蹤 (Cost Tracking)</div>
+            <div class="check-desc">已具備能力精確計算介入方案的直接與間接微觀成本。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(1)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">成效數據 (Outcome Data)</div>
+            <div class="check-desc">已具備對照組設計或嚴謹的前後測成效數據可供比對。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(2)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">效用權重 (Utility Weights)</div>
+            <div class="check-desc">測量工具（如 EQ-5D）允許將健康狀態轉換為標準效用值。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(3)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">長期視野 (Time Horizon)</div>
+            <div class="check-desc">追蹤時間夠長，能捕捉到復發率或慢性疾病的長期變化。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(4)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">折現率認知 (Discounting)</div>
+            <div class="check-desc">了解未來發生的成本與健康效益必須依照經濟學原則進行折現計算。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="radar-wrap">
+        <canvas id="diagRadar"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>WHO MSD/MSB Framework Workbook 8 數位化導引</strong></p>
+  <p style="margin-top:.5rem;opacity:.6;">
+    本工具僅供學術與政策研究參考。由王聲昌醫師帶領的政策評估組應用開發。<br>
+    Taiwan Mental Health and Addiction Policy Translation Center (TMAP)
+  </p>
+</footer>
+
+<script>
+  // 初始化 Icons
+  lucide.createIcons();
+
+  /* ── 互動 2: ICER SCATTER CHART ── */
+  let icerChart;
+  function initICERChart() {
+    const ctx = document.getElementById('icerChart').getContext('2d');
+    
+    icerChart = new Chart(ctx, {
+      type: 'scatter',
+      data: {
+        datasets: [{
+          label: '新介入方案',
+          data: [{x: 2, y: 500}],
+          backgroundColor: '#f59e0b',
+          borderColor: '#d97706',
+          pointRadius: 8,
+          pointHoverRadius: 12
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                return `效果差異: ${ctx.raw.x}, 成本差異: $${ctx.raw.y}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            title: { display: true, text: '效果差異 (Δ Effect)', color: '#334155', font: {weight: 'bold'} },
+            min: -5, max: 5,
+            grid: {
+              color: (ctx) => ctx.tick.value === 0 ? '#0f172a' : '#e2e8f0',
+              lineWidth: (ctx) => ctx.tick.value === 0 ? 2 : 1
+            }
+          },
+          y: {
+            title: { display: true, text: '成本差異 (Δ Cost)', color: '#334155', font: {weight: 'bold'} },
+            min: -1000, max: 1000,
+            grid: {
+              color: (ctx) => ctx.tick.value === 0 ? '#0f172a' : '#e2e8f0',
+              lineWidth: (ctx) => ctx.tick.value === 0 ? 2 : 1
+            }
+          }
+        },
+        animation: { duration: 200, easing: 'easeOutQuart' }
+      }
+    });
+  }
+
+  function updateICER() {
+    const deltaC = parseFloat(document.getElementById('slider-cost').value);
+    const deltaE = parseFloat(document.getElementById('slider-effect').value);
+    
+    // Update labels
+    document.getElementById('val-cost').innerText = (deltaC > 0 ? '+' : '') + '$' + deltaC;
+    document.getElementById('val-effect').innerText = (deltaE > 0 ? '+' : '') + deltaE + ' QALYs';
+
+    // Update Chart
+    icerChart.data.datasets[0].data = [{x: deltaE, y: deltaC}];
+    icerChart.update();
+
+    // Calculate ICER & Status
+    const icerBox = document.getElementById('icer-box');
+    const icerDisplay = document.getElementById('icer-display');
+    const icerStatus = document.getElementById('icer-status');
+
+    icerStatus.classList.remove('status-dominant', 'status-dominated', 'status-tradeoff');
+
+    if (deltaC < 0 && deltaE > 0) {
+      icerDisplay.innerText = "絕對優勢";
+      icerStatus.innerText = "直接採納此方案";
+      icerStatus.classList.add('status-dominant');
+      icerBox.style.borderColor = "#2dd4bf";
+    } else if (deltaC > 0 && deltaE < 0) {
+      icerDisplay.innerText = "絕對劣勢";
+      icerStatus.innerText = "拒絕採納此方案";
+      icerStatus.classList.add('status-dominated');
+      icerBox.style.borderColor = "#fb7185";
+    } else if (deltaE === 0) {
+      icerDisplay.innerText = "N/A";
+      icerStatus.innerText = "效果無差異 (請做CMA)";
+    } else {
+      const icerValue = (deltaC / deltaE).toFixed(0);
+      icerDisplay.innerText = `$${Math.abs(icerValue)} / QALY`;
+      icerStatus.innerText = "需與支付意願(WTP)比較";
+      icerStatus.classList.add('status-tradeoff');
+      icerBox.style.borderColor = "#fbbf24";
+    }
+  }
+
+  /* ── 互動 3: QALY SIMULATOR ── */
+  function updateQALY() {
+    const years = parseFloat(document.getElementById('slider-years').value);
+    const utility = parseFloat(document.getElementById('slider-utility').value);
+    
+    document.getElementById('val-years').innerText = years + ' 年';
+    document.getElementById('val-utility').innerText = utility.toFixed(2);
+    
+    const qaly = (years * utility).toFixed(1);
+    document.getElementById('qaly-total').innerText = qaly + ' QALYs';
+
+    const widthPct = (years / 20) * 100;
+    const heightPct = (utility / 1) * 100;
+    
+    const area = document.getElementById('qaly-area');
+    area.style.width = widthPct + '%';
+    area.style.height = heightPct + '%';
+  }
+
+  /* ── 互動 4: CHECKLIST & RADAR ── */
+  let diagState = [false, false, false, false, false];
+  let radarChart = null;
+
+  function initRadar() {
+    const ctx = document.getElementById('diagRadar').getContext('2d');
+    radarChart = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: ['成本追蹤', '成效數據', '效用權重', '長期視野', '折現原則'],
+        datasets: [{
+          label: '經濟評估準備度',
+          data: [20, 20, 20, 20, 20], 
+          backgroundColor: 'rgba(245, 158, 11, 0.2)', 
+          borderColor: 'rgba(245, 158, 11, 0.8)',
+          borderWidth: 2,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: 'rgba(245, 158, 11, 1)',
+          pointHoverBackgroundColor: 'rgba(245, 158, 11, 1)',
+          pointHoverBorderColor: '#fff',
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            angleLines: { color: 'rgba(0, 0, 0, 0.05)' },
+            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+            pointLabels: {
+              font: { family: "'Noto Sans TC', sans-serif", size: 12, weight: '600' },
+              color: '#334155'
+            },
+            ticks: { display: false, min: 0, max: 100 }
+          }
+        },
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        animation: { duration: 600, easing: 'easeOutQuart' }
+      }
+    });
+  }
+
+  function toggleDiag(index) {
+    diagState[index] = !diagState[index];
+    const items = document.querySelectorAll('.check-item');
+    if (diagState[index]) {
+      items[index].classList.add('checked');
+    } else {
+      items[index].classList.remove('checked');
+    }
+    updateRadar();
+  }
+
+  function updateRadar() {
+    const newData = diagState.map(val => val ? 100 : 20);
+    radarChart.data.datasets[0].data = newData;
+    
+    const isAllTrue = diagState.every(val => val);
+    if(isAllTrue) {
+      radarChart.data.datasets[0].backgroundColor = 'rgba(20, 184, 166, 0.2)'; 
+      radarChart.data.datasets[0].borderColor = 'rgba(20, 184, 166, 0.8)';
+      radarChart.data.datasets[0].pointBorderColor = 'rgba(20, 184, 166, 1)';
+    } else {
+      radarChart.data.datasets[0].backgroundColor = 'rgba(245, 158, 11, 0.2)';
+      radarChart.data.datasets[0].borderColor = 'rgba(245, 158, 11, 0.8)';
+      radarChart.data.datasets[0].pointBorderColor = 'rgba(245, 158, 11, 1)';
+    }
+    radarChart.update();
+  }
+
+  /* ── SCROLL REVEAL ── */
+  function initReveal() {
+    const els = document.querySelectorAll('.reveal');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+    }, { threshold: .12 });
+    els.forEach(el => obs.observe(el));
+  }
+
+  window.onload = () => {
+    initReveal();
+    initICERChart();
+    updateICER();
+    updateQALY();
+    initRadar();
+  };
+</script>
+</body>
+</html>

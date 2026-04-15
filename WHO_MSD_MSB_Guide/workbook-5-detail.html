@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workbook 5 成本評估 - WHO 成癮治療評估架構</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  :root {
+    --navy: #1e3a8a;
+    --navy-light: #1d4ed8;
+    --navy-dark: #1e2d5a;
+    --navy-pale: #dbeafe;
+    --emerald: #059669; /* 成本評估的專屬主題色：祖母綠（財務與資源） */
+    --emerald-light: #10b981;
+    --emerald-dark: #047857;
+    --emerald-pale: #d1fae5;
+    --gold: #b45309;
+    --gold-light: #fbbf24;
+    --slate: #64748b;
+    --slate-light: #f1f5f9;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: #f8fafc; 
+    color: #1e293b;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+  h1, h2, h3 { font-family: 'Noto Serif TC', serif; }
+
+  /* ── NAV ── */
+  nav {
+    background: var(--navy-dark);
+    position: sticky; top: 0; z-index: 200;
+    border-bottom: 2px solid var(--emerald-light);
+    box-shadow: 0 2px 20px rgba(0,0,0,.3);
+  }
+  .nav-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .75rem 1.5rem;
+  }
+  .nav-brand { color: white; font-family: 'Noto Serif TC', serif; font-size: .95rem; font-weight: 600; }
+  .nav-brand span { color: var(--emerald-light); }
+  .btn-return {
+    color: white; font-size: 0.8rem; text-decoration: none; font-weight: 500;
+    padding: 0.35rem 0.8rem; border-radius: 2rem;
+    border: 1px solid rgba(255,255,255,0.3); transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+  }
+  .btn-return:hover { background: rgba(255,255,255,0.1); border-color: white; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e2d5a 50%, #064e3b 100%);
+    padding: 5rem 1.5rem 4rem;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(16,185,129,.15) 0%, transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(56,189,248,.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 900px; margin: 0 auto; position: relative; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: rgba(16,185,129,.15);
+    border: 1px solid rgba(16,185,129,.3);
+    color: var(--emerald-light); font-size: .75rem; font-weight: 500;
+    padding: .3rem .75rem; border-radius: 2rem; margin-bottom: 1.5rem;
+    animation: fadeDown .6s ease both;
+  }
+  .hero h1 {
+    color: white; font-size: clamp(1.7rem, 4vw, 2.6rem); line-height: 1.3; margin-bottom: 1.25rem;
+    animation: fadeDown .7s ease .1s both;
+  }
+  .hero h1 span { color: var(--emerald-light); }
+  .hero-sub {
+    color: #a7f3d0; font-size: .95rem; max-width: 780px; margin-bottom: 2rem;
+    font-weight: 300; line-height: 1.8;
+    animation: fadeDown .8s ease .2s both;
+  }
+  .hero-stats {
+    display: flex; gap: 2rem; flex-wrap: wrap;
+    animation: fadeDown .9s ease .35s both;
+  }
+  .hero-stat {
+    display: flex; flex-direction: column;
+    border-left: 2px solid rgba(16,185,129,.4); padding-left: 1rem;
+  }
+  .hero-stat-num { font-size: 1.6rem; font-weight: 700; color: var(--emerald-light); font-family: 'DM Mono', monospace; }
+  .hero-stat-label { font-size: .72rem; color: #d1fae5; }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SECTIONS ── */
+  .section { padding: 4.5rem 1.5rem; }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--emerald-pale); color: var(--emerald-dark); font-size: .72rem; font-weight: 600;
+    padding: .25rem .7rem; border-radius: 2rem; text-transform: uppercase; letter-spacing: .06em;
+    margin-bottom: .75rem;
+  }
+  .section-title { color: var(--navy-dark); font-size: clamp(1.35rem, 3vw, 1.8rem); margin-bottom: .5rem; }
+  .section-desc { color: var(--slate); font-size: .92rem; max-width: 640px; margin-bottom: 2.5rem; }
+
+  /* ── 互動 1: 三大層次卡片 (HOVER EXPAND CARDS) ── */
+  .level-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+  .level-card {
+    background: white; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 2rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: default;
+    border-top: 4px solid var(--navy-pale);
+  }
+  .level-card:hover { 
+    transform: translateY(-6px); box-shadow: 0 12px 24px rgba(5,150,105,0.08); 
+    border-top-color: var(--emerald);
+  }
+  .level-icon {
+    width: 48px; height: 48px; border-radius: 50%; background: var(--emerald-pale);
+    color: var(--emerald-dark); display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.25rem; transition: all 0.3s;
+  }
+  .level-card:hover .level-icon { background: var(--emerald); color: white; transform: scale(1.1); }
+  .level-title { font-size: 1.1rem; font-weight: 700; color: var(--navy-dark); margin-bottom: 0.5rem; }
+  .level-desc { font-size: 0.85rem; color: #475569; line-height: 1.7; }
+
+  /* ── 互動 2: 垂直分頁面板 (VERTICAL TABS) ── */
+  .v-tabs-container {
+    display: flex; gap: 2.5rem; background: white; padding: 2.5rem; border-radius: 1rem;
+    border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  }
+  .v-tab-menu {
+    flex: 1; display: flex; flex-direction: column; gap: 0.75rem; 
+    border-right: 2px solid #f1f5f9; padding-right: 2rem;
+  }
+  .v-tab-btn {
+    text-align: left; padding: 1rem 1.25rem; border-radius: 0.5rem; border: 1px solid transparent; 
+    background: transparent; font-weight: 600; color: var(--slate); 
+    cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: space-between;
+  }
+  .v-tab-btn:hover { background: #f8fafc; border-color: #e2e8f0; }
+  .v-tab-btn.active { background: var(--emerald-pale); color: var(--emerald-dark); border-color: var(--emerald-light); }
+  .v-tab-content {
+    flex: 2; display: none; animation: fadeInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+  .v-tab-content.active { display: block; }
+  .v-content-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+  .v-content-num { font-size: 2rem; font-weight: 700; color: var(--emerald-light); font-family: 'DM Mono', monospace; opacity: 0.5; }
+  .v-content-title { font-size: 1.25rem; font-weight: 700; color: var(--navy-dark); }
+  .v-content-text { font-size: 0.9rem; color: #475569; line-height: 1.8; margin-bottom: 1.5rem; }
+  .info-box { background: #f8fafc; border-left: 4px solid var(--emerald); padding: 1.25rem; border-radius: 0 0.5rem 0.5rem 0; }
+  .info-box strong { color: var(--navy-dark); display: block; margin-bottom: 0.4rem; font-size: 0.95rem; }
+  .info-box p { font-size: 0.85rem; color: #475569; margin: 0; }
+
+  @keyframes fadeInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ── 互動 3: 懸浮焦點卡 (FOCUS CARDS) ── */
+  .focus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .focus-card {
+    background: #ffffff; border-radius: 1rem; border: 1px solid #e2e8f0; padding: 2rem;
+    transition: all 0.3s; position: relative; overflow: hidden;
+  }
+  .focus-card:hover {
+    transform: translateY(-5px); box-shadow: 0 10px 25px rgba(5,150,105,0.08); border-color: var(--emerald-light);
+  }
+  .focus-badge {
+    position: absolute; top: 0; right: 0; background: var(--emerald); color: white;
+    padding: 0.3rem 1.2rem; border-radius: 0 1rem 0 1rem; font-size: 0.75rem; font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .focus-card h4 { color: var(--navy-dark); font-size: 1.2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; }
+  .focus-card p { color: #475569; font-size: 0.88rem; line-height: 1.7; margin-bottom: 1rem; }
+  .focus-list { list-style: none; }
+  .focus-list li { font-size: 0.82rem; color: #334155; margin-bottom: 0.5rem; display: flex; align-items: flex-start; gap: 0.5rem; }
+  .focus-list i { color: var(--emerald); flex-shrink: 0; margin-top: 1px; }
+
+  /* ── 互動 4: CHECKLIST & RADAR (DIAGNOSTICS) ── */
+  .diag-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; align-items: center; }
+  .checklist { display: flex; flex-direction: column; gap: 0.75rem; }
+  .check-item {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem;
+    padding: 1rem 1.25rem; cursor: pointer; transition: all 0.2s;
+  }
+  .check-item:hover { border-color: var(--emerald-light); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+  .check-item.checked { background: var(--emerald-pale); border-color: var(--emerald); }
+  .check-icon {
+    width: 20px; height: 20px; border-radius: 4px; border: 2px solid #cbd5e1;
+    display: flex; align-items: center; justify-content: center; margin-top: 2px;
+    transition: all 0.2s; color: transparent; flex-shrink: 0;
+  }
+  .check-item.checked .check-icon { background: var(--emerald); border-color: var(--emerald); color: white; }
+  .check-content { flex: 1; }
+  .check-title { font-size: 0.95rem; font-weight: 600; color: var(--navy-dark); margin-bottom: 0.25rem; }
+  .check-desc { font-size: 0.8rem; color: var(--slate); }
+  
+  .radar-wrap { background: white; border-radius: 1rem; padding: 2rem; border: 1px solid #e2e8f0; aspect-ratio: 1; position: relative; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy-dark); color: #64748b;
+    padding: 2.5rem 1.5rem; text-align: center;
+    font-size: .8rem; border-top: 2px solid var(--emerald-dark);
+  }
+  footer strong { color: #94a3b8; }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(24px); transition: all .55s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    .v-tabs-container { flex-direction: column; padding: 1.5rem; gap: 1.5rem; }
+    .v-tab-menu { border-right: none; border-bottom: 2px solid #f1f5f9; padding-right: 0; padding-bottom: 1.5rem; }
+    .focus-grid { grid-template-columns: 1fr; }
+    .diag-layout { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="main-nav">
+  <div class="nav-inner">
+    <div class="nav-brand">WHO <span>成癮醫療服務</span> 評估架構</div>
+    <div class="nav-right">
+      <a href="WHO_MSD_MSB_Guide_13_developing.html" class="btn-return"><i data-lucide="arrow-left" style="width:16px;height:16px;"></i> 返回主頁</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">💲 Workbook 5: Cost Evaluations</div>
+    <h1>
+      第五階段：透視資源運用<br>
+      <span>實現成效與預算的精準平衡</span>
+    </h1>
+    <p class="hero-sub">
+      成本評估 (Cost Evaluations) 旨在解答一個核心問題：「如何在有限的預算下發揮最大的效益？」本手冊將引導您評估精神活性物質使用 (PSU) 障礙治療過程中所「消耗」的資源，幫助治療機構、資助單位及政策制定者進行高效的資源配置與決策。
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-num">3</span>
+        <span class="hero-stat-label">評估視野層次</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">3</span>
+        <span class="hero-stat-label">實務操作步驟</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">效益</span>
+        <span class="hero-stat-label">極大化導向</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="levels" style="background:#f0f4fb;">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="layers" style="width:14px;height:14px;"></i> The 3 Levels</span>
+    <h2 class="section-title reveal">成本評估的三大層次</h2>
+    <p class="section-desc reveal">成本評估可根據您的身分（一線機構、資助方或政策決策者）在三個不同的視野深度進行操作。</p>
+
+    <div class="level-grid reveal">
+      <div class="level-card">
+        <div class="level-icon"><i data-lucide="home" style="width:24px;height:24px;"></i></div>
+        <h3 class="level-title">層次一：單一機構內部</h3>
+        <p class="level-desc">
+          追蹤特定服務單位內部的資源使用情形。主要用於了解服務量（如門診人次）增減時，成本會如何變動。此層級有助於機構管理者精算預算與監控營運效率。
+        </p>
+      </div>
+      <div class="level-card">
+        <div class="level-icon"><i data-lucide="network" style="width:24px;height:24px;"></i></div>
+        <h3 class="level-title">層次二：跨機構比較</h3>
+        <p class="level-desc">
+          比較不同機構（例如各地的成癮醫療示範中心）提供相似介入方案的成本。此層級對資助單位或監管機構尤為重要，但必須確保各單位採用標準化的成本計算單位。
+        </p>
+      </div>
+      <div class="level-card">
+        <div class="level-icon"><i data-lucide="globe-2" style="width:24px;height:24px;"></i></div>
+        <h3 class="level-title">層次三：廣泛社會成本</h3>
+        <p class="level-desc">
+          採取「社會觀點 (Societal Perspective)」，將所有資源影響納入考量。不僅包含直接治療成本，也包含個案因治療損失的生產力，以及為社會帶來的潛在節省（如犯罪率下降）。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="steps" style="background:white;">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="list-ordered" style="width:14px;height:14px;"></i> General Steps</span>
+    <h2 class="section-title reveal">實施成本評估的核心步驟</h2>
+    <p class="section-desc reveal">不論您選擇哪一個層次的評估，都必須嚴謹遵循以下三個基本步驟。點擊左側選單查看步驟細節與實務範例。</p>
+
+    <div class="v-tabs-container reveal">
+      <div class="v-tab-menu">
+        <button class="v-tab-btn active" onclick="switchVTab(0)" id="v-btn-0">
+          Step 1: 盤點相關成本 <i data-lucide="chevron-right" style="width:16px;height:16px;"></i>
+        </button>
+        <button class="v-tab-btn" onclick="switchVTab(1)" id="v-btn-1">
+          Step 2: 測量服務單位 <i data-lucide="chevron-right" style="width:16px;height:16px;"></i>
+        </button>
+        <button class="v-tab-btn" onclick="switchVTab(2)" id="v-btn-2">
+          Step 3: 資源定價與分攤 <i data-lucide="chevron-right" style="width:16px;height:16px;"></i>
+        </button>
+      </div>
+
+      <div class="v-tab-content active" id="v-content-0">
+        <div class="v-content-header">
+          <span class="v-content-num">01</span>
+          <h3 class="v-content-title">盤點與區分相關成本</h3>
+        </div>
+        <p class="v-content-text">
+          首先需識別 PSU 服務相關的三大成本區塊：機構的直接成本、個案與家屬負擔的成本，以及外部機構負擔或節省的成本。<br><br>
+          針對「直接成本」，必須進一步區分：
+          <br>• <strong>固定成本 (Fixed costs)：</strong>如建築租金、水電，不隨服務量波動。
+          <br>• <strong>半固定成本 (Semi-fixed)：</strong>如正職人事費，達到服務上限時才需擴編。
+          <br>• <strong>變動成本 (Variable costs)：</strong>如居家訪視的交通費，隨個案數直接增減。
+        </p>
+        <div class="info-box">
+          <strong>💡 為什麼要區分固定與變動成本？</strong>
+          <p>這決定了「平均成本」的變化軌跡。例如，擁有一座大型住宿設施的機構，若收容率低，平均單日成本將極高；隨著接近滿床，平均成本會下降。</p>
+        </div>
+      </div>
+
+      <div class="v-tab-content" id="v-content-1">
+        <div class="v-content-header">
+          <span class="v-content-num">02</span>
+          <h3 class="v-content-title">界定並測量服務活動單位</h3>
+        </div>
+        <p class="v-content-text">
+          單位 (Units) 可以有多種形式，例如：單次諮商訪談、住院天數、每週照護費用等。界定服務單位的標準將取決於研究目的與可取得的數據。<br><br>
+          如果目標是進行跨機構比較，則<strong>測量單位的標準化</strong>絕對不可或缺。否則，拿 A 機構的「單次看診成本」與 B 機構的「全套療程成本」進行比較將毫無意義。
+        </p>
+        <div class="info-box">
+          <strong>💡 資本設備的生命週期</strong>
+          <p>資本支出（如建築物或昂貴的檢測儀器）的成本不應全部計入購買當年的營運成本，而應依據其預期壽命（如建築 60 年，設備 5-10 年）加上利息計算每年折舊。</p>
+        </div>
+      </div>
+
+      <div class="v-tab-content" id="v-content-2">
+        <div class="v-content-header">
+          <span class="v-content-num">03</span>
+          <h3 class="v-content-title">資源定價與成本分攤機制</h3>
+        </div>
+        <p class="v-content-text">
+          大多數機構可以從會計系統取得基本的財務成本，但在實務上，人力與空間往往具有多重功能。這時就需要運用<strong>成本分攤 (Cost Allocation)</strong> 的技術。<br><br>
+          此外，針對無給職的「志願工作者 (Volunteers)」，雖然帳面上沒有薪資支出，但仍應以市場非技術性工資或其職業對應工資賦予價值，以反映真實的資源投入。
+        </p>
+        <div class="info-box">
+          <strong>💡 成本分攤 (Allocation) 實例</strong>
+          <p>如果政策轉譯中心的一位專員年薪為 $900，過去一年中該中心共服務了 20,000 人次，其中 1,000 人次屬於特定預防計畫。則分攤係數為 0.05，該專員薪資中應有 $45 分攤至預防計畫成本中。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="tools" style="background:#f8fafc;">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="briefcase" style="width:14px;height:14px;"></i> Core Tools & Cases</span>
+    <h2 class="section-title reveal">標竿工具與實務案例</h2>
+    <p class="section-desc reveal">手冊中收錄了國際知名的成本分析工具與大型評估專案，展示科學化定價的強大威力。</p>
+
+    <div class="focus-grid reveal">
+      <div class="focus-card">
+        <div class="focus-badge">工具框架</div>
+        <h4><i data-lucide="file-spreadsheet"></i> DATCAP 分析工具</h4>
+        <p><strong>藥物濫用治療成本分析計畫 (DATCAP)</strong> 是一套由美國開發，具備高度科學性與結構化的估算工具。它能將複雜的支出項目，轉換為直觀的決策指標。</p>
+        <ul class="focus-list">
+          <li><i data-lucide="check-circle"></i> 能夠產出三種層次的數據：服務總年成本、每週個案成本、單一治療插曲成本。</li>
+          <li><i data-lucide="check-circle"></i> 強制計入志工時間、捐贈物資等容易被忽略的隱性資源。</li>
+        </ul>
+      </div>
+      <div class="focus-card">
+        <div class="focus-badge">州級專案</div>
+        <h4><i data-lucide="bar-chart-3"></i> CALDATA 評估專案</h4>
+        <p><strong>加州藥酒癮治療評估 (CALDATA)</strong> 是一項採用社會觀點進行的超大型成本效益分析。它不僅計算治療投入，更精算治療後所帶來的社會節省。</p>
+        <ul class="focus-list">
+          <li><i data-lucide="check-circle"></i> 證實每投入 1 美元於成癮治療，可為社會省下 7 美元（主要來自犯罪率與醫療需求的下降）。</li>
+          <li><i data-lucide="check-circle"></i> 評估結果成為說服議會持續為治療服務撥款的鐵證。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="diagnostics" style="background:white;">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="activity" style="width:14px;height:14px;"></i> Readiness Diagnostics</span>
+    <h2 class="section-title reveal">成本評估：財務追蹤健全度診斷</h2>
+    <p class="section-desc reveal">勾選您的團隊目前已具備的財務與數據追蹤能力，右側的雷達圖將即時為您的「成本評估整備度」進行多維度診斷。</p>
+
+    <div class="diag-layout reveal">
+      <div class="checklist">
+        <div class="check-item" onclick="toggleDiag(0)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">成本分類能力 (Cost Classification)</div>
+            <div class="check-desc">會計系統能準確區分固定、半固定與變動成本，並具備計算資本折舊的能力。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(1)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">分攤計算機制 (Cost Allocation)</div>
+            <div class="check-desc">對於共用的人力、辦公空間或管理行政費用，已建立客觀的比例拆分公式。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(2)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">非財務資源估價 (Resource Valuation)</div>
+            <div class="check-desc">具備將志工投入的時間、捐贈物資等非直接現金支出轉換為量化價值的機制。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(3)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">標準化測量單位 (Standardized Units)</div>
+            <div class="check-desc">各附屬機構的活動紀錄（如門診次數、時數）格式完全統一，利於跨單位比較。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(4)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">社會觀點意識 (Societal Perspective)</div>
+            <div class="check-desc">評估視野不限於機構內部支出，能考量到個案生產力損失及為其他部門帶來的潛在節省。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="radar-wrap">
+        <canvas id="diagRadar"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>WHO MSD/MSB Framework Workbook 5 數位化導引</strong></p>
+  <p style="margin-top:.5rem;opacity:.6;">
+    本工具僅供學術與政策研究參考。由王聲昌醫師帶領的政策評估組應用開發。<br>
+    Taiwan Mental Health and Addiction Policy Translation Center (TMAP)
+  </p>
+</footer>
+
+<script>
+  // 初始化 Icons
+  lucide.createIcons();
+
+  /* ── 互動 2: VERTICAL TABS ── */
+  function switchVTab(index) {
+    const btns = [document.getElementById('v-btn-0'), document.getElementById('v-btn-1'), document.getElementById('v-btn-2')];
+    const contents = [document.getElementById('v-content-0'), document.getElementById('v-content-1'), document.getElementById('v-content-2')];
+    
+    btns.forEach((btn, i) => {
+      btn.classList.toggle('active', i === index);
+      contents[i].classList.toggle('active', i === index);
+    });
+  }
+
+  /* ── 互動 4: CHECKLIST & RADAR ── */
+  let diagState = [false, false, false, false, false];
+  let radarChart = null;
+
+  function initRadar() {
+    const ctx = document.getElementById('diagRadar').getContext('2d');
+    radarChart = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: ['成本分類', '分攤計算', '資源估價', '標準化測量', '社會觀點'],
+        datasets: [{
+          label: '財務追蹤整備度',
+          data: [20, 20, 20, 20, 20], 
+          backgroundColor: 'rgba(16, 185, 129, 0.2)', // Emerald
+          borderColor: 'rgba(16, 185, 129, 0.8)',
+          borderWidth: 2,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: 'rgba(16, 185, 129, 1)',
+          pointHoverBackgroundColor: 'rgba(16, 185, 129, 1)',
+          pointHoverBorderColor: '#fff',
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            angleLines: { color: 'rgba(0, 0, 0, 0.05)' },
+            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+            pointLabels: {
+              font: { family: "'Noto Sans TC', sans-serif", size: 12, weight: '600' },
+              color: '#475569'
+            },
+            ticks: { display: false, min: 0, max: 100 }
+          }
+        },
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        animation: { duration: 600, easing: 'easeOutQuart' }
+      }
+    });
+  }
+
+  function toggleDiag(index) {
+    diagState[index] = !diagState[index];
+    const items = document.querySelectorAll('.check-item');
+    if (diagState[index]) {
+      items[index].classList.add('checked');
+    } else {
+      items[index].classList.remove('checked');
+    }
+    updateRadar();
+  }
+
+  function updateRadar() {
+    const newData = diagState.map(val => val ? 100 : 20);
+    radarChart.data.datasets[0].data = newData;
+    
+    const isAllTrue = diagState.every(val => val);
+    if(isAllTrue) {
+      radarChart.data.datasets[0].backgroundColor = 'rgba(251, 191, 36, 0.3)'; // Gold
+      radarChart.data.datasets[0].borderColor = 'rgba(251, 191, 36, 1)';
+      radarChart.data.datasets[0].pointBorderColor = 'rgba(251, 191, 36, 1)';
+    } else {
+      radarChart.data.datasets[0].backgroundColor = 'rgba(16, 185, 129, 0.2)'; // Emerald
+      radarChart.data.datasets[0].borderColor = 'rgba(16, 185, 129, 0.8)';
+      radarChart.data.datasets[0].pointBorderColor = 'rgba(16, 185, 129, 1)';
+    }
+    radarChart.update();
+  }
+
+  /* ── SCROLL REVEAL ── */
+  function initReveal() {
+    const els = document.querySelectorAll('.reveal');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+    }, { threshold: .12 });
+    els.forEach(el => obs.observe(el));
+  }
+
+  window.onload = () => {
+    initReveal();
+    initRadar();
+  };
+</script>
+</body>
+</html>

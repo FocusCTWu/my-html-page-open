@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workbook 6 客戶滿意度評估 - WHO 成癮治療評估架構</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  :root {
+    --navy: #1e3a8a;
+    --navy-dark: #1e2d5a;
+    --navy-pale: #dbeafe;
+    
+    /* Workbook 6 主題色：紫羅蘭 (傳遞同理、傾聽與信任) */
+    --violet: #7c3aed;
+    --violet-light: #8b5cf6;
+    --violet-dark: #5b21b6;
+    --violet-pale: #ede9fe;
+    
+    --coral: #f43f5e;
+    --coral-light: #fb7185;
+    --coral-pale: #ffe4e6;
+    
+    --slate: #64748b;
+    --slate-light: #f1f5f9;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: #f8fafc; 
+    color: #1e293b;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+  h1, h2, h3 { font-family: 'Noto Serif TC', serif; }
+
+  /* ── NAV ── */
+  nav {
+    background: var(--navy-dark);
+    position: sticky; top: 0; z-index: 200;
+    border-bottom: 2px solid var(--violet-light);
+    box-shadow: 0 2px 20px rgba(0,0,0,.3);
+  }
+  .nav-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .75rem 1.5rem;
+  }
+  .nav-brand { color: white; font-family: 'Noto Serif TC', serif; font-size: .95rem; font-weight: 600; }
+  .nav-brand span { color: var(--violet-light); }
+  .btn-return {
+    color: white; font-size: 0.8rem; text-decoration: none; font-weight: 500;
+    padding: 0.35rem 0.8rem; border-radius: 2rem;
+    border: 1px solid rgba(255,255,255,0.3); transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+  }
+  .btn-return:hover { background: rgba(255,255,255,0.1); border-color: white; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #2e1065 0%, #5b21b6 50%, #7c3aed 100%);
+    padding: 5rem 1.5rem 4rem;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(244,63,94,.15) 0%, transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(139,92,246,.2) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 900px; margin: 0 auto; position: relative; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.3);
+    color: white; font-size: .75rem; font-weight: 500;
+    padding: .3rem .75rem; border-radius: 2rem; margin-bottom: 1.5rem;
+    animation: fadeDown .6s ease both;
+  }
+  .hero h1 {
+    color: white; font-size: clamp(1.7rem, 4vw, 2.6rem); line-height: 1.3; margin-bottom: 1.25rem;
+    animation: fadeDown .7s ease .1s both;
+  }
+  .hero h1 span { color: var(--coral-light); }
+  .hero-sub {
+    color: #ddd6fe; font-size: .95rem; max-width: 780px; margin-bottom: 2rem;
+    font-weight: 300; line-height: 1.8;
+    animation: fadeDown .8s ease .2s both;
+  }
+  .hero-stats {
+    display: flex; gap: 2rem; flex-wrap: wrap;
+    animation: fadeDown .9s ease .35s both;
+  }
+  .hero-stat {
+    display: flex; flex-direction: column;
+    border-left: 2px solid rgba(251,113,133,.4); padding-left: 1rem;
+  }
+  .hero-stat-num { font-size: 1.6rem; font-weight: 700; color: var(--coral-light); font-family: 'DM Mono', monospace; }
+  .hero-stat-label { font-size: .72rem; color: #ede9fe; }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SECTIONS ── */
+  .section { padding: 4.5rem 1.5rem; }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--violet-pale); color: var(--violet-dark); font-size: .72rem; font-weight: 600;
+    padding: .25rem .7rem; border-radius: 2rem; text-transform: uppercase; letter-spacing: .06em;
+    margin-bottom: .75rem;
+  }
+  .section-title { color: var(--navy-dark); font-size: clamp(1.35rem, 3vw, 1.8rem); margin-bottom: .5rem; }
+  .section-desc { color: var(--slate); font-size: .92rem; max-width: 640px; margin-bottom: 2.5rem; }
+
+  /* ── 互動 1: 動態遮罩浮雕卡 (HOVER REVEAL CARDS) ── */
+  .dimension-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+  .dim-card {
+    position: relative; background: white; border-radius: 1rem; overflow: hidden;
+    border: 1px solid #e2e8f0; height: 220px; cursor: default;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  }
+  .dim-front {
+    position: absolute; inset: 0; padding: 2rem; display: flex; flex-direction: column; 
+    align-items: center; justify-content: center; text-align: center;
+    background: white; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 2;
+  }
+  .dim-icon {
+    width: 50px; height: 50px; border-radius: 50%; background: var(--violet-pale); color: var(--violet);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;
+    transition: transform 0.4s;
+  }
+  .dim-card:hover .dim-front { transform: translateY(-100%); opacity: 0; }
+  .dim-card:hover .dim-icon { transform: scale(0.5); }
+  .dim-title { font-size: 1.1rem; font-weight: 700; color: var(--navy-dark); }
+  
+  .dim-back {
+    position: absolute; inset: 0; padding: 1.5rem; background: var(--violet-dark); color: white;
+    display: flex; flex-direction: column; justify-content: center;
+    transform: translateY(100%); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1;
+  }
+  .dim-card:hover .dim-back { transform: translateY(0); }
+  .dim-back-title { font-size: 0.95rem; font-weight: 700; color: var(--coral-light); margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 0.3rem;}
+  .dim-back-list { list-style: none; margin-top: 0.5rem; }
+  .dim-back-list li { font-size: 0.8rem; color: #ddd6fe; margin-bottom: 0.4rem; display: flex; gap: 0.4rem; align-items: flex-start; }
+  .dim-back-list i { color: var(--coral-light); margin-top: 2px; flex-shrink: 0; }
+
+  /* ── 互動 2: 時光軌跡滑桿 (TIMELINE RANGE SLIDER) ── */
+  .timeline-wrap { background: white; border-radius: 1rem; padding: 2.5rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+  .slider-container { position: relative; margin: 2rem 0 3rem 0; }
+  input[type=range] {
+    -webkit-appearance: none; width: 100%; background: transparent; position: relative; z-index: 3;
+  }
+  input[type=range]:focus { outline: none; }
+  input[type=range]::-webkit-slider-runnable-track {
+    width: 100%; height: 8px; cursor: pointer; background: #e2e8f0; border-radius: 4px;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    height: 24px; width: 24px; border-radius: 50%; background: var(--violet); cursor: pointer;
+    -webkit-appearance: none; margin-top: -8px; border: 4px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: transform 0.1s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+  
+  .slider-labels { display: flex; justify-content: space-between; margin-top: 1rem; position: relative; z-index: 1;}
+  .slider-label { font-size: 0.8rem; font-weight: 600; color: var(--slate); text-align: center; flex: 1; cursor: pointer; transition: color 0.3s; }
+  .slider-label.active { color: var(--violet); }
+
+  .timeline-content-box {
+    background: var(--violet-pale); border-left: 4px solid var(--violet); border-radius: 0 0.5rem 0.5rem 0;
+    padding: 1.5rem; transition: all 0.3s ease;
+  }
+  .tc-title { font-size: 1.1rem; font-weight: 700; color: var(--violet-dark); margin-bottom: 0.5rem; }
+  .tc-desc { font-size: 0.9rem; color: #475569; margin-bottom: 0.75rem; }
+  .tc-bias { font-size: 0.85rem; color: var(--coral); background: var(--coral-pale); padding: 0.5rem 0.8rem; border-radius: 0.4rem; display: inline-flex; align-items: flex-start; gap: 0.5rem; }
+
+  /* ── 互動 3: 膠囊式切換控制 (SEGMENTED CONTROL) ── */
+  .method-wrap { background: white; border-radius: 1rem; padding: 2.5rem; border: 1px solid #e2e8f0; }
+  .segmented-control {
+    display: flex; background: #f1f5f9; padding: 0.3rem; border-radius: 3rem; margin-bottom: 2rem;
+    position: relative; max-width: 600px; margin-left: auto; margin-right: auto;
+  }
+  .seg-btn {
+    flex: 1; text-align: center; padding: 0.6rem 1rem; font-size: 0.9rem; font-weight: 600; color: var(--slate);
+    background: transparent; border: none; border-radius: 3rem; cursor: pointer; z-index: 2; transition: color 0.3s;
+  }
+  .seg-btn.active { color: white; }
+  .seg-indicator {
+    position: absolute; top: 0.3rem; bottom: 0.3rem; left: 0.3rem; width: calc(33.333% - 0.2rem);
+    background: var(--violet); border-radius: 3rem; z-index: 1; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(124,58,237,0.3);
+  }
+  
+  .method-content { display: none; animation: fadeIn 0.4s ease; }
+  .method-content.active { display: block; }
+  .mc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .mc-pros, .mc-cons { padding: 1.5rem; border-radius: 0.75rem; }
+  .mc-pros { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .mc-cons { background: #fff1f2; border: 1px solid #fecdd3; }
+  .mc-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+  .mc-pros .mc-title { color: #166534; }
+  .mc-cons .mc-title { color: #9f1239; }
+  .mc-list li { font-size: 0.85rem; color: #334155; margin-bottom: 0.5rem; display: flex; gap: 0.5rem; }
+  .mc-tip { grid-column: 1 / -1; font-size: 0.85rem; color: var(--slate); background: #f8fafc; padding: 1rem; border-radius: 0.5rem; text-align: center; border: 1px dashed #cbd5e1;}
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── 互動 4: CHECKLIST & RADAR (DIAGNOSTICS) ── */
+  .diag-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; align-items: center; }
+  .checklist { display: flex; flex-direction: column; gap: 0.75rem; }
+  .check-item {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem;
+    padding: 1rem 1.25rem; cursor: pointer; transition: all 0.2s;
+  }
+  .check-item:hover { border-color: var(--violet-light); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+  .check-item.checked { background: var(--violet-pale); border-color: var(--violet); }
+  .check-icon {
+    width: 20px; height: 20px; border-radius: 4px; border: 2px solid #cbd5e1;
+    display: flex; align-items: center; justify-content: center; margin-top: 2px;
+    transition: all 0.2s; color: transparent; flex-shrink: 0;
+  }
+  .check-item.checked .check-icon { background: var(--violet); border-color: var(--violet); color: white; }
+  .check-content { flex: 1; }
+  .check-title { font-size: 0.95rem; font-weight: 600; color: var(--navy-dark); margin-bottom: 0.25rem; }
+  .check-desc { font-size: 0.8rem; color: var(--slate); }
+  
+  .radar-wrap { background: white; border-radius: 1rem; padding: 2rem; border: 1px solid #e2e8f0; aspect-ratio: 1; position: relative; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy-dark); color: #64748b;
+    padding: 2.5rem 1.5rem; text-align: center;
+    font-size: .8rem; border-top: 2px solid var(--violet-dark);
+  }
+  footer strong { color: #94a3b8; }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(24px); transition: all .55s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    .dimension-grid { grid-template-columns: 1fr; }
+    .mc-grid { grid-template-columns: 1fr; }
+    .diag-layout { grid-template-columns: 1fr; }
+    .segmented-control { flex-direction: column; border-radius: 1rem; }
+    .seg-indicator { display: none; /* 手機端簡化效果 */ }
+    .seg-btn { border-radius: 0.5rem; margin-bottom: 0.2rem; }
+    .seg-btn.active { background: var(--violet); color: white; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="main-nav">
+  <div class="nav-inner">
+    <div class="nav-brand">WHO <span>成癮醫療服務</span> 評估架構</div>
+    <div class="nav-right">
+      <a href="WHO_MSD_MSB_Guide_13_developing.html" class="btn-return"><i data-lucide="arrow-left" style="width:16px;height:16px;"></i> 返回主頁</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">💬 Workbook 6: Client Satisfaction</div>
+    <h1>
+      第六階段：傾聽個案聲音<br>
+      <span>掌握服務滿意度與體驗優化</span>
+    </h1>
+    <p class="hero-sub">
+      客戶滿意度評估是讓「個案」參與評估流程的最佳機會。它介於「過程評估」與「成效評估」之間，不僅能反映服務的品質與可靠性，滿意度更與個案的「治療順從度」及「正向治療結果」高度相關。這不僅是一份問卷，而是與您的服務對象進行誠摯協商的過程。
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-num">4</span>
+        <span class="hero-stat-label">滿意度核心維度</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">3</span>
+        <span class="hero-stat-label">常見偏誤陷阱</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">5</span>
+        <span class="hero-stat-label">點量表最佳實務</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="dimensions" style="background:#f0f4fb;">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="layout-grid" style="width:14px;height:14px;"></i> Core Dimensions</span>
+    <h2 class="section-title reveal">滿意度評估的四大核心維度</h2>
+    <p class="section-desc reveal">滿意度是一個複合概念。請將滑鼠懸停（或點擊）下方卡片，查看我們在編製問卷時，應該針對哪些具體的服務細節進行提問。</p>
+
+    <div class="dimension-grid reveal">
+      <div class="dim-card">
+        <div class="dim-front">
+          <div class="dim-icon"><i data-lucide="shield-check" style="width:28px;height:28px;"></i></div>
+          <div class="dim-title">1. 服務可靠性<br><span style="font-size:0.8rem;color:var(--slate);font-weight:400;">Reliability</span></div>
+        </div>
+        <div class="dim-back">
+          <div class="dim-back-title">可靠性評估焦點</div>
+          <ul class="dim-back-list">
+            <li><i data-lucide="chevron-right" style="width:14px;"></i> 服務提供是否穩定、一致？</li>
+            <li><i data-lucide="chevron-right" style="width:14px;"></i> 預約制度是否準確執行？</li>
+            <li><i data-lucide="chevron-right" style="width:14px;"></i> 諮商師的專業能力與勝任感。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-front">
+          <div class="dim-icon"><i data-lucide="zap" style="width:28px;height:28px;"></i></div>
+          <div class="dim-title">2. 服務回應性<br><span style="font-size:0.8rem;color:var(--slate);font-weight:400;">Responsiveness</span></div>
+        </div>
+        <div class="dim-back">
+          <div class="dim-back-title">回應性評估焦點</div>
+          <ul class="dim-back-list">
+            <li><i data-lucide="chevron-right" style="width:14px;"></i> 服務提供者是否願意主動滿足需求？</li>
+            <li><i data-lucide="chevron-right" style="width:14px;"></i> 候診或等待服務的時間長短。</li>
+            <li><i data-lucide="chevron-right" style="width:14px;"></i> 服務內容對個案當前困境的關聯性。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-front">
+          <div class="dim-icon"><i data-lucide="heart" style="width:28px;height:28px;"></i></div>
+          <div class="dim-title">3. 服務禮貌性<br><span style="font-size:0.8rem;color:var(--slate);font-weight:400;">Courtesy</span></div>
+        </div>
+        <div class="dim-back">
+          <div class="dim-back-title">禮貌性評估焦點</div>
+          <ul class="dim-back-list">
+            <li><i data-lucide="chevron-right" style="width:14px;"></i> 支援與行政人員的協助態度。</li>
+            <li><i data-lucide="chevron-right" style="width:14px;"></i> 服務過程中的「人性化 (Humanness)」。</li>
+            <li><i data-lucide="chevron-right" style="width:14px;"></i> 是否感受到尊重與不被批判。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-front">
+          <div class="dim-icon"><i data-lucide="lock" style="width:28px;height:28px;"></i></div>
+          <div class="dim-title">4. 安全性與隱私<br><span style="font-size:0.8rem;color:var(--slate);font-weight:400;">Security</span></div>
+        </div>
+        <div class="dim-back">
+          <div class="dim-back-title">安全性評估焦點</div>
+          <ul class="dim-back-list">
+            <li><i data-lucide="chevron-right" style="width:14px;"></i> 設施的實體環境是否讓人感到安全？</li>
+            <li><i data-lucide="chevron-right" style="width:14px;"></i> 個案的病歷與紀錄是否被妥善保密？</li>
+            <li><i data-lucide="chevron-right" style="width:14px;"></i> 隱私空間的配置是否充足。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="timing" style="background:white;">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="clock" style="width:14px;height:14px;"></i> Timing & Bias</span>
+    <h2 class="section-title reveal">施測時機與潛在偏誤分析</h2>
+    <p class="section-desc reveal">滿意度調查「何時發放」會極大地影響結果。拖曳下方滑桿，查看在不同治療階段進行評估的優點與潛在的偏誤陷阱。</p>
+
+    <div class="timeline-wrap reveal">
+      <div class="slider-container">
+        <input type="range" min="0" max="3" value="0" id="timeSlider" oninput="updateTimeline(this.value)">
+        <div class="slider-labels">
+          <div class="slider-label active" id="sl-0" onclick="document.getElementById('timeSlider').value=0; updateTimeline(0);">治療初期<br>(Intake)</div>
+          <div class="slider-label" id="sl-1" onclick="document.getElementById('timeSlider').value=1; updateTimeline(1);">治療期間<br>(During)</div>
+          <div class="slider-label" id="sl-2" onclick="document.getElementById('timeSlider').value=2; updateTimeline(2);">結案出院時<br>(Discharge)</div>
+          <div class="slider-label" id="sl-3" onclick="document.getElementById('timeSlider').value=3; updateTimeline(3);">結束後追蹤<br>(Post-treatment)</div>
+        </div>
+      </div>
+
+      <div class="timeline-content-box" id="tc-box">
+        <h3 class="tc-title" id="tc-title">治療初期 (Intake)</h3>
+        <p class="tc-desc" id="tc-desc">這個階段的評估焦點通常放在：設施的物理環境、初次接待的禮貌性、以及等候時間。適合用於優化行政流程。</p>
+        <div class="tc-bias">
+          <i data-lucide="alert-triangle" style="width:16px;height:16px;"></i>
+          <span id="tc-bias">偏誤風險：個案可能處於身心極度不適或高度防衛的狀態，難以客觀評價服務品質。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="methods" style="background:#f8fafc;">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="clipboard-list" style="width:14px;height:14px;"></i> Data Collection Methods</span>
+    <h2 class="section-title reveal">滿意度資料蒐集方法比較</h2>
+    <p class="section-desc reveal">不同的蒐集方法適用於不同的群體與預算。點擊切換，查看手冊中建議的三種主要評估方法之優劣勢。</p>
+
+    <div class="method-wrap reveal">
+      <div class="segmented-control">
+        <div class="seg-indicator" id="seg-indicator"></div>
+        <button class="seg-btn active" onclick="switchMethod(0)" id="seg-btn-0">📝 自填問卷</button>
+        <button class="seg-btn" onclick="switchMethod(1)" id="seg-btn-1">🗣️ 獨立訪談</button>
+        <button class="seg-btn" onclick="switchMethod(2)" id="seg-btn-2">👥 焦點團體</button>
+      </div>
+
+      <div class="method-content active" id="mc-0">
+        <div class="mc-grid">
+          <div class="mc-pros">
+            <h4 class="mc-title"><i data-lucide="thumbs-up" style="width:18px;"></i> 優勢 (Pros)</h4>
+            <ul class="mc-list">
+              <li>成本最低，是最常見的滿意度評估方式。</li>
+              <li>容易達到完全匿名，個案較敢表達真實想法。</li>
+              <li>數據標準化，易於輸入電腦進行量化統計分析。</li>
+            </ul>
+          </div>
+          <div class="mc-cons">
+            <h4 class="mc-title"><i data-lucide="thumbs-down" style="width:18px;"></i> 限制 (Cons)</h4>
+            <ul class="mc-list">
+              <li>不適合識字率低或認知功能嚴重受損的個案群體。</li>
+              <li>若採郵寄回收，通常回收率極低。</li>
+              <li>若使用「滿意/不滿意」二分法量表，極易產生偏高偏誤。</li>
+            </ul>
+          </div>
+          <div class="mc-tip"><strong>手冊實務建議：</strong>請務必使用「五點量表（如：非常滿意到非常不滿意）」，才能敏銳區分出真實的滿意度差異。若需郵寄，請務必附上已貼郵票的回郵信封。</div>
+        </div>
+      </div>
+
+      <div class="method-content" id="mc-1">
+        <div class="mc-grid">
+          <div class="mc-pros">
+            <h4 class="mc-title"><i data-lucide="thumbs-up" style="width:18px;"></i> 優勢 (Pros)</h4>
+            <ul class="mc-list">
+              <li>能克服個案的閱讀與書寫障礙。</li>
+              <li>訪員可即時針對含糊的回答進行追問與釐清。</li>
+              <li>比起冷冰冰的問卷，有些個案更喜歡面對面的互動感。</li>
+            </ul>
+          </div>
+          <div class="mc-cons">
+            <h4 class="mc-title"><i data-lucide="thumbs-down" style="width:18px;"></i> 限制 (Cons)</h4>
+            <ul class="mc-list">
+              <li>成本與時間消耗遠高於自填問卷。</li>
+              <li>個案面對面時，給予負面評價的壓力較大。</li>
+              <li>若由主治諮商師進行訪談，個案幾乎不敢說真話。</li>
+            </ul>
+          </div>
+          <div class="mc-tip"><strong>手冊實務建議：</strong>若必須進行面訪，應由「獨立評估人員」、「受訓過的志工」或「已康復的前個案」來執行，絕對不可由負責該個案的治療師進行。</div>
+        </div>
+      </div>
+
+      <div class="method-content" id="mc-2">
+        <div class="mc-grid">
+          <div class="mc-pros">
+            <h4 class="mc-title"><i data-lucide="thumbs-up" style="width:18px;"></i> 優勢 (Pros)</h4>
+            <ul class="mc-list">
+              <li>透過群體互動，能激發出問卷上未曾列出的潛在問題。</li>
+              <li>能深入探討「為什麼」滿意或不滿意。</li>
+              <li>適合用於探索性研究或新服務開發前的需求調查。</li>
+            </ul>
+          </div>
+          <div class="mc-cons">
+            <h4 class="mc-title"><i data-lucide="thumbs-down" style="width:18px;"></i> 限制 (Cons)</h4>
+            <ul class="mc-list">
+              <li>害羞或自卑的個案在團體中可能不敢發言。</li>
+              <li>容易被少數意見領袖主導討論方向。</li>
+              <li>質性資料難以直接轉換為標準化的滿意度分數。</li>
+            </ul>
+          </div>
+          <div class="mc-tip"><strong>手冊實務建議：</strong>焦點團體常作為問卷調查的輔助工具。應尋找具備引導技巧的主持人，確保每位參與者都有表達意見的安全空間。</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="section" id="diagnostics" style="background:white;">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="target" style="width:14px;height:14px;"></i> Readiness Diagnostics</span>
+    <h2 class="section-title reveal">滿意度評估：防偏誤自我診斷</h2>
+    <p class="section-desc reveal">滿意度調查最怕流於形式或充滿「感激偏誤」。請勾選您的團隊已落實的防護機制，右側雷達圖將為您的調查信度進行診斷。</p>
+
+    <div class="diag-layout reveal">
+      <div class="checklist">
+        <div class="check-item" onclick="toggleDiag(0)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">獨立性原則 (Independence)</div>
+            <div class="check-desc">調查或訪談是由「非個案主治人員」或獨立第三方執行。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(1)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">量表敏感度 (Scale Sensitivity)</div>
+            <div class="check-desc">問卷放棄了二分法，採用「五點量表」以敏銳捕捉滿意度的細微差異。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(2)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">文化適配性 (Cultural Sensitivity)</div>
+            <div class="check-desc">題型設計考量了當地文化（例如：當地人是否認為直接給負評是不禮貌的？）。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(3)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">匿名與安全感 (Anonymity)</div>
+            <div class="check-desc">已向個案保證反饋絕對不會影響未來的治療權益，並有妥善的保密流程。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(4)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">涵蓋退出者 (Drop-out Inclusion)</div>
+            <div class="check-desc">抽樣計畫不僅針對「成功畢業」的個案，也設法涵蓋中途退出的個案。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="radar-wrap">
+        <canvas id="diagRadar"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>WHO MSD/MSB Framework Workbook 6 數位化導引</strong></p>
+  <p style="margin-top:.5rem;opacity:.6;">
+    本工具僅供學術與政策研究參考。由王聲昌醫師帶領的政策評估組應用開發。<br>
+    Taiwan Mental Health and Addiction Policy Translation Center (TMAP)
+  </p>
+</footer>
+
+<div class="toast" id="toast" style="position:fixed; bottom:2rem; right:2rem; z-index:999; background:var(--violet-dark); color:white; padding:0.75rem 1.25rem; border-radius:0.6rem; font-size:0.85rem; box-shadow:0 4px 20px rgba(0,0,0,0.3); transform:translateY(100px); opacity:0; transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1); pointer-events:none; display:flex; align-items:center; gap:0.5rem;">
+  <i data-lucide="check-circle" style="width:18px;height:18px;"></i>
+  <span id="toast-msg">已更新評估狀態！</span>
+</div>
+
+<script>
+  // 初始化 Icons
+  lucide.createIcons();
+
+  /* ── 互動 2: TIMELINE SLIDER ── */
+  const timelineData = [
+    { 
+      title: "治療初期 (Intake)", 
+      desc: "這個階段的評估焦點通常放在：設施的物理環境、初次接待的禮貌性、以及等候時間。適合用於優化行政流程。", 
+      bias: "偏誤風險：個案可能處於身心極度不適或高度防衛的狀態，難以客觀評價服務品質。" 
+    },
+    { 
+      title: "治療期間 (During)", 
+      desc: "這個階段的評估焦點在於：諮商過程的品質、治療計畫的執行度與專業人員的回應性。", 
+      bias: "偏誤風險：感激偏誤 (Gratitude Bias)。若個案害怕給予負評會影響後續的治療品質，往往傾向給予過高的評價。" 
+    },
+    { 
+      title: "結案出院時 (Discharge)", 
+      desc: "這個階段可評估：對整體計畫的滿意度、自身症狀改善的主觀感受。", 
+      bias: "偏誤風險：畢業偏誤 (Graduation Bias)。個案可能受到出院儀式或即將康復的亢奮情緒影響，導致滿意度被異常高估。" 
+    },
+    { 
+      title: "結束後追蹤 (Post-treatment)", 
+      desc: "此階段的焦點：評估治療服務對個案回歸現實生活後的實際幫助程度。滿意度此時可視為成效的代理指標。", 
+      bias: "偏誤風險：滿意度容易與治療成效高度綁定。復發的個案可能給予負評，而保持康復的個案則給予正評。" 
+    }
+  ];
+
+  function updateTimeline(val) {
+    const index = parseInt(val);
+    document.getElementById('tc-title').innerText = timelineData[index].title;
+    document.getElementById('tc-desc').innerText = timelineData[index].desc;
+    document.getElementById('tc-bias').innerText = timelineData[index].bias;
+
+    // Update active label
+    for(let i=0; i<=3; i++) {
+      document.getElementById('sl-'+i).classList.toggle('active', i === index);
+    }
+  }
+
+  /* ── 互動 3: SEGMENTED CONTROL ── */
+  function switchMethod(index) {
+    // 處理 Indicator 位移
+    const indicator = document.getElementById('seg-indicator');
+    if(window.innerWidth > 768) {
+      indicator.style.transform = `translateX(${index * 100}%)`;
+    }
+
+    // 處理 Button 樣式
+    for(let i=0; i<=2; i++) {
+      document.getElementById('seg-btn-'+i).classList.toggle('active', i === index);
+      document.getElementById('mc-'+i).classList.toggle('active', i === index);
+    }
+  }
+
+  // 監聽視窗大小改變，重置 indicator
+  window.addEventListener('resize', () => {
+    const activeBtn = document.querySelector('.seg-btn.active');
+    const index = parseInt(activeBtn.id.split('-')[2]);
+    const indicator = document.getElementById('seg-indicator');
+    if(window.innerWidth > 768) {
+      indicator.style.display = 'block';
+      indicator.style.transform = `translateX(${index * 100}%)`;
+    } else {
+      indicator.style.display = 'none';
+    }
+  });
+
+  /* ── 互動 4: CHECKLIST & RADAR ── */
+  let diagState = [false, false, false, false, false];
+  let radarChart = null;
+
+  function initRadar() {
+    const ctx = document.getElementById('diagRadar').getContext('2d');
+    radarChart = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: ['獨立執行', '量表敏銳', '文化適配', '保密安全', '涵蓋退案'],
+        datasets: [{
+          label: '防偏誤整備度',
+          data: [20, 20, 20, 20, 20], 
+          backgroundColor: 'rgba(124, 58, 237, 0.2)', // Violet
+          borderColor: 'rgba(124, 58, 237, 0.8)',
+          borderWidth: 2,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: 'rgba(124, 58, 237, 1)',
+          pointHoverBackgroundColor: 'rgba(124, 58, 237, 1)',
+          pointHoverBorderColor: '#fff',
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            angleLines: { color: 'rgba(0, 0, 0, 0.05)' },
+            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+            pointLabels: {
+              font: { family: "'Noto Sans TC', sans-serif", size: 12, weight: '600' },
+              color: '#475569'
+            },
+            ticks: { display: false, min: 0, max: 100 }
+          }
+        },
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        animation: { duration: 600, easing: 'easeOutQuart' }
+      }
+    });
+  }
+
+  function showToast() {
+    const t = document.getElementById('toast');
+    t.style.transform = 'translateY(0)';
+    t.style.opacity = '1';
+    setTimeout(() => {
+      t.style.transform = 'translateY(100px)';
+      t.style.opacity = '0';
+    }, 2000);
+  }
+
+  function toggleDiag(index) {
+    diagState[index] = !diagState[index];
+    const items = document.querySelectorAll('.check-item');
+    if (diagState[index]) {
+      items[index].classList.add('checked');
+    } else {
+      items[index].classList.remove('checked');
+    }
+    updateRadar();
+    showToast();
+  }
+
+  function updateRadar() {
+    const newData = diagState.map(val => val ? 100 : 20);
+    radarChart.data.datasets[0].data = newData;
+    
+    // 全滿時變換為 Coral 珊瑚橘色做為彩蛋
+    const isAllTrue = diagState.every(val => val);
+    if(isAllTrue) {
+      radarChart.data.datasets[0].backgroundColor = 'rgba(244, 63, 94, 0.2)'; 
+      radarChart.data.datasets[0].borderColor = 'rgba(244, 63, 94, 0.8)';
+      radarChart.data.datasets[0].pointBorderColor = 'rgba(244, 63, 94, 1)';
+    } else {
+      radarChart.data.datasets[0].backgroundColor = 'rgba(124, 58, 237, 0.2)';
+      radarChart.data.datasets[0].borderColor = 'rgba(124, 58, 237, 0.8)';
+      radarChart.data.datasets[0].pointBorderColor = 'rgba(124, 58, 237, 1)';
+    }
+    radarChart.update();
+  }
+
+  /* ── SCROLL REVEAL ── */
+  function initReveal() {
+    const els = document.querySelectorAll('.reveal');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+    }, { threshold: .12 });
+    els.forEach(el => obs.observe(el));
+  }
+
+  window.onload = () => {
+    initReveal();
+    initRadar();
+  };
+</script>
+</body>
+</html>

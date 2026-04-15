@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workbook 7 成效評估 - WHO 成癮治療評估架構</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  :root {
+    --navy: #1e3a8a;
+    --navy-dark: #1e2d5a;
+    --navy-pale: #dbeafe;
+    
+    /* Workbook 7 主題色：靛藍與青色 (傳遞科學、數據與專業感) */
+    --indigo: #4f46e5;
+    --indigo-light: #818cf8;
+    --indigo-dark: #3730a3;
+    --indigo-pale: #e0e7ff;
+    
+    --cyan: #06b6d4;
+    --cyan-light: #67e8f9;
+    --cyan-pale: #cffafe;
+    
+    --slate: #64748b;
+    --slate-light: #f1f5f9;
+    --bg-color: #f8fafc;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg-color); 
+    color: #1e293b;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+  h1, h2, h3 { font-family: 'Noto Serif TC', serif; }
+
+  /* ── NAV ── */
+  nav {
+    background: var(--navy-dark);
+    position: sticky; top: 0; z-index: 200;
+    border-bottom: 2px solid var(--cyan-light);
+    box-shadow: 0 2px 20px rgba(0,0,0,.3);
+  }
+  .nav-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .75rem 1.5rem;
+  }
+  .nav-brand { color: white; font-family: 'Noto Serif TC', serif; font-size: .95rem; font-weight: 600; }
+  .nav-brand span { color: var(--cyan-light); }
+  .btn-return {
+    color: white; font-size: 0.8rem; text-decoration: none; font-weight: 500;
+    padding: 0.35rem 0.8rem; border-radius: 2rem;
+    border: 1px solid rgba(255,255,255,0.3); transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+  }
+  .btn-return:hover { background: rgba(255,255,255,0.1); border-color: white; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #1e1b4b 0%, #3730a3 50%, #06b6d4 100%);
+    padding: 5rem 1.5rem 4rem;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(6,182,212,.2) 0%, transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(129,140,248,.2) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 900px; margin: 0 auto; position: relative; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.3);
+    color: white; font-size: .75rem; font-weight: 500;
+    padding: .3rem .75rem; border-radius: 2rem; margin-bottom: 1.5rem;
+    animation: fadeDown .6s ease both;
+  }
+  .hero h1 {
+    color: white; font-size: clamp(1.7rem, 4vw, 2.6rem); line-height: 1.3; margin-bottom: 1.25rem;
+    animation: fadeDown .7s ease .1s both;
+  }
+  .hero h1 span { color: var(--cyan-light); }
+  .hero-sub {
+    color: #e0e7ff; font-size: .95rem; max-width: 780px; margin-bottom: 2rem;
+    font-weight: 300; line-height: 1.8;
+    animation: fadeDown .8s ease .2s both;
+  }
+  .hero-stats {
+    display: flex; gap: 2rem; flex-wrap: wrap;
+    animation: fadeDown .9s ease .35s both;
+  }
+  .hero-stat {
+    display: flex; flex-direction: column;
+    border-left: 2px solid rgba(103,232,249,.4); padding-left: 1rem;
+  }
+  .hero-stat-num { font-size: 1.6rem; font-weight: 700; color: var(--cyan-light); font-family: 'DM Mono', monospace; }
+  .hero-stat-label { font-size: .72rem; color: #e0e7ff; }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SECTIONS ── */
+  .section { padding: 4.5rem 1.5rem; }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--indigo-pale); color: var(--indigo-dark); font-size: .72rem; font-weight: 600;
+    padding: .25rem .7rem; border-radius: 2rem; text-transform: uppercase; letter-spacing: .06em;
+    margin-bottom: .75rem;
+  }
+  .section-title { color: var(--navy-dark); font-size: clamp(1.35rem, 3vw, 1.8rem); margin-bottom: .5rem; }
+  .section-desc { color: var(--slate); font-size: .92rem; max-width: 640px; margin-bottom: 2.5rem; }
+
+  /* ── 互動 1: 動態擴展焦點卡 (FLEX-GROW CARDS) ── */
+  .design-wrapper { display: flex; gap: 1.5rem; height: 380px; }
+  .design-card {
+    flex: 1; background: white; border-radius: 1.5rem; border: 1px solid #e2e8f0;
+    padding: 2rem; cursor: pointer; overflow: hidden; position: relative;
+    display: flex; flex-direction: column; transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  }
+  .design-card:hover {
+    flex: 2.5; border-color: var(--indigo-light); box-shadow: 0 10px 30px rgba(79,70,229,0.15);
+  }
+  .design-icon {
+    width: 64px; height: 64px; border-radius: 1rem; background: var(--indigo-pale); color: var(--indigo);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; flex-shrink: 0;
+  }
+  .design-title { font-size: 1.25rem; font-weight: 700; color: var(--navy-dark); margin-bottom: 0.5rem; white-space: nowrap; }
+  .design-badge {
+    display: inline-block; padding: 0.2rem 0.6rem; border-radius: 2rem;
+    background: #f1f5f9; color: var(--slate); font-size: 0.75rem; font-weight: 600;
+    margin-bottom: 1rem; width: fit-content;
+  }
+  .design-details {
+    opacity: 0; transform: translateY(20px); transition: all 0.4s ease;
+    pointer-events: none; min-width: 280px;
+  }
+  .design-card:hover .design-details {
+    opacity: 1; transform: translateY(0); transition-delay: 0.15s; pointer-events: auto;
+  }
+  .design-details p { font-size: 0.85rem; color: #475569; margin-bottom: 0.75rem; line-height: 1.6; }
+  .design-details ul { list-style: none; }
+  .design-details li { font-size: 0.8rem; color: #334155; margin-bottom: 0.4rem; display: flex; gap: 0.5rem; }
+  .design-details i { color: var(--cyan); flex-shrink: 0; margin-top: 2px; }
+
+  /* ── 互動 2: 垂直互動時間軸 (VERTICAL TIMELINE) ── */
+  .tl-layout {
+    display: grid; grid-template-columns: 280px 1fr; gap: 3rem; background: white;
+    padding: 3rem; border-radius: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+  }
+  .tl-nav { position: relative; display: flex; flex-direction: column; gap: 1.5rem; }
+  .tl-nav::before {
+    content: ''; position: absolute; left: 15px; top: 10px; bottom: 10px;
+    width: 2px; background: #e2e8f0; z-index: 0;
+  }
+  .tl-item {
+    display: flex; align-items: center; gap: 1rem; position: relative; z-index: 1; cursor: pointer;
+    transition: all 0.3s; opacity: 0.6;
+  }
+  .tl-item:hover { opacity: 0.9; }
+  .tl-item.active { opacity: 1; }
+  .tl-dot {
+    width: 32px; height: 32px; border-radius: 50%; background: white; border: 2px solid #cbd5e1;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem;
+    color: var(--slate); transition: all 0.3s; flex-shrink: 0;
+  }
+  .tl-item.active .tl-dot { background: var(--indigo); border-color: var(--indigo); color: white; box-shadow: 0 0 0 4px var(--indigo-pale); }
+  .tl-label { font-size: 1rem; font-weight: 600; color: var(--navy-dark); transition: color 0.3s; }
+  .tl-item.active .tl-label { color: var(--indigo); }
+
+  .tl-content-area { position: relative; }
+  .tl-content-box {
+    background: var(--bg-color); border-radius: 1rem; padding: 2.5rem;
+    border-left: 4px solid var(--indigo); display: none; animation: fadeIn 0.4s ease;
+  }
+  .tl-content-box.active { display: block; }
+  .tl-title { font-size: 1.25rem; font-weight: 700; color: var(--indigo-dark); margin-bottom: 1rem; }
+  .tl-desc { font-size: 0.95rem; color: #475569; margin-bottom: 1.5rem; line-height: 1.7; }
+  .tl-tip { background: white; padding: 1rem 1.5rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; display: flex; gap: 1rem; align-items: flex-start; }
+  .tl-tip i { color: var(--cyan); flex-shrink: 0; margin-top: 2px; }
+  .tl-tip p { font-size: 0.85rem; color: #334155; margin: 0; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateX(15px); } to { opacity: 1; transform: translateX(0); } }
+
+  /* ── 互動 3: 模擬成效數據儀表板 (CHART DASHBOARD) ── */
+  .dashboard-wrap { background: white; border-radius: 1.5rem; border: 1px solid #e2e8f0; padding: 2.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+  .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+  .chart-controls { display: flex; background: #f1f5f9; padding: 0.3rem; border-radius: 3rem; }
+  .chart-btn {
+    padding: 0.5rem 1.25rem; font-size: 0.85rem; font-weight: 600; color: var(--slate);
+    border: none; background: transparent; border-radius: 3rem; cursor: pointer; transition: all 0.3s;
+  }
+  .chart-btn.active { background: white; color: var(--indigo); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .chart-container { position: relative; height: 350px; width: 100%; }
+
+  /* ── 互動 4: CHECKLIST & RADAR (DIAGNOSTICS) ── */
+  .diag-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; align-items: center; }
+  .checklist { display: flex; flex-direction: column; gap: 0.75rem; }
+  .check-item {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem;
+    padding: 1rem 1.25rem; cursor: pointer; transition: all 0.2s;
+  }
+  .check-item:hover { border-color: var(--cyan); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+  .check-item.checked { background: var(--cyan-pale); border-color: var(--cyan); }
+  .check-icon {
+    width: 20px; height: 20px; border-radius: 4px; border: 2px solid #cbd5e1;
+    display: flex; align-items: center; justify-content: center; margin-top: 2px;
+    transition: all 0.2s; color: transparent; flex-shrink: 0;
+  }
+  .check-item.checked .check-icon { background: var(--cyan); border-color: var(--cyan); color: white; }
+  .check-content { flex: 1; }
+  .check-title { font-size: 0.95rem; font-weight: 600; color: var(--navy-dark); margin-bottom: 0.25rem; }
+  .check-desc { font-size: 0.8rem; color: var(--slate); }
+  
+  .radar-wrap { background: white; border-radius: 1rem; padding: 2rem; border: 1px solid #e2e8f0; aspect-ratio: 1; position: relative; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy-dark); color: #64748b;
+    padding: 2.5rem 1.5rem; text-align: center;
+    font-size: .8rem; border-top: 2px solid var(--indigo);
+  }
+  footer strong { color: #94a3b8; }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(24px); transition: all .55s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    .design-wrapper { flex-direction: column; height: auto; }
+    .design-card { flex: none !important; }
+    .design-details { opacity: 1; transform: none; position: static; pointer-events: auto; max-height: 500px; margin-top: 1rem;}
+    .tl-layout { grid-template-columns: 1fr; padding: 1.5rem; gap: 1.5rem; }
+    .tl-nav { flex-direction: row; overflow-x: auto; padding-bottom: 1rem; gap: 1rem;}
+    .tl-nav::before { display: none; }
+    .tl-label { display: none; }
+    .dash-header { flex-direction: column; align-items: flex-start; }
+    .diag-layout { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="main-nav">
+  <div class="nav-inner">
+    <div class="nav-brand">WHO <span>成癮醫療服務</span> 評估架構</div>
+    <div class="nav-right">
+      <a href="WHO_MSD_MSB_Guide_13_developing.html" class="btn-return"><i data-lucide="arrow-left" style="width:16px;height:16px;"></i> 返回主頁</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">📈 Workbook 7: Outcome Evaluations</div>
+    <h1>
+      第七階段：衡量治療成效<br>
+      <span>證明服務價值與個案改變</span>
+    </h1>
+    <p class="hero-sub">
+      成效評估 (Outcome Evaluations) 是檢驗治療服務是否帶來實質改變的終極指標。本手冊將引導您透過科學化的研究設計，追蹤個案在治療後的生活品質、物質使用及社會功能的變化，並證明這些改變確實歸功於您的介入方案。
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-num">3</span>
+        <span class="hero-stat-label">核心研究設計</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">6</span>
+        <span class="hero-stat-label">追蹤執行步驟</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">因果</span>
+        <span class="hero-stat-label">關係之證明</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="designs" style="background:#f0f4fb;">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="microscope" style="width:14px;height:14px;"></i> Study Designs</span>
+    <h2 class="section-title reveal">三大成效評估研究設計</h2>
+    <p class="section-desc reveal">如何證明個案的改善是因為「我們的治療」而非自然康復？這取決於您選擇的研究設計。請將滑鼠懸停於卡片上，探索不同設計的優缺點。</p>
+
+    <div class="design-wrapper reveal">
+      <div class="design-card">
+        <div class="design-icon"><i data-lucide="shuffle" style="width:32px;height:32px;"></i></div>
+        <div class="design-title">1. 隨機對照試驗 (RCT)</div>
+        <div class="design-badge">黃金標準</div>
+        <div class="design-details">
+          <p>將符合資格的個案透過隨機方式分派至「實驗組」與「對照組（如候補名單）」，並比較兩組的結果差異。</p>
+          <ul>
+            <li><i data-lucide="check-circle"></i> 能最強烈地證明「因果關係」。</li>
+            <li><i data-lucide="check-circle"></i> 能有效排除外部干擾因素。</li>
+            <li><i data-lucide="alert-circle" style="color:#ef4444;"></i> 實務上極度昂貴且執行困難。</li>
+            <li><i data-lucide="alert-circle" style="color:#ef4444;"></i> 拒絕給予對照組治療有倫理疑慮。</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="design-card">
+        <div class="design-icon"><i data-lucide="users" style="width:32px;height:32px;"></i></div>
+        <div class="design-title">2. 對照組設計</div>
+        <div class="design-badge">實務折衷方案</div>
+        <div class="design-details">
+          <p>尋找特徵相近但未接受該服務的群體作為對照（例如：因交通不便無法前來的個案，或是其他機構的個案）。</p>
+          <ul>
+            <li><i data-lucide="check-circle"></i> 避免了隨機分派的倫理挑戰。</li>
+            <li><i data-lucide="check-circle"></i> 成本較低，適合常規服務機構。</li>
+            <li><i data-lucide="alert-circle" style="color:#ef4444;"></i> 存在「選擇偏誤 (Selection Bias)」。</li>
+            <li><i data-lucide="alert-circle" style="color:#ef4444;"></i> 兩組的動機或嚴重度可能原本就不同。</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="design-card">
+        <div class="design-icon"><i data-lucide="history" style="width:32px;height:32px;"></i></div>
+        <div class="design-title">3. 前後測設計</div>
+        <div class="design-badge">最廣泛使用</div>
+        <div class="design-details">
+          <p>無對照組。僅比較同一群個案在「進入治療前(Baseline)」與「治療結束後(Follow-up)」的狀態變化。</p>
+          <ul>
+            <li><i data-lucide="check-circle"></i> 執行最簡單，最適合內部品質管理。</li>
+            <li><i data-lucide="check-circle"></i> 所有個案都能獲得治療。</li>
+            <li><i data-lucide="alert-circle" style="color:#ef4444;"></i> 無法證明改變是「因為治療」而發生。</li>
+            <li><i data-lucide="alert-circle" style="color:#ef4444;"></i> 無法排除「自然康復」或社會政策改變的影響。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="steps" style="background:white;">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="list-checks" style="width:14px;height:14px;"></i> Execution Steps</span>
+    <h2 class="section-title reveal">追蹤執行的六大關鍵步驟</h2>
+    <p class="section-desc reveal">成效評估的成敗往往取決於追蹤機制的細節。點擊左側流程節點，查看各階段的方法學考量與實務技巧。</p>
+
+    <div class="tl-layout reveal">
+      <div class="tl-nav">
+        <div class="tl-item active" onclick="switchTimeline(0)" id="tl-nav-0">
+          <div class="tl-dot">1</div><div class="tl-label">選擇參與者</div>
+        </div>
+        <div class="tl-item" onclick="switchTimeline(1)" id="tl-nav-1">
+          <div class="tl-dot">2</div><div class="tl-label">決定樣本數</div>
+        </div>
+        <div class="tl-item" onclick="switchTimeline(2)" id="tl-nav-2">
+          <div class="tl-dot">3</div><div class="tl-label">追蹤時機與頻率</div>
+        </div>
+        <div class="tl-item" onclick="switchTimeline(3)" id="tl-nav-3">
+          <div class="tl-dot">4</div><div class="tl-label">尋找與聯繫個案</div>
+        </div>
+        <div class="tl-item" onclick="switchTimeline(4)" id="tl-nav-4">
+          <div class="tl-dot">5</div><div class="tl-label">執行追蹤訪談</div>
+        </div>
+        <div class="tl-item" onclick="switchTimeline(5)" id="tl-nav-5">
+          <div class="tl-dot">6</div><div class="tl-label">訪員選才與訓練</div>
+        </div>
+      </div>
+
+      <div class="tl-content-area">
+        <div class="tl-content-box active" id="tl-box-0">
+          <h3 class="tl-title">1. 選擇參與者 (Selecting clients)</h3>
+          <p class="tl-desc">您需要決定是將「所有個案」納入評估，還是只抽取一個「具代表性的樣本」。對於大型機構而言，追蹤所有人成本過高，此時隨機抽樣 (Random Sampling) 是較佳的選擇。<br><br>同時，必須明確訂定「納入與排除條件 (Inclusion/Exclusion criteria)」，例如是否排除嚴重精神共病者或未成年人。</p>
+          <div class="tl-tip">
+            <i data-lucide="lightbulb"></i>
+            <p><strong>知情同意：</strong>在蒐集任何基準線 (Baseline) 資料前，必須讓參與者簽署知情同意書，並保證拒絕參與絕對不會影響其治療權益。</p>
+          </div>
+        </div>
+        <div class="tl-content-box" id="tl-box-1">
+          <h3 class="tl-title">2. 決定樣本數 (Sample size)</h3>
+          <p class="tl-desc">樣本數不足是成效評估最常見的致命傷。如果樣本太小，即使介入方案真的有效，在統計學上也無法偵測出顯著差異（即統計檢定力 Statistical Power 不足）。</p>
+          <div class="tl-tip">
+            <i data-lucide="lightbulb"></i>
+            <p><strong>預防流失率：</strong>成癮個案的追蹤流失率 (Attrition rate) 極高（常高達 30-50%）。因此在估算初始樣本數時，必須大幅向上增加，以吸收後續失聯的損失。</p>
+          </div>
+        </div>
+        <div class="tl-content-box" id="tl-box-2">
+          <h3 class="tl-title">3. 追蹤時機與頻率 (Timing & Frequency)</h3>
+          <p class="tl-desc">何時進行追蹤訪談？常見的時間點為結束治療後的 3 個月、6 個月或 12 個月。短期追蹤（1-3個月）著重於初步改變，長期追蹤（1年以上）才能真正評估「維持期 (Maintenance)」的成效。</p>
+          <div class="tl-tip">
+            <i data-lucide="lightbulb"></i>
+            <p><strong>追蹤起始點：</strong>一般建議以「進入治療日 (Admission)」為起算點，而非出院日。因為每位個案的治療長度不同，以進入日為準較容易標準化。</p>
+          </div>
+        </div>
+        <div class="tl-content-box" id="tl-box-3">
+          <h3 class="tl-title">4. 尋找與聯繫個案 (Tracing clients)</h3>
+          <p class="tl-desc">這是成效評估中最具挑戰性的工作。必須在個案剛進入治療時（而非離開時），就盡可能蒐集詳盡的聯絡資訊。建立一份「定位表 (Locator form)」。</p>
+          <div class="tl-tip">
+            <i data-lucide="lightbulb"></i>
+            <p><strong>備用聯絡人：</strong>務必取得至少 2-3 位「無論發生什麼事都會知道個案下落」的親友聯絡方式。並約定好追蹤團隊與親友聯絡時的安全說詞（保護個案隱私）。</p>
+          </div>
+        </div>
+        <div class="tl-content-box" id="tl-box-4">
+          <h3 class="tl-title">5. 執行追蹤訪談 (Conduct of interviews)</h3>
+          <p class="tl-desc">資料蒐集可透過面對面訪談、電話訪談或郵寄問卷。郵寄問卷成本最低但回收率極差；電話訪談是目前成本與效益最平衡的做法。</p>
+          <div class="tl-tip">
+            <i data-lucide="lightbulb"></i>
+            <p><strong>安全與保密：</strong>如果是面對面訪談，盡量安排在診所或中立的公共場所，避免直接前往個案家中以保護訪員安全；同時確保環境不會被其他人聽見訪談內容。</p>
+          </div>
+        </div>
+        <div class="tl-content-box" id="tl-box-5">
+          <h3 class="tl-title">6. 訪員選才與訓練 (Selection & Training)</h3>
+          <p class="tl-desc">訪員的素質直接決定了數據的真實性。訪員絕對不能是個案的主治人員或諮商師，否則會產生極大的「感激偏誤」或「隱瞞行為」。</p>
+          <div class="tl-tip">
+            <i data-lucide="lightbulb"></i>
+            <p><strong>獨立評估者：</strong>最好聘請獨立的研究助理，或由其他部門的社工進行交叉訪談。必須進行一致性訓練，確保每位訪員對題目的解釋完全相同。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="dashboard" style="background:#f8fafc;">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="bar-chart-2" style="width:14px;height:14px;"></i> Outcome Visualization</span>
+    <h2 class="section-title reveal">成果視覺化：治療成效追蹤儀表板</h2>
+    <p class="section-desc reveal">成效評估最終將產出個案在各維度（物質使用、犯罪行為、身心健康）的變化。點擊下方按鈕，體驗如何透過視覺化圖表向利害關係人展示您的計畫成果。</p>
+
+    <div class="dashboard-wrap reveal">
+      <div class="dash-header">
+        <div>
+          <h3 style="font-size:1.1rem; font-weight:700; color:var(--navy-dark);">治療前後核心指標變化分析 (模擬數據)</h3>
+          <p style="font-size:0.85rem; color:var(--slate);">測量工具：Addiction Severity Index (ASI) 與 WHOQOL</p>
+        </div>
+        <div class="chart-controls">
+          <button class="chart-btn active" onclick="updateChart('total')" id="btn-chart-total">總體成效</button>
+          <button class="chart-btn" onclick="updateChart('alcohol')" id="btn-chart-alcohol">酒精依賴組</button>
+          <button class="chart-btn" onclick="updateChart('drug')" id="btn-chart-drug">藥物依賴組</button>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="outcomeChart"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="diagnostics" style="background:white;">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="target" style="width:14px;height:14px;"></i> Readiness Diagnostics</span>
+    <h2 class="section-title reveal">成效評估：科學嚴謹度自我診斷</h2>
+    <p class="section-desc reveal">要證明成果「經得起科學檢驗」，機構必須具備相應的研究能力。勾選您已具備的防護機制，右側雷達圖將即時診斷您的研究信度。</p>
+
+    <div class="diag-layout reveal">
+      <div class="checklist">
+        <div class="check-item" onclick="toggleDiag(0)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">對照設計 (Control/Comparison)</div>
+            <div class="check-desc">有能力設置對照組或確保取得精確的基準線(Baseline)資料。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(1)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">流失控制 (Attrition Control)</div>
+            <div class="check-desc">具備嚴謹的個案聯絡清單與追蹤機制，能將失聯率控制在 30% 以下。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(2)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">獨立評估 (Independent Evaluation)</div>
+            <div class="check-desc">追蹤訪談由未參與治療的第三方或專職研究助理獨立執行。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(3)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">標準化量表 (Standardized Tools)</div>
+            <div class="check-desc">使用具備國際信效度的工具（如 ASI, MAP）而非自創問卷。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(4)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">統計檢定力 (Statistical Power)</div>
+            <div class="check-desc">樣本數經過專業精算，確保能偵測到具統計學意義的成效改變。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="radar-wrap">
+        <canvas id="diagRadar"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>WHO MSD/MSB Framework Workbook 7 數位化導引</strong></p>
+  <p style="margin-top:.5rem;opacity:.6;">
+    本工具僅供學術與政策研究參考。由王聲昌醫師帶領的政策評估組應用開發。<br>
+    Taiwan Mental Health and Addiction Policy Translation Center (TMAP)
+  </p>
+</footer>
+
+<script>
+  // 初始化 Icons
+  lucide.createIcons();
+
+  /* ── 互動 2: VERTICAL TIMELINE ── */
+  function switchTimeline(index) {
+    for(let i=0; i<=5; i++) {
+      document.getElementById('tl-nav-'+i).classList.toggle('active', i === index);
+      document.getElementById('tl-box-'+i).classList.toggle('active', i === index);
+    }
+  }
+
+  /* ── 互動 3: CHART.JS DASHBOARD ── */
+  let outcomeChart;
+  function initChart() {
+    const ctx = document.getElementById('outcomeChart').getContext('2d');
+    outcomeChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['高風險物質使用(天/月)', '犯罪行為(次/半年)', '急診醫療(次/年)', '生活品質評分(0-100)'],
+        datasets: [
+          { 
+            label: '治療前 (Baseline)', 
+            data: [22, 15, 4, 35], 
+            backgroundColor: 'rgba(100, 116, 139, 0.8)', // Slate
+            borderRadius: 4
+          },
+          { 
+            label: '治療後 (6-month Follow-up)', 
+            data: [6, 2, 1, 72], 
+            backgroundColor: 'rgba(6, 182, 212, 0.9)', // Cyan
+            borderRadius: 4
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { beginAtZero: true, grid: { borderDash: [4, 4] } },
+          x: { grid: { display: false } }
+        },
+        plugins: {
+          legend: { position: 'top', labels: { font: { family: "'Noto Sans TC', sans-serif" } } },
+          tooltip: {
+            backgroundColor: 'rgba(30, 41, 59, 0.9)',
+            titleFont: { family: "'Noto Sans TC', sans-serif" },
+            bodyFont: { family: "'Noto Sans TC', sans-serif" }
+          }
+        },
+        animation: { duration: 800, easing: 'easeOutQuart' }
+      }
+    });
+  }
+
+  function updateChart(group) {
+    document.querySelectorAll('.chart-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('btn-chart-' + group).classList.add('active');
+    
+    if (group === 'total') {
+      outcomeChart.data.datasets[0].data = [22, 15, 4, 35];
+      outcomeChart.data.datasets[1].data = [6, 2, 1, 72];
+    } else if (group === 'alcohol') {
+      outcomeChart.data.datasets[0].data = [26, 4, 6, 40];
+      outcomeChart.data.datasets[1].data = [8, 0, 2, 80];
+    } else if (group === 'drug') {
+      outcomeChart.data.datasets[0].data = [20, 28, 3, 28];
+      outcomeChart.data.datasets[1].data = [4, 5, 0, 65];
+    }
+    outcomeChart.update();
+  }
+
+  /* ── 互動 4: CHECKLIST & RADAR ── */
+  let diagState = [false, false, false, false, false];
+  let radarChart = null;
+
+  function initRadar() {
+    const ctx = document.getElementById('diagRadar').getContext('2d');
+    radarChart = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: ['對照設計', '流失控制', '獨立評估', '標準化量表', '統計檢定力'],
+        datasets: [{
+          label: '科學嚴謹度',
+          data: [20, 20, 20, 20, 20], 
+          backgroundColor: 'rgba(6, 182, 212, 0.2)', // Cyan
+          borderColor: 'rgba(6, 182, 212, 0.8)',
+          borderWidth: 2,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: 'rgba(6, 182, 212, 1)',
+          pointHoverBackgroundColor: 'rgba(6, 182, 212, 1)',
+          pointHoverBorderColor: '#fff',
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            angleLines: { color: 'rgba(0, 0, 0, 0.05)' },
+            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+            pointLabels: {
+              font: { family: "'Noto Sans TC', sans-serif", size: 12, weight: '600' },
+              color: '#475569'
+            },
+            ticks: { display: false, min: 0, max: 100 }
+          }
+        },
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        animation: { duration: 600, easing: 'easeOutQuart' }
+      }
+    });
+  }
+
+  function toggleDiag(index) {
+    diagState[index] = !diagState[index];
+    const items = document.querySelectorAll('.check-item');
+    if (diagState[index]) {
+      items[index].classList.add('checked');
+    } else {
+      items[index].classList.remove('checked');
+    }
+    updateRadar();
+  }
+
+  function updateRadar() {
+    const newData = diagState.map(val => val ? 100 : 20);
+    radarChart.data.datasets[0].data = newData;
+    
+    // 全滿時變換為 Indigo 色做為彩蛋
+    const isAllTrue = diagState.every(val => val);
+    if(isAllTrue) {
+      radarChart.data.datasets[0].backgroundColor = 'rgba(79, 70, 229, 0.2)'; 
+      radarChart.data.datasets[0].borderColor = 'rgba(79, 70, 229, 0.8)';
+      radarChart.data.datasets[0].pointBorderColor = 'rgba(79, 70, 229, 1)';
+    } else {
+      radarChart.data.datasets[0].backgroundColor = 'rgba(6, 182, 212, 0.2)';
+      radarChart.data.datasets[0].borderColor = 'rgba(6, 182, 212, 0.8)';
+      radarChart.data.datasets[0].pointBorderColor = 'rgba(6, 182, 212, 1)';
+    }
+    radarChart.update();
+  }
+
+  /* ── SCROLL REVEAL ── */
+  function initReveal() {
+    const els = document.querySelectorAll('.reveal');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+    }, { threshold: .12 });
+    els.forEach(el => obs.observe(el));
+  }
+
+  window.onload = () => {
+    initReveal();
+    initChart();
+    initRadar();
+  };
+</script>
+</body>
+</html>
