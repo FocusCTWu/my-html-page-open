@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workbook 3 需求評估 - WHO 成癮治療評估架構</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  :root {
+    --navy: #1e3a8a;
+    --navy-light: #1d4ed8;
+    --navy-pale: #dbeafe;
+    --navy-dark: #1e2d5a;
+    --gold: #b45309;
+    --gold-light: #fbbf24;
+    --gold-pale: #fef3c7;
+    --slate: #64748b;
+    --slate-light: #f1f5f9;
+    --green: #059669;
+    --purple: #7c3aed; /* 新增紫色系搭配不同章節 */
+    --purple-pale: #ede9fe;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: #f0f4fb;
+    color: #1e293b;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+  h1, h2, h3 { font-family: 'Noto Serif TC', serif; }
+
+  /* ── NAV ── */
+  nav {
+    background: var(--navy-dark);
+    position: sticky; top: 0; z-index: 200;
+    border-bottom: 2px solid var(--gold-light);
+    box-shadow: 0 2px 20px rgba(0,0,0,.3);
+  }
+  .nav-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .75rem 1.5rem;
+  }
+  .nav-brand { color: white; font-family: 'Noto Serif TC', serif; font-size: .95rem; font-weight: 600; }
+  .nav-brand span { color: var(--gold-light); }
+  .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+  .btn-return {
+    color: white; font-size: 0.8rem; text-decoration: none; font-weight: 500;
+    padding: 0.35rem 0.8rem; border-radius: 2rem;
+    border: 1px solid rgba(255,255,255,0.3); transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+  }
+  .btn-return:hover { background: rgba(255,255,255,0.1); border-color: white; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #1e2d5a 0%, #1e3a8a 50%, #4c1d95 100%);
+    padding: 5rem 1.5rem 4rem;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 70% 30%, rgba(251,191,36,.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 80%, rgba(124,58,237,.3) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 900px; margin: 0 auto; position: relative; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: rgba(251,191,36,.15);
+    border: 1px solid rgba(251,191,36,.3);
+    color: var(--gold-light); font-size: .75rem; font-weight: 500;
+    padding: .3rem .75rem; border-radius: 2rem; margin-bottom: 1.5rem;
+    animation: fadeDown .6s ease both;
+  }
+  .hero h1 {
+    color: white; font-size: clamp(1.7rem, 4vw, 2.6rem); line-height: 1.3; margin-bottom: 1.25rem;
+    animation: fadeDown .7s ease .1s both;
+  }
+  .hero h1 span { color: var(--gold-light); }
+  .hero-sub {
+    color: #c4b5fd; font-size: .95rem; max-width: 780px; margin-bottom: 2rem;
+    font-weight: 300; line-height: 1.8;
+    animation: fadeDown .8s ease .2s both;
+  }
+  .hero-stats {
+    display: flex; gap: 2rem; flex-wrap: wrap;
+    animation: fadeDown .9s ease .35s both;
+  }
+  .hero-stat {
+    display: flex; flex-direction: column;
+    border-left: 2px solid rgba(251,191,36,.4); padding-left: 1rem;
+  }
+  .hero-stat-num { font-size: 1.6rem; font-weight: 700; color: var(--gold-light); font-family: 'DM Mono', monospace; }
+  .hero-stat-label { font-size: .72rem; color: #c4b5fd; }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SECTIONS ── */
+  .section { padding: 4.5rem 1.5rem; }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--navy-pale); color: var(--navy); font-size: .72rem; font-weight: 600;
+    padding: .25rem .7rem; border-radius: 2rem; text-transform: uppercase; letter-spacing: .06em;
+    margin-bottom: .75rem;
+  }
+  .section-title { color: var(--navy-dark); font-size: clamp(1.35rem, 3vw, 1.8rem); margin-bottom: .5rem; }
+  .section-desc { color: var(--slate); font-size: .92rem; max-width: 640px; margin-bottom: 2.5rem; }
+
+  /* ── 互動 1: 手風琴式四大問題 (ACCORDION) ── */
+  .accordion-container {
+    background: white; border-radius: 1rem; border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03); overflow: hidden;
+  }
+  .accordion-item {
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .accordion-item:last-child { border-bottom: none; }
+  .accordion-btn {
+    width: 100%; text-align: left; background: white; border: none;
+    padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .accordion-btn:hover { background: #f8fafc; }
+  .accordion-title-wrap { display: flex; align-items: center; gap: 1rem; }
+  .accordion-num {
+    width: 32px; height: 32px; border-radius: 50%; background: var(--navy-pale);
+    color: var(--navy); display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-family: 'DM Mono', monospace; font-size: 0.9rem;
+  }
+  .accordion-title { font-size: 1.1rem; font-weight: 600; color: var(--navy-dark); }
+  .accordion-icon {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: var(--slate);
+  }
+  .accordion-item.active .accordion-icon { transform: rotate(180deg); color: var(--navy); }
+  .accordion-item.active .accordion-btn { background: #f8fafc; }
+  .accordion-content {
+    max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #f8fafc;
+  }
+  .accordion-inner { padding: 0 2rem 1.5rem 4.5rem; }
+  .accordion-inner p { font-size: 0.9rem; color: #475569; margin-bottom: 1rem; }
+  .accordion-pill-wrap { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .accordion-pill {
+    font-size: 0.75rem; background: var(--purple-pale); color: var(--purple);
+    padding: 0.25rem 0.75rem; border-radius: 2rem; font-weight: 500;
+  }
+
+  /* ── 互動 2: 3D 翻轉卡片 (FLIP CARDS) ── */
+  .flip-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;
+    perspective: 1000px;
+  }
+  .flip-card {
+    background: transparent; height: 260px; perspective: 1000px; cursor: pointer;
+  }
+  .flip-card-inner {
+    position: relative; width: 100%; height: 100%; text-align: center;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+  }
+  .flip-card:hover .flip-card-inner, .flip-card.flipped .flip-card-inner {
+    transform: rotateY(180deg);
+  }
+  .flip-front, .flip-back {
+    position: absolute; width: 100%; height: 100%;
+    backface-visibility: hidden; border-radius: 1rem;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    padding: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  }
+  .flip-front { background: white; }
+  .flip-back { background: var(--navy-dark); color: white; transform: rotateY(180deg); text-align: left; align-items: flex-start; }
+  .flip-icon { margin-bottom: 1rem; color: var(--navy); background: var(--navy-pale); padding: 0.75rem; border-radius: 50%; }
+  .flip-title { font-size: 1rem; font-weight: 700; color: var(--navy-dark); }
+  .flip-back-title { font-size: 0.9rem; color: var(--gold-light); font-weight: 700; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 0.3rem; width: 100%; }
+  .flip-back-desc { font-size: 0.8rem; color: #cbd5e1; line-height: 1.6; }
+  .formula-box {
+    background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 0.5rem; font-family: 'DM Mono', monospace;
+    font-size: 0.75rem; color: #a78bfa; margin-top: 0.5rem; width: 100%; text-align: center;
+  }
+
+  /* ── 互動 3: 動態切換開關 (TOGGLE SWITCH) ── */
+  .case-study-wrap { background: white; border-radius: 1rem; padding: 2.5rem; border: 1px solid #e2e8f0; }
+  .toggle-container { display: flex; justify-content: center; margin-bottom: 2rem; }
+  .toggle-bg {
+    background: #f1f5f9; border-radius: 2rem; padding: 0.25rem; display: inline-flex; position: relative;
+  }
+  .toggle-btn {
+    padding: 0.6rem 1.5rem; font-size: 0.9rem; font-weight: 600; color: var(--slate);
+    border: none; background: transparent; border-radius: 2rem; cursor: pointer;
+    position: relative; z-index: 1; transition: color 0.3s;
+  }
+  .toggle-btn.active { color: var(--navy-dark); }
+  .toggle-slider {
+    position: absolute; top: 0.25rem; left: 0.25rem; bottom: 0.25rem; width: calc(50% - 0.25rem);
+    background: white; border-radius: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .case-content { display: none; animation: fadeIn 0.4s ease; }
+  .case-content.active { display: block; }
+  .case-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .case-header { font-size: 1.25rem; font-weight: 700; color: var(--navy-dark); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+  .case-tag { font-size: 0.7rem; background: var(--gold-pale); color: var(--gold); padding: 0.2rem 0.6rem; border-radius: 2rem; font-weight: 600;}
+  .case-text { font-size: 0.9rem; color: #475569; line-height: 1.8; margin-bottom: 1.5rem; }
+  .case-list li { font-size: 0.85rem; color: #334155; margin-bottom: 0.5rem; display: flex; align-items: flex-start; gap: 0.5rem; }
+  .case-list i { color: var(--green); flex-shrink: 0; margin-top: 2px; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── CHECKLIST & RADAR (DIAGNOSTICS) ── */
+  .diag-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; align-items: center; }
+  .checklist { display: flex; flex-direction: column; gap: 0.75rem; }
+  .check-item {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem;
+    padding: 1rem 1.25rem; cursor: pointer; transition: all 0.2s;
+  }
+  .check-item:hover { border-color: #bfdbfe; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+  .check-item.checked { background: var(--navy-pale); border-color: var(--navy-light); }
+  .check-icon {
+    width: 20px; height: 20px; border-radius: 4px; border: 2px solid #cbd5e1;
+    display: flex; align-items: center; justify-content: center; margin-top: 2px;
+    transition: all 0.2s; color: transparent; flex-shrink: 0;
+  }
+  .check-item.checked .check-icon { background: var(--navy); border-color: var(--navy); color: white; }
+  .check-content { flex: 1; }
+  .check-title { font-size: 0.95rem; font-weight: 600; color: var(--navy-dark); margin-bottom: 0.25rem; }
+  .check-desc { font-size: 0.8rem; color: var(--slate); }
+  
+  .radar-wrap { background: white; border-radius: 1rem; padding: 2rem; border: 1px solid #e2e8f0; aspect-ratio: 1; position: relative; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy-dark); color: #64748b;
+    padding: 2.5rem 1.5rem; text-align: center;
+    font-size: .8rem; border-top: 2px solid rgba(251,191,36,.2);
+  }
+  footer strong { color: #94a3b8; }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(24px); transition: all .55s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    .accordion-inner { padding: 0 1.5rem 1.5rem 1.5rem; }
+    .case-grid { grid-template-columns: 1fr; }
+    .diag-layout { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="main-nav">
+  <div class="nav-inner">
+    <div class="nav-brand">WHO <span>成癮醫療服務</span> 評估架構</div>
+    <div class="nav-right">
+      <a href="WHO_MSD_MSB_Guide_13_developing.html" class="btn-return"><i data-lucide="arrow-left" style="width:16px;height:16px;"></i> 返回主頁</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">🔍 Workbook 3: Needs Assessment</div>
+    <h1>
+      第三階段：掌握系統需求<br>
+      <span>精準配置醫療資源</span>
+    </h1>
+    <p class="hero-sub">
+      需求評估 (Needs Assessment) 是規劃服務系統與優化資源配置的核心工具。本手冊將協助您評估社區對精神活性物質使用 (PSU) 障礙治療的真實需求，並探討服務能量、服務組合與系統協調性。<br><br>
+      沒有一種「萬靈丹」式的評估法能解答所有問題。本頁面彙整了多種科學估算模型與跨國實務案例，協助您找出最適合當地情境的需求分析策略。
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-num">4</span>
+        <span class="hero-stat-label">核心探索問題</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">5</span>
+        <span class="hero-stat-label">分析方法與模型</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">2</span>
+        <span class="hero-stat-label">跨國實務案例</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="questions" style="background:#f0f4fb;">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="help-circle" style="width:14px;height:14px;"></i> 4 Core Questions</span>
+    <h2 class="section-title reveal">釐清您的需求評估核心問題</h2>
+    <p class="section-desc reveal">在展開需求評估前，請先確認您的主要目標。點擊下方問題列，查看對應的焦點與適用方法。</p>
+
+    <div class="accordion-container reveal" id="accordion-group">
+      <div class="accordion-item active">
+        <button class="accordion-btn" onclick="toggleAccordion(0)">
+          <div class="accordion-title-wrap">
+            <span class="accordion-num">1</span>
+            <span class="accordion-title">該地區有多少人「需要」成癮治療？</span>
+          </div>
+          <i data-lucide="chevron-down" class="accordion-icon"></i>
+        </button>
+        <div class="accordion-content" style="max-height: 500px;">
+          <div class="accordion-inner">
+            <p>這個問題試圖估算當地精神活性物質使用 (PSU) 障礙者的總數，亦即潛在的治療需求母體。由於成癮者往往具有隱蔽性，直接計算極其困難，因此必須仰賴統計模型或大規模抽樣。</p>
+            <div class="accordion-pill-wrap">
+              <span class="accordion-pill">適用方法：死亡率盛行模型</span>
+              <span class="accordion-pill">適用方法：一般人口調查</span>
+              <span class="accordion-pill">適用方法：捕獲-重捕獲模型</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(1)">
+          <div class="accordion-title-wrap">
+            <span class="accordion-num">2</span>
+            <span class="accordion-title">不同區域或社區間的「相對需求」為何？</span>
+          </div>
+          <i data-lucide="chevron-down" class="accordion-icon"></i>
+        </button>
+        <div class="accordion-content">
+          <div class="accordion-inner">
+            <p>當資源有限時，決策者需要決定哪些地區應優先獲得經費或設立新機構。此時絕對人數不是重點，而是透過綜合各項社會問題指標，進行地理區域間的相對排名與比較。</p>
+            <div class="accordion-pill-wrap">
+              <span class="accordion-pill">適用方法：社會指標綜合指數 (Social Indicators)</span>
+              <span class="accordion-pill">適用方法：地理資訊對比分析</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(2)">
+          <div class="accordion-title-wrap">
+            <span class="accordion-num">3</span>
+            <span class="accordion-title">社區需要「哪些類型」的服務？量能是否足夠？</span>
+          </div>
+          <i data-lucide="chevron-down" class="accordion-icon"></i>
+        </button>
+        <div class="accordion-content">
+          <div class="accordion-inner">
+            <p>光知道「有多少人」是不夠的。我們必須了解目標族群真正缺乏的是門診、住院排毒、心理諮商還是中途之家。這需要從潛在使用者（個案）的視角出發，進行前瞻性的資料蒐集。</p>
+            <div class="accordion-pill-wrap">
+              <span class="accordion-pill">適用方法：以個案為中心的社區需求評估 (CCCNA)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(3)">
+          <div class="accordion-title-wrap">
+            <span class="accordion-num">4</span>
+            <span class="accordion-title">現有服務是否協調？如何改善整體系統運作？</span>
+          </div>
+          <i data-lucide="chevron-down" class="accordion-icon"></i>
+        </button>
+        <div class="accordion-content">
+          <div class="accordion-inner">
+            <p>有時問題不在於服務短缺，而在於個案在不同機構間（如司法、醫療、社政）的轉銜障礙。此評估焦點在於描繪「個案旅程」，找出系統的斷點並提出資源整合方案。</p>
+            <div class="accordion-pill-wrap">
+              <span class="accordion-pill">適用方法：系統協調性分析與跨機構訪談</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="methods" style="background:white;">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="briefcase" style="width:14px;height:14px;"></i> Methodological Toolkit</span>
+    <h2 class="section-title reveal">需求評估工具箱：5 種分析模型</h2>
+    <p class="section-desc reveal">滑鼠懸停（或點擊）下方卡片，翻轉查看各分析方法的原理、適用情境與公式。</p>
+
+    <div class="flip-grid reveal">
+      <div class="flip-card" onclick="this.classList.toggle('flipped')">
+        <div class="flip-card-inner">
+          <div class="flip-front">
+            <div class="flip-icon"><i data-lucide="activity" style="width:32px;height:32px;"></i></div>
+            <div class="flip-title">死亡率盛行模型<br><span style="font-size:0.8rem;color:var(--slate);font-weight:400;">Mortality-based Models</span></div>
+          </div>
+          <div class="flip-back">
+            <div class="flip-back-title">原理與優缺點</div>
+            <div class="flip-back-desc">
+              利用已知相關疾病（如酒精性肝硬化）的死亡率來回推潛在的成癮總人口。資料容易取得，但對於較少引發直接死亡的物質或輕度使用者容易嚴重低估。
+              <div class="formula-box">估算 A = P * (D/K)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')">
+        <div class="flip-card-inner">
+          <div class="flip-front">
+            <div class="flip-icon"><i data-lucide="users" style="width:32px;height:32px;"></i></div>
+            <div class="flip-title">一般人口調查<br><span style="font-size:0.8rem;color:var(--slate);font-weight:400;">Population Survey</span></div>
+          </div>
+          <div class="flip-back">
+            <div class="flip-back-title">原理與優缺點</div>
+            <div class="flip-back-desc">
+              透過隨機抽樣進行面對面或電話訪談（如 CIDI 問卷），直接詢問物質使用狀況與治療需求。準確度高且直接，但成本極高，且易因受訪者防衛而產生低報(Under-reporting)。
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')">
+        <div class="flip-card-inner">
+          <div class="flip-front">
+            <div class="flip-icon"><i data-lucide="git-merge" style="width:32px;height:32px;"></i></div>
+            <div class="flip-title">捕獲-重捕獲模型<br><span style="font-size:0.8rem;color:var(--slate);font-weight:400;">Capture-Recapture</span></div>
+          </div>
+          <div class="flip-back">
+            <div class="flip-back-title">原理與優缺點</div>
+            <div class="flip-back-desc">
+              交叉比對兩個以上獨立的異常名冊（如：急診名單與警察逮捕名單），透過兩份名單重疊的比例，推算出未出現在任何名單上的隱藏黑數。
+              <div class="formula-box">總數 D = [(f11+f12)*(f11+f21)]/f11</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')">
+        <div class="flip-card-inner">
+          <div class="flip-front">
+            <div class="flip-icon"><i data-lucide="bar-chart-2" style="width:32px;height:32px;"></i></div>
+            <div class="flip-title">社會指標指數<br><span style="font-size:0.8rem;color:var(--slate);font-weight:400;">Social Indicators Index</span></div>
+          </div>
+          <div class="flip-back">
+            <div class="flip-back-title">原理與優缺點</div>
+            <div class="flip-back-desc">
+              將多種與成癮高度相關的次級資料（如酒駕率、貧窮率、失業率）整合為一個複合指數，用於區域排名。計算簡便，但指標的信度可能受各地執法嚴格程度影響。
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')">
+        <div class="flip-card-inner">
+          <div class="flip-front">
+            <div class="flip-icon"><i data-lucide="message-circle" style="width:32px;height:32px;"></i></div>
+            <div class="flip-title">個案中心需求評估<br><span style="font-size:0.8rem;color:var(--slate);font-weight:400;">CCCNA</span></div>
+          </div>
+          <div class="flip-back">
+            <div class="flip-back-title">原理與優缺點</div>
+            <div class="flip-back-desc">
+              Client-centered Community Needs Assessment。透過質性訪談潛在個案，了解其真正渴望的服務類型及阻礙其就醫的門檻，能補足量化數據缺乏的人性與脈絡深度。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="cases" style="background:#f8fafc;">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="globe" style="width:14px;height:14px;"></i> Cross-National Case Studies</span>
+    <h2 class="section-title reveal">實務案例：量化與質性的不同途徑</h2>
+    <p class="section-desc reveal">手冊收錄了兩個截然不同的國家級案例。點擊開關切換檢視不同的策略應用。</p>
+
+    <div class="case-study-wrap reveal">
+      <div class="toggle-container">
+        <div class="toggle-bg">
+          <div class="toggle-slider" id="toggle-slider"></div>
+          <button class="toggle-btn active" onclick="switchCase(0)" id="btn-case-0">🇪🇸 西班牙：量化資料庫比對</button>
+          <button class="toggle-btn" onclick="switchCase(1)" id="btn-case-1">🇿🇦 南非：質性社區深訪</button>
+        </div>
+      </div>
+
+      <div class="case-content active" id="case-0">
+        <div class="case-grid">
+          <div>
+            <div class="case-header">巴塞隆納：門診治療需求評估 <span class="case-tag">量化主導</span></div>
+            <p class="case-text">
+              西班牙巴塞隆納利用豐富的醫療與司法電子化資料庫，進行高階的統計估算。他們運用「捕獲-重捕獲模型」(Capture-recapture)，交叉比對了全市的**急診就醫紀錄**、**監獄入監紀錄**以及**成癮治療中心登記冊**。
+            </p>
+            <ul class="case-list">
+              <li><i data-lucide="check-circle"></i> 成功推算出未就醫的隱性海洛因依賴者黑數。</li>
+              <li><i data-lucide="check-circle"></i> 客觀數據能有效說服政府編列預算。</li>
+              <li><i data-lucide="check-circle"></i> 但無法深入了解個案為何排斥目前的治療資源。</li>
+            </ul>
+          </div>
+          <div style="background:var(--navy-pale); border-radius:1rem; padding:1.5rem; display:flex; flex-direction:column; justify-content:center;">
+            <div style="font-family:'DM Mono', monospace; color:var(--navy); font-weight:700; margin-bottom:0.5rem;">適用情境：</div>
+            <p style="font-size:0.85rem; color:#334155;">當國家/城市的健保或警政資料庫系統已高度數位化，且各機關願意開放資料串接比對時，此種巨量資料分析法能以極低成本提供強而有力的盛行率估計。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="case-content" id="case-1">
+        <div class="case-grid">
+          <div>
+            <div class="case-header">東德蘭士瓦：福利服務需求探勘 <span class="case-tag">質性主導</span></div>
+            <p class="case-text">
+              南非在面臨資源極度匱乏與社區差異巨大的情況下，選擇走入基層。評估團隊放棄冰冷的統計數據，改採舉辦大量的**社區焦點團體 (Focus Groups)**與**深度訪談**，並發放簡單的紙本問卷給在地意見領袖。
+            </p>
+            <ul class="case-list">
+              <li><i data-lucide="check-circle"></i> 發掘出當地獨特的街頭毒品文化與真實困境。</li>
+              <li><i data-lucide="check-circle"></i> 評估過程本身就成為凝聚社區意識的衛教活動。</li>
+              <li><i data-lucide="check-circle"></i> 缺點是耗時費力，且結果較難以轉換為標準化指標。</li>
+            </ul>
+          </div>
+          <div style="background:#fce7f3; border-radius:1rem; padding:1.5rem; display:flex; flex-direction:column; justify-content:center;">
+            <div style="font-family:'DM Mono', monospace; color:#9d174d; font-weight:700; margin-bottom:0.5rem;">適用情境：</div>
+            <p style="font-size:0.85rem; color:#831843;">當缺乏官方次級資料庫，或是正在規劃全新的社區介入方案時。唯有透過第一線的傾聽，才能確保設計出來的服務組合 (Mix of services) 符合當地文化與真實痛點。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="diagnostics" style="background:white;">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="target" style="width:14px;height:14px;"></i> Readiness Diagnostics</span>
+    <h2 class="section-title reveal">需求評估：資源準備度自我診斷</h2>
+    <p class="section-desc reveal">勾選您的團隊目前已達成的準備事項，右側的雷達圖將即時為您的「需求評估準備度」進行多維度診斷。</p>
+
+    <div class="diag-layout reveal">
+      <div class="checklist">
+        <div class="check-item" onclick="toggleDiag(0)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">問題明確性 (Problem Definition)</div>
+            <div class="check-desc">我們已清楚界定這次要解答的是四大核心問題中的哪一項。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(1)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">方法適配性 (Method Selection)</div>
+            <div class="check-desc">我們已決定要採取量化推估、質性訪談，或兩者混合的評估策略。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(2)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">資料可近性 (Data Availability)</div>
+            <div class="check-desc">我們已掌握取得警政、醫療次級資料庫的權限，或具備問卷發放管道。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(3)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">社群網絡度 (Community Involvement)</div>
+            <div class="check-desc">我們能有效接觸並邀請隱蔽群體或地方意見領袖參與焦點團體。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(4)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">專業分析力 (Analytical Expertise)</div>
+            <div class="check-desc">我們團隊中具備能處理統計模型（如 SPSS）或質性逐字稿編碼的專才。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="radar-wrap">
+        <canvas id="diagRadar"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>WHO MSD/MSB Framework Workbook 3 數位化導引</strong></p>
+  <p style="margin-top:.5rem;opacity:.6;">
+    本工具僅供學術與政策研究參考。<br>
+    Taiwan Mental Health and Addiction Policy Translation Center (TMAP)
+  </p>
+</footer>
+
+<script>
+  // 初始化 Icons
+  lucide.createIcons();
+
+  /* ── 互動 1: ACCORDION ── */
+  function toggleAccordion(index) {
+    const items = document.querySelectorAll('.accordion-item');
+    items.forEach((item, i) => {
+      const content = item.querySelector('.accordion-content');
+      if (i === index) {
+        item.classList.toggle('active');
+        if (item.classList.contains('active')) {
+          content.style.maxHeight = content.scrollHeight + "px";
+        } else {
+          content.style.maxHeight = "0";
+        }
+      } else {
+        // 單選模式：關閉其他
+        item.classList.remove('active');
+        content.style.maxHeight = "0";
+      }
+    });
+  }
+
+  /* ── 互動 3: TOGGLE SWITCH ── */
+  function switchCase(index) {
+    const slider = document.getElementById('toggle-slider');
+    const btn0 = document.getElementById('btn-case-0');
+    const btn1 = document.getElementById('btn-case-1');
+    const case0 = document.getElementById('case-0');
+    const case1 = document.getElementById('case-1');
+
+    if (index === 0) {
+      slider.style.transform = 'translateX(0)';
+      btn0.classList.add('active');
+      btn1.classList.remove('active');
+      case0.classList.add('active');
+      case1.classList.remove('active');
+    } else {
+      // 依據字串寬度調整滑塊位移，這裡用 100% 代表移動到右邊按鈕
+      slider.style.transform = 'translateX(100%)';
+      btn1.classList.add('active');
+      btn0.classList.remove('active');
+      case1.classList.add('active');
+      case0.classList.remove('active');
+    }
+  }
+
+  /* ── 互動 4: CHECKLIST & RADAR ── */
+  let diagState = [false, false, false, false, false];
+  let radarChart = null;
+
+  function initRadar() {
+    const ctx = document.getElementById('diagRadar').getContext('2d');
+    radarChart = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: ['問題明確', '方法適配', '資料可近', '社群網絡', '專業分析'],
+        datasets: [{
+          label: '準備度',
+          data: [20, 20, 20, 20, 20], // 初始給予微小底數以呈現多邊形形狀
+          backgroundColor: 'rgba(124, 58, 237, 0.2)', // Purple
+          borderColor: 'rgba(124, 58, 237, 0.8)',
+          borderWidth: 2,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: 'rgba(124, 58, 237, 1)',
+          pointHoverBackgroundColor: 'rgba(124, 58, 237, 1)',
+          pointHoverBorderColor: '#fff',
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            angleLines: { color: 'rgba(0, 0, 0, 0.05)' },
+            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+            pointLabels: {
+              font: { family: "'Noto Sans TC', sans-serif", size: 12, weight: '600' },
+              color: '#475569'
+            },
+            ticks: { display: false, min: 0, max: 100 }
+          }
+        },
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        animation: { duration: 600, easing: 'easeOutQuart' }
+      }
+    });
+  }
+
+  function toggleDiag(index) {
+    diagState[index] = !diagState[index];
+    const items = document.querySelectorAll('.check-item');
+    if (diagState[index]) {
+      items[index].classList.add('checked');
+    } else {
+      items[index].classList.remove('checked');
+    }
+    updateRadar();
+  }
+
+  function updateRadar() {
+    // True = 100, False = 20 (base)
+    const newData = diagState.map(val => val ? 100 : 20);
+    radarChart.data.datasets[0].data = newData;
+    
+    // 如果全部勾選，改變顏色為金色作為彩蛋
+    const isAllTrue = diagState.every(val => val);
+    if(isAllTrue) {
+      radarChart.data.datasets[0].backgroundColor = 'rgba(251, 191, 36, 0.3)';
+      radarChart.data.datasets[0].borderColor = 'rgba(251, 191, 36, 1)';
+      radarChart.data.datasets[0].pointBorderColor = 'rgba(251, 191, 36, 1)';
+    } else {
+      radarChart.data.datasets[0].backgroundColor = 'rgba(124, 58, 237, 0.2)';
+      radarChart.data.datasets[0].borderColor = 'rgba(124, 58, 237, 0.8)';
+      radarChart.data.datasets[0].pointBorderColor = 'rgba(124, 58, 237, 1)';
+    }
+    
+    radarChart.update();
+  }
+
+  /* ── SCROLL REVEAL ── */
+  function initReveal() {
+    const els = document.querySelectorAll('.reveal');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+    }, { threshold: .12 });
+    els.forEach(el => obs.observe(el));
+  }
+
+  window.onload = () => {
+    initReveal();
+    initRadar();
+    // 預設展開第一個手風琴
+    const content0 = document.querySelector('.accordion-item.active .accordion-content');
+    if(content0) content0.style.maxHeight = content0.scrollHeight + "px";
+  };
+</script>
+</body>
+</html>

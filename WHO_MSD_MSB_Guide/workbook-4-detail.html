@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workbook 4 過程評估 - WHO 成癮治療評估架構</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  :root {
+    --navy: #1e3a8a;
+    --navy-light: #1d4ed8;
+    --navy-pale: #dbeafe;
+    --navy-dark: #1e2d5a;
+    --gold: #b45309;
+    --gold-light: #fbbf24;
+    --slate: #64748b;
+    --slate-light: #f1f5f9;
+    --teal: #0d9488; /* 過程評估的專屬主題色：藍綠色 */
+    --teal-light: #14b8a6;
+    --teal-pale: #ccfbf1;
+    --teal-dark: #0f766e;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: #f4f4f5; /* 略帶冷灰的背景 */
+    color: #1e293b;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+  h1, h2, h3 { font-family: 'Noto Serif TC', serif; }
+
+  /* ── NAV ── */
+  nav {
+    background: var(--navy-dark);
+    position: sticky; top: 0; z-index: 200;
+    border-bottom: 2px solid var(--teal-light);
+    box-shadow: 0 2px 20px rgba(0,0,0,.3);
+  }
+  .nav-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .75rem 1.5rem;
+  }
+  .nav-brand { color: white; font-family: 'Noto Serif TC', serif; font-size: .95rem; font-weight: 600; }
+  .nav-brand span { color: var(--teal-light); }
+  .btn-return {
+    color: white; font-size: 0.8rem; text-decoration: none; font-weight: 500;
+    padding: 0.35rem 0.8rem; border-radius: 2rem;
+    border: 1px solid rgba(255,255,255,0.3); transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+  }
+  .btn-return:hover { background: rgba(255,255,255,0.1); border-color: white; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e2d5a 50%, #0f766e 100%);
+    padding: 5rem 1.5rem 4rem;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(20,184,166,.15) 0%, transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(56,189,248,.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .hero-orb {
+    position: absolute; border-radius: 50%; pointer-events: none;
+    animation: floatOrb 8s ease-in-out infinite;
+  }
+  .hero-orb-1 { width: 250px; height: 250px; background: rgba(20,184,166,.05); top: -50px; right: -20px; animation-delay: 0s; }
+  .hero-orb-2 { width: 180px; height: 180px; background: rgba(251,191,36,.05); bottom: -40px; left: 15%; animation-delay: 2s; }
+  @keyframes floatOrb {
+    0%,100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-20px) scale(1.05); }
+  }
+  .hero-inner { max-width: 900px; margin: 0 auto; position: relative; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: rgba(20,184,166,.15);
+    border: 1px solid rgba(20,184,166,.3);
+    color: var(--teal-light); font-size: .75rem; font-weight: 500;
+    padding: .3rem .75rem; border-radius: 2rem; margin-bottom: 1.5rem;
+    animation: fadeDown .6s ease both;
+  }
+  .hero h1 {
+    color: white; font-size: clamp(1.7rem, 4vw, 2.6rem); line-height: 1.3; margin-bottom: 1.25rem;
+    animation: fadeDown .7s ease .1s both;
+  }
+  .hero h1 span { color: var(--teal-light); }
+  .hero-sub {
+    color: #99f6e4; font-size: .95rem; max-width: 780px; margin-bottom: 2rem;
+    font-weight: 300; line-height: 1.8;
+    animation: fadeDown .8s ease .2s both;
+  }
+  .hero-stats {
+    display: flex; gap: 2rem; flex-wrap: wrap;
+    animation: fadeDown .9s ease .35s both;
+  }
+  .hero-stat {
+    display: flex; flex-direction: column;
+    border-left: 2px solid rgba(20,184,166,.4); padding-left: 1rem;
+  }
+  .hero-stat-num { font-size: 1.6rem; font-weight: 700; color: var(--teal-light); font-family: 'DM Mono', monospace; }
+  .hero-stat-label { font-size: .72rem; color: #ccfbf1; }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SECTIONS ── */
+  .section { padding: 4.5rem 1.5rem; }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--teal-pale); color: var(--teal-dark); font-size: .72rem; font-weight: 600;
+    padding: .25rem .7rem; border-radius: 2rem; text-transform: uppercase; letter-spacing: .06em;
+    margin-bottom: .75rem;
+  }
+  .section-title { color: var(--navy-dark); font-size: clamp(1.35rem, 3vw, 1.8rem); margin-bottom: .5rem; }
+  .section-desc { color: var(--slate); font-size: .92rem; max-width: 640px; margin-bottom: 2.5rem; }
+
+  /* ── 互動 1: 雙軌切換面板 (PILL TABS) ── */
+  .tabs-wrapper { background: white; border-radius: 1rem; padding: 2rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+  .pill-nav { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 1rem; }
+  .pill-btn {
+    background: transparent; border: none; font-size: 1.1rem; font-weight: 600; color: #64748b;
+    padding: 0.5rem 1.5rem; cursor: pointer; position: relative; transition: color 0.3s;
+  }
+  .pill-btn.active { color: var(--teal-dark); }
+  .pill-btn::after {
+    content: ''; position: absolute; bottom: -1.1rem; left: 0; width: 100%; height: 3px;
+    background: var(--teal); transform: scaleX(0); transition: transform 0.3s; border-radius: 3px 3px 0 0;
+  }
+  .pill-btn.active::after { transform: scaleX(1); }
+  
+  .tab-content { display: none; animation: fadeIn 0.4s ease; }
+  .tab-content.active { display: block; }
+  .tab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .tab-card { background: #f8fafc; border-radius: 0.75rem; padding: 1.5rem; border: 1px solid #e2e8f0; }
+  .tab-card h4 { font-size: 1rem; color: var(--navy-dark); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+  .tab-card p { font-size: 0.85rem; color: #475569; margin-bottom: 1rem; }
+  .tab-list { list-style: none; }
+  .tab-list li { font-size: 0.85rem; color: #334155; margin-bottom: 0.5rem; display: flex; align-items: flex-start; gap: 0.5rem; }
+  .tab-list i { color: var(--teal); flex-shrink: 0; margin-top: 2px; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── 互動 2: 層級擴展卡片 (EXPANDABLE PATHWAY) ── */
+  .pathway-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+  .path-card {
+    background: white; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1.5rem;
+    cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative; overflow: hidden; display: flex; flex-direction: column;
+  }
+  .path-card:hover { border-color: var(--teal-light); box-shadow: 0 10px 25px rgba(13,148,136,0.1); transform: translateY(-3px); }
+  .path-card.expanded { grid-column: span 4; flex-direction: row; gap: 2rem; background: var(--navy-dark); color: white; border-color: var(--navy-dark); }
+  .path-header { flex-shrink: 0; }
+  .path-num {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--teal-pale); color: var(--teal-dark);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-family: 'DM Mono', monospace;
+    margin-bottom: 1rem; transition: all 0.3s;
+  }
+  .path-card.expanded .path-num { background: rgba(255,255,255,0.2); color: white; }
+  .path-title { font-size: 1rem; font-weight: 700; color: var(--navy-dark); margin-bottom: 0.5rem; transition: color 0.3s; }
+  .path-card.expanded .path-title { color: var(--teal-light); font-size: 1.2rem; }
+  .path-subtitle { font-size: 0.8rem; color: var(--slate); }
+  .path-card.expanded .path-subtitle { color: #94a3b8; }
+  .path-details {
+    display: none; opacity: 0; flex: 1; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 2rem;
+  }
+  .path-card.expanded .path-details { display: block; animation: fadeDetail 0.5s ease forwards; animation-delay: 0.1s; }
+  .detail-title { font-size: 0.9rem; color: #ccfbf1; font-weight: 600; margin-bottom: 0.5rem; }
+  .detail-text { font-size: 0.85rem; color: #cbd5e1; margin-bottom: 1rem; }
+  .detail-list li { font-size: 0.85rem; color: #f8fafc; margin-bottom: 0.4rem; display: flex; gap: 0.5rem; }
+  .detail-list i { color: var(--teal-light); }
+  @keyframes fadeDetail { to { opacity: 1; } }
+
+  /* ── 互動 3: 案例對比滑塊 (COMPARISON TOGGLE) ── */
+  .case-section { background: white; border-radius: 1rem; padding: 2.5rem; border: 1px solid #e2e8f0; }
+  .toggle-container { display: flex; justify-content: center; margin-bottom: 2rem; }
+  .toggle-bg { background: #f1f5f9; border-radius: 2rem; padding: 0.25rem; display: inline-flex; position: relative; }
+  .toggle-btn {
+    padding: 0.6rem 1.5rem; font-size: 0.9rem; font-weight: 600; color: var(--slate);
+    border: none; background: transparent; border-radius: 2rem; cursor: pointer;
+    position: relative; z-index: 1; transition: color 0.3s;
+  }
+  .toggle-btn.active { color: white; }
+  .toggle-slider {
+    position: absolute; top: 0.25rem; left: 0.25rem; bottom: 0.25rem; width: calc(50% - 0.25rem);
+    background: var(--teal); border-radius: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .case-wrap { display: none; animation: fadeIn 0.4s ease; }
+  .case-wrap.active { display: block; }
+  .case-box { background: #f8fafc; border-left: 4px solid var(--teal); padding: 1.5rem; border-radius: 0 0.5rem 0.5rem 0; margin-bottom: 1.5rem; }
+  .case-box h4 { font-size: 1.1rem; color: var(--navy-dark); margin-bottom: 0.5rem; }
+  .case-box p { font-size: 0.85rem; color: #475569; }
+
+  /* ── 互動 4: CHECKLIST & RADAR (DIAGNOSTICS) ── */
+  .diag-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; align-items: center; }
+  .checklist { display: flex; flex-direction: column; gap: 0.75rem; }
+  .check-item {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem;
+    padding: 1rem 1.25rem; cursor: pointer; transition: all 0.2s;
+  }
+  .check-item:hover { border-color: var(--teal-light); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+  .check-item.checked { background: var(--teal-pale); border-color: var(--teal); }
+  .check-icon {
+    width: 20px; height: 20px; border-radius: 4px; border: 2px solid #cbd5e1;
+    display: flex; align-items: center; justify-content: center; margin-top: 2px;
+    transition: all 0.2s; color: transparent; flex-shrink: 0;
+  }
+  .check-item.checked .check-icon { background: var(--teal); border-color: var(--teal); color: white; }
+  .check-content { flex: 1; }
+  .check-title { font-size: 0.95rem; font-weight: 600; color: var(--navy-dark); margin-bottom: 0.25rem; }
+  .check-desc { font-size: 0.8rem; color: var(--slate); }
+  
+  .radar-wrap { background: white; border-radius: 1rem; padding: 2rem; border: 1px solid #e2e8f0; aspect-ratio: 1; position: relative; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy-dark); color: #64748b;
+    padding: 2.5rem 1.5rem; text-align: center;
+    font-size: .8rem; border-top: 2px solid var(--teal-dark);
+  }
+  footer strong { color: #94a3b8; }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(24px); transition: all .55s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    .tab-grid { grid-template-columns: 1fr; }
+    .pathway-grid { grid-template-columns: 1fr; }
+    .path-card.expanded { grid-column: span 1; flex-direction: column; gap: 1rem; }
+    .path-card.expanded .path-details { border-left: none; border-top: 1px solid rgba(255,255,255,0.2); padding-left: 0; padding-top: 1rem; }
+    .diag-layout { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="main-nav">
+  <div class="nav-inner">
+    <div class="nav-brand">WHO <span>成癮醫療服務</span> 評估架構</div>
+    <div class="nav-right">
+      <a href="WHO_MSD_MSB_Guide_13_developing.html" class="btn-return"><i data-lucide="arrow-left" style="width:16px;height:16px;"></i> 返回主頁</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">📊 Workbook 4: Process Evaluations</div>
+    <h1>
+      第四階段：透視治療黑盒子<br>
+      <span>掌握涵蓋率與服務流程</span>
+    </h1>
+    <p class="hero-sub">
+      過程評估 (Process Evaluations) 旨在幫助您全面了解計畫的實際運作狀況。它測量「計畫實際做了什麼」以及「這些服務提供給了誰」。透過釐清「涵蓋率 (Coverage)」與「流程 (Process)」，我們能確認服務是否遵循標準、是否接觸到目標族群，並為改善方案提供實證基礎。
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-num">2</span>
+        <span class="hero-stat-label">核心評估面向</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">4</span>
+        <span class="hero-stat-label">評估問題層次</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">責信</span>
+        <span class="hero-stat-label">與品質改善目標</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="concepts">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="split-square-horizontal" style="width:14px;height:14px;"></i> Dual Focus</span>
+    <h2 class="section-title reveal">過程評估的雙軌焦點</h2>
+    <p class="section-desc reveal">過程評估通常提出兩大領域的問題：涵蓋率（評估服務對象）與流程（評估服務如何進行）。點擊標籤切換說明。</p>
+
+    <div class="tabs-wrapper reveal">
+      <div class="pill-nav">
+        <button class="pill-btn active" onclick="switchTab(0)" id="tab-btn-0">涵蓋率 (Coverage)</button>
+        <button class="pill-btn" onclick="switchTab(1)" id="tab-btn-1">治療流程 (Process)</button>
+      </div>
+      
+      <div class="tab-content active" id="tab-content-0">
+        <div class="tab-grid">
+          <div class="tab-card">
+            <h4><i data-lucide="users"></i> 什麼是涵蓋率評估？</h4>
+            <p>了解您的服務或網絡是否真正接觸到「預期要服務的對象」。這涉及到資源是否有效分配給最有需要的人群。</p>
+            <ul class="tab-list">
+              <li><i data-lucide="check"></i> 潛在需求者中，實際使用服務的比例？</li>
+              <li><i data-lucide="check"></i> 機構是否服務了預設的目標個案？</li>
+              <li><i data-lucide="check"></i> 個案的人口學與臨床特徵為何？</li>
+              <li><i data-lucide="check"></i> 完成治療與中途退出者的特徵差異？</li>
+            </ul>
+          </div>
+          <div class="tab-card">
+            <h4><i data-lucide="clipboard-list"></i> 常用評估變項與工具</h4>
+            <p>需收集年齡、性別、轉介來源、物質使用嚴重度等資料。手冊建議使用公有領域的標準化測量工具：</p>
+            <ul class="tab-list">
+              <li><i data-lucide="chevron-right"></i> <strong>成癮嚴重度指數 (ASI):</strong> 評估醫療、就業、法律等次量表。</li>
+              <li><i data-lucide="chevron-right"></i> <strong>WHO-CIDI / AUDIT:</strong> 用於評估物質使用障礙程度。</li>
+              <li><i data-lucide="chevron-right"></i> <strong>症狀檢核表 (SCL-90):</strong> 測量一般心理健康與共病。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-content-1">
+        <div class="tab-grid">
+          <div class="tab-card">
+            <h4><i data-lucide="git-merge"></i> 什麼是流程評估？</h4>
+            <p>剖析治療機構內部的「黑盒子」，檢視服務介入的強度、品質、順序，以及個案流動的順暢度。</p>
+            <ul class="tab-list">
+              <li><i data-lucide="check"></i> 個案是透過何種管道進入治療的？</li>
+              <li><i data-lucide="check"></i> 候補名單有多長？是如何管理的？</li>
+              <li><i data-lucide="check"></i> 治療中實際發生的事，是否與計畫初衷相符？</li>
+              <li><i data-lucide="check"></i> 治療計畫是否與初始的評估結果保持一致？</li>
+            </ul>
+          </div>
+          <div class="tab-card">
+            <h4><i data-lucide="activity"></i> 系統層面的協調</h4>
+            <p>在系統層面上，流程評估特別關注不同服務機構之間的「轉銜」是否無縫接軌：</p>
+            <ul class="tab-list">
+              <li><i data-lucide="chevron-right"></i> <strong>轉介機制:</strong> 從排毒中心轉介至復健機構的成功率。</li>
+              <li><i data-lucide="chevron-right"></i> <strong>資源運用:</strong> 網絡內的服務是否有重疊浪費或斷層。</li>
+              <li><i data-lucide="chevron-right"></i> <strong>個案旅程:</strong> 追蹤個案在不同設施間的治療歷程。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="levels" style="background:white;">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="layers" style="width:14px;height:14px;"></i> The 4 Levels of Process</span>
+    <h2 class="section-title reveal">四大問題層次：從單一機構到整體系統</h2>
+    <p class="section-desc reveal">點擊下方任一層次卡片，展開詳細的評估範例與實務操作重點。</p>
+
+    <div class="pathway-grid reveal">
+      <div class="path-card" onclick="expandCard(this)">
+        <div class="path-header">
+          <div class="path-num">1</div>
+          <div class="path-title">機構涵蓋率</div>
+          <div class="path-subtitle">Activity / Agency Level</div>
+        </div>
+        <div class="path-details">
+          <div class="detail-title">重點目標：確保收案精準度</div>
+          <p class="detail-text">檢視單一治療中心是否服務了正確的目標群體。需要對比「實際收案個案的特徵」與「計畫書設定的目標群體」。</p>
+          <ul class="detail-list">
+            <li><i data-lucide="arrow-right-circle"></i> 範例：青少年預防計畫檢查司法轉介比例是否上升。</li>
+            <li><i data-lucide="arrow-right-circle"></i> 實務：需建立常規的收案基本資料庫（年齡、性別、用藥史）。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="path-card" onclick="expandCard(this)">
+        <div class="path-header">
+          <div class="path-num">2</div>
+          <div class="path-title">系統涵蓋率</div>
+          <div class="path-subtitle">System Level</div>
+        </div>
+        <div class="path-details">
+          <div class="detail-title">重點目標：跨機構資源分配</div>
+          <p class="detail-text">關注整個服務網絡（如一個城市的成癮醫療網）收治個案的樣貌。焦點在於不同機構間個案輪廓的異同。</p>
+          <ul class="detail-list">
+            <li><i data-lucide="arrow-right-circle"></i> 範例：確保具備精神共病的重度成癮者，確實被分流到具備專業醫療人員的設施。</li>
+            <li><i data-lucide="arrow-right-circle"></i> 實務：需要跨機構達成共識，採用統一的核心評估量表。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="path-card" onclick="expandCard(this)">
+        <div class="path-header">
+          <div class="path-num">3</div>
+          <div class="path-title">機構治療流程</div>
+          <div class="path-subtitle">Activity / Agency Level</div>
+        </div>
+        <div class="path-details">
+          <div class="detail-title">重點目標：品質控管與保真度</div>
+          <p class="detail-text">打開治療的黑盒子，確認介入方案是否按照原定計畫執行（Execution Fidelity），找出服務的「有效成分」。</p>
+          <ul class="detail-list">
+            <li><i data-lucide="arrow-right-circle"></i> 範例：追蹤每位個案實際獲得的心理諮商時數與團體治療次數。</li>
+            <li><i data-lucide="arrow-right-circle"></i> 實務：稽核病歷紀錄，比對「初始治療評估」與「實際處置」的一致性。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="path-card" onclick="expandCard(this)">
+        <div class="path-header">
+          <div class="path-num">4</div>
+          <div class="path-title">系統治療流程</div>
+          <div class="path-subtitle">System Level</div>
+        </div>
+        <div class="path-details">
+          <div class="detail-title">重點目標：服務網絡連貫性</div>
+          <p class="detail-text">評估系統內各個子單位如何共同運作。重點在於個案在不同服務階段間的流動與轉介效率。</p>
+          <ul class="detail-list">
+            <li><i data-lucide="arrow-right-circle"></i> 範例：分析排毒病房出院後，成功轉銜至社區復健中心的個案比例與等候時間。</li>
+            <li><i data-lucide="arrow-right-circle"></i> 實務：建立跨機構個案追蹤系統，識別造成個案流失的「系統斷點」。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="cases" style="background:#f8fafc;">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="globe" style="width:14px;height:14px;"></i> Process Case Studies</span>
+    <h2 class="section-title reveal">實務案例對比：責信與品質改善</h2>
+    <p class="section-desc reveal">手冊收錄了兩項真實的過程評估案例。點擊切換查看他們如何運用過程評估達成不同目標。</p>
+
+    <div class="case-section reveal">
+      <div class="toggle-container">
+        <div class="toggle-bg">
+          <div class="toggle-slider" id="case-slider"></div>
+          <button class="toggle-btn active" onclick="switchCase(0)" id="btn-case-0">🇬🇧 英國：居家戒斷計畫</button>
+          <button class="toggle-btn" onclick="switchCase(1)" id="btn-case-1">🇨🇭 瑞士：海洛因處方計畫</button>
+        </div>
+      </div>
+
+      <div class="case-wrap active" id="case-0">
+        <div class="case-box">
+          <h4>酒精居家戒斷與評估計畫 (AHDA)</h4>
+          <p><strong>背景：</strong>這是一項為中度酒精依賴者提供的社區居家排毒服務。評估目的是檢視服務流動性、滿意度以及臨床程序的遵循度。</p>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem; margin-top:1.5rem;">
+          <div>
+            <h5 style="color:var(--teal-dark); font-size:0.95rem; margin-bottom:0.5rem;"><i data-lucide="check-square" style="width:16px;height:16px;"></i> 評估作法</h5>
+            <p style="font-size:0.85rem; color:#475569; line-height:1.6;">透過編碼表記錄個案基本特徵（涵蓋率）。運用自填滿意度問卷調查個案與其「支持者（家屬）」的回饋。同時透過問卷調查全科醫師（GP）的合作經驗與後續追蹤狀況（流程協調性）。</p>
+          </div>
+          <div>
+            <h5 style="color:var(--teal-dark); font-size:0.95rem; margin-bottom:0.5rem;"><i data-lucide="bar-chart" style="width:16px;height:16px;"></i> 評估結果與應用</h5>
+            <p style="font-size:0.85rem; color:#475569; line-height:1.6;">發現 GP 對於出院後的追蹤責任存在認知落差。此過程評估促使團隊重新設計了「轉介與出院計畫表」，並強化了與基層醫療的雙向溝通，直接提升了服務品質。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="case-wrap" id="case-1">
+        <div class="case-box" style="border-left-color: var(--navy);">
+          <h4>瑞士國家麻醉品醫療處方計畫</h4>
+          <p><strong>背景：</strong>這是一項具高度爭議性的國家級前導計畫（合法處方海洛因給重度成癮者）。政府與大眾對其「責信 (Accountability)」要求極高。</p>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem; margin-top:1.5rem;">
+          <div>
+            <h5 style="color:var(--navy); font-size:0.95rem; margin-bottom:0.5rem;"><i data-lucide="check-square" style="width:16px;height:16px;"></i> 評估作法</h5>
+            <p style="font-size:0.85rem; color:#475569; line-height:1.6;">嚴格的系統級過程評估。監控各診所的收案標準是否完全符合聯邦規定（涵蓋率保真度）。稽查藥物配發的安全性、員工受訓時數，以及治療計畫的執行率（流程控制）。</p>
+          </div>
+          <div>
+            <h5 style="color:var(--navy); font-size:0.95rem; margin-bottom:0.5rem;"><i data-lucide="bar-chart" style="width:16px;height:16px;"></i> 評估結果與應用</h5>
+            <p style="font-size:0.85rem; color:#475569; line-height:1.6;">評估報告向議會證明了該計畫能被安全、嚴謹地執行，藥物無外流風險，且個案穩定出席。過程評估的成功是該爭議性計畫得以延續並推廣的關鍵背書。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="diagnostics">
+  <div class="section-inner">
+    <span class="section-label"><i data-lucide="activity" style="width:14px;height:14px;"></i> Readiness Diagnostics</span>
+    <h2 class="section-title reveal">過程評估：機制健全度自我診斷</h2>
+    <p class="section-desc reveal">勾選您的機構目前已落實的管理機制，右側的雷達圖將即時為您的「過程評估整備度」進行多維度診斷。</p>
+
+    <div class="diag-layout reveal">
+      <div class="checklist">
+        <div class="check-item" onclick="toggleDiag(0)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">責信落實度 (Accountability)</div>
+            <div class="check-desc">機構能定期向資助方或大眾提出服務量能的客觀數據與經費運用證明。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(1)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">目標涵蓋度 (Target Coverage)</div>
+            <div class="check-desc">具備常規的數據採集機制，能隨時比對實際收案特徵與計畫設定的目標群體。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(2)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">流程監控度 (Process Monitoring)</div>
+            <div class="check-desc">有病歷稽核制度，能確認治療計畫（如諮商次數）是否如實依照醫療常規被執行。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(3)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">系統協調性 (System Co-ordination)</div>
+            <div class="check-desc">追蹤個案轉介的成功率，並定期與網絡內的其他服務機構召開聯繫會議。</div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggleDiag(4)">
+          <div class="check-icon"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="check-content">
+            <div class="check-title">測量標準化 (Standardized Tools)</div>
+            <div class="check-desc">使用經驗證的工具（如 ASI, AUDIT）進行收案評估，而非僅憑主觀臨床印象。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="radar-wrap">
+        <canvas id="diagRadar"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>WHO MSD/MSB Framework Workbook 4 數位化導引</strong></p>
+  <p style="margin-top:.5rem;opacity:.6;">
+    本工具僅供學術與政策研究參考。<br>
+    Taiwan Mental Health and Addiction Policy Translation Center (TMAP)
+  </p>
+</footer>
+
+<div class="toast" id="toast" style="position:fixed; bottom:2rem; right:2rem; z-index:999; background:var(--teal-dark); color:white; padding:0.75rem 1.25rem; border-radius:0.6rem; font-size:0.85rem; box-shadow:0 4px 20px rgba(0,0,0,0.3); transform:translateY(100px); opacity:0; transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1); pointer-events:none; display:flex; align-items:center; gap:0.5rem;">
+  <i data-lucide="check-circle" style="width:18px;height:18px;"></i>
+  <span id="toast-msg">已更新評估狀態！</span>
+</div>
+
+<script>
+  // 初始化 Icons
+  lucide.createIcons();
+
+  /* ── 互動 1: PILL TABS ── */
+  function switchTab(index) {
+    document.getElementById('tab-btn-0').classList.toggle('active', index === 0);
+    document.getElementById('tab-btn-1').classList.toggle('active', index === 1);
+    document.getElementById('tab-content-0').classList.toggle('active', index === 0);
+    document.getElementById('tab-content-1').classList.toggle('active', index === 1);
+  }
+
+  /* ── 互動 2: EXPANDABLE PATHWAY ── */
+  function expandCard(clickedCard) {
+    const cards = document.querySelectorAll('.path-card');
+    
+    // 如果點擊的是已經展開的卡片，則收起它
+    if (clickedCard.classList.contains('expanded')) {
+      clickedCard.classList.remove('expanded');
+      return;
+    }
+
+    // 收起所有卡片，展開被點擊的卡片
+    cards.forEach(card => card.classList.remove('expanded'));
+    clickedCard.classList.add('expanded');
+  }
+
+  /* ── 互動 3: TOGGLE SWITCH (CASE STUDIES) ── */
+  function switchCase(index) {
+    const slider = document.getElementById('case-slider');
+    const btn0 = document.getElementById('btn-case-0');
+    const btn1 = document.getElementById('btn-case-1');
+    const case0 = document.getElementById('case-0');
+    const case1 = document.getElementById('case-1');
+
+    if (index === 0) {
+      slider.style.transform = 'translateX(0)';
+      btn0.classList.add('active');
+      btn1.classList.remove('active');
+      case0.classList.add('active');
+      case1.classList.remove('active');
+    } else {
+      slider.style.transform = 'translateX(100%)';
+      btn1.classList.add('active');
+      btn0.classList.remove('active');
+      case1.classList.add('active');
+      case0.classList.remove('active');
+    }
+  }
+
+  /* ── 互動 4: CHECKLIST & RADAR ── */
+  let diagState = [false, false, false, false, false];
+  let radarChart = null;
+
+  function initRadar() {
+    const ctx = document.getElementById('diagRadar').getContext('2d');
+    radarChart = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: ['責信落實', '涵蓋確認', '流程監控', '系統協調', '測量標準'],
+        datasets: [{
+          label: '整備度',
+          data: [20, 20, 20, 20, 20], 
+          backgroundColor: 'rgba(13, 148, 136, 0.2)', // Teal
+          borderColor: 'rgba(13, 148, 136, 0.8)',
+          borderWidth: 2,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: 'rgba(13, 148, 136, 1)',
+          pointHoverBackgroundColor: 'rgba(13, 148, 136, 1)',
+          pointHoverBorderColor: '#fff',
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            angleLines: { color: 'rgba(0, 0, 0, 0.05)' },
+            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+            pointLabels: {
+              font: { family: "'Noto Sans TC', sans-serif", size: 12, weight: '600' },
+              color: '#475569'
+            },
+            ticks: { display: false, min: 0, max: 100 }
+          }
+        },
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        animation: { duration: 600, easing: 'easeOutQuart' }
+      }
+    });
+  }
+
+  function showToast() {
+    const t = document.getElementById('toast');
+    t.style.transform = 'translateY(0)';
+    t.style.opacity = '1';
+    setTimeout(() => {
+      t.style.transform = 'translateY(100px)';
+      t.style.opacity = '0';
+    }, 2000);
+  }
+
+  function toggleDiag(index) {
+    diagState[index] = !diagState[index];
+    const items = document.querySelectorAll('.check-item');
+    if (diagState[index]) {
+      items[index].classList.add('checked');
+    } else {
+      items[index].classList.remove('checked');
+    }
+    updateRadar();
+    showToast();
+  }
+
+  function updateRadar() {
+    const newData = diagState.map(val => val ? 100 : 20);
+    radarChart.data.datasets[0].data = newData;
+    
+    // 全滿時變換顏色 (金牌達成)
+    const isAllTrue = diagState.every(val => val);
+    if(isAllTrue) {
+      radarChart.data.datasets[0].backgroundColor = 'rgba(251, 191, 36, 0.3)';
+      radarChart.data.datasets[0].borderColor = 'rgba(251, 191, 36, 1)';
+      radarChart.data.datasets[0].pointBorderColor = 'rgba(251, 191, 36, 1)';
+    } else {
+      radarChart.data.datasets[0].backgroundColor = 'rgba(13, 148, 136, 0.2)';
+      radarChart.data.datasets[0].borderColor = 'rgba(13, 148, 136, 0.8)';
+      radarChart.data.datasets[0].pointBorderColor = 'rgba(13, 148, 136, 1)';
+    }
+    
+    radarChart.update();
+  }
+
+  /* ── SCROLL REVEAL ── */
+  function initReveal() {
+    const els = document.querySelectorAll('.reveal');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+    }, { threshold: .12 });
+    els.forEach(el => obs.observe(el));
+  }
+
+  window.onload = () => {
+    initReveal();
+    initRadar();
+  };
+</script>
+</body>
+</html>

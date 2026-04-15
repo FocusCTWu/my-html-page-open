@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workbook 2 執行評估 - WHO 成癮治療評估架構</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root {
+    --navy: #1e3a8a;
+    --navy-light: #1d4ed8;
+    --navy-pale: #dbeafe;
+    --navy-dark: #1e2d5a;
+    --gold: #b45309;
+    --gold-light: #fbbf24;
+    --gold-pale: #fef3c7;
+    --slate: #64748b;
+    --slate-light: #f1f5f9;
+    --green: #059669;
+    --green-pale: #d1fae5;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: #f0f4fb;
+    color: #1e293b;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+  h1, h2, h3 { font-family: 'Noto Serif TC', serif; }
+
+  /* ── NAV ── */
+  nav {
+    background: var(--navy-dark);
+    position: sticky; top: 0; z-index: 200;
+    border-bottom: 2px solid var(--gold-light);
+    box-shadow: 0 2px 20px rgba(0,0,0,.3);
+  }
+  .nav-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .75rem 1.5rem;
+  }
+  .nav-brand { color: white; font-family: 'Noto Serif TC', serif; font-size: .95rem; font-weight: 600; }
+  .nav-brand span { color: var(--gold-light); }
+  .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+  .nav-progress {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .7rem; color: #93c5fd; font-family: 'DM Mono', monospace;
+  }
+  .nav-progress-bar {
+    width: 100px; height: 4px; background: rgba(255,255,255,.15); border-radius: 2px; overflow: hidden;
+  }
+  .nav-progress-fill {
+    height: 100%; background: var(--gold-light); border-radius: 2px;
+    transition: width .4s ease; width: 0%;
+  }
+  .btn-return {
+    color: white; font-size: 0.8rem; text-decoration: none; font-weight: 500;
+    padding: 0.35rem 0.8rem; border-radius: 2rem;
+    border: 1px solid rgba(255,255,255,0.3); transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+  }
+  .btn-return:hover { background: rgba(255,255,255,0.1); border-color: white; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #1e2d5a 0%, #1e3a8a 50%, #1d4ed8 100%);
+    padding: 5rem 1.5rem 4rem;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 70% 30%, rgba(251,191,36,.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 80%, rgba(29,78,216,.3) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .hero-orb {
+    position: absolute; border-radius: 50%; pointer-events: none;
+    animation: floatOrb 8s ease-in-out infinite;
+  }
+  .hero-orb-1 { width: 300px; height: 300px; background: rgba(251,191,36,.04); top: -80px; right: -60px; animation-delay: 0s; }
+  .hero-orb-2 { width: 200px; height: 200px; background: rgba(29,78,216,.12); bottom: -50px; left: 10%; animation-delay: 3s; }
+  @keyframes floatOrb {
+    0%,100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-20px) scale(1.05); }
+  }
+  .hero-inner { max-width: 900px; margin: 0 auto; position: relative; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: rgba(251,191,36,.15);
+    border: 1px solid rgba(251,191,36,.3);
+    color: var(--gold-light); font-size: .75rem; font-weight: 500;
+    padding: .3rem .75rem; border-radius: 2rem; margin-bottom: 1.5rem;
+    animation: fadeDown .6s ease both;
+  }
+  .hero h1 {
+    color: white; font-size: clamp(1.7rem, 4vw, 2.6rem); line-height: 1.3; margin-bottom: 1.25rem;
+    animation: fadeDown .7s ease .1s both;
+  }
+  .hero h1 span { color: var(--gold-light); }
+  .hero-sub {
+    color: #93c5fd; font-size: .95rem; max-width: 750px; margin-bottom: 2rem;
+    font-weight: 300; line-height: 1.8;
+    animation: fadeDown .8s ease .2s both;
+  }
+  .hero-stats {
+    display: flex; gap: 2rem; flex-wrap: wrap;
+    animation: fadeDown .9s ease .35s both;
+  }
+  .hero-stat {
+    display: flex; flex-direction: column;
+    border-left: 2px solid rgba(251,191,36,.4); padding-left: 1rem;
+  }
+  .hero-stat-num { font-size: 1.6rem; font-weight: 700; color: var(--gold-light); font-family: 'DM Mono', monospace; }
+  .hero-stat-label { font-size: .72rem; color: #93c5fd; }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SECTIONS ── */
+  .section { padding: 4rem 1.5rem; }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--navy-pale); color: var(--navy); font-size: .72rem; font-weight: 600;
+    padding: .25rem .7rem; border-radius: 2rem; text-transform: uppercase; letter-spacing: .06em;
+    margin-bottom: .75rem;
+  }
+  .section-title { color: var(--navy-dark); font-size: clamp(1.35rem, 3vw, 1.8rem); margin-bottom: .5rem; }
+  .section-desc { color: var(--slate); font-size: .92rem; max-width: 640px; margin-bottom: 2.5rem; }
+
+  /* ── STEPPER ── */
+  .stepper-layout { display: grid; grid-template-columns: 280px 1fr; gap: 1.5rem; align-items: start; }
+  .stepper-nav { display: flex; flex-direction: column; gap: .3rem; position: sticky; top: 80px; }
+  .stepper-btn {
+    display: flex; align-items: center; gap: .75rem;
+    padding: .75rem 1rem; border-radius: .6rem;
+    cursor: pointer; border: 1px solid transparent;
+    background: transparent; text-align: left;
+    transition: all .2s; position: relative; overflow: hidden;
+  }
+  .stepper-btn::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(30,58,138,.06) 0%, transparent 100%);
+    opacity: 0; transition: opacity .2s;
+  }
+  .stepper-btn:hover:not(.active)::after { opacity: 1; }
+  .stepper-btn:hover:not(.active) { background: white; border-color: #e2e8f0; transform: translateX(3px); }
+  .stepper-btn.active {
+    background: white; border-color: var(--navy);
+    box-shadow: 0 2px 12px rgba(30,58,138,.15); transform: translateX(4px);
+  }
+  .stepper-num {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .7rem; font-weight: 700; flex-shrink: 0;
+    background: #e2e8f0; color: var(--slate);
+    transition: all .25s; font-family: 'DM Mono', monospace;
+  }
+  .stepper-btn.done .stepper-num { background: var(--green); color: white; }
+  .stepper-btn.active .stepper-num { background: var(--navy); color: white; }
+  .stepper-btn-text { font-size: .84rem; color: #334155; font-weight: 500; }
+  .stepper-btn.active .stepper-btn-text { color: var(--navy); font-weight: 600; }
+  .stepper-btn-sub { font-size: .68rem; color: var(--slate); margin-top: 1px; }
+
+  /* ── CARD ── */
+  .workbook-card {
+    background: white; border-radius: 1rem;
+    border: 1px solid #e2e8f0;
+    padding: 2.5rem; min-height: 400px;
+  }
+  .wb-header { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.75rem; }
+  .wb-num-badge {
+    width: 60px; height: 60px; border-radius: .7rem; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    color: white;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(30,58,138,.25);
+  }
+  .wb-num-badge .big { font-size: 1.3rem; font-weight: 700; font-family: 'DM Mono', monospace; }
+  .wb-num-badge .small { font-size: .55rem; color: #93c5fd; letter-spacing: .05em; }
+  .wb-title { font-size: 1.3rem; color: var(--navy-dark); font-weight: 700; }
+  .wb-subtitle { font-size: .82rem; color: var(--slate); margin-top: .25rem; font-style: italic; }
+  .wb-tag {
+    display: inline-flex; align-items: center; gap: .3rem;
+    font-size: .7rem; font-weight: 600; padding: .2rem .6rem; border-radius: 2rem;
+    margin-top: .5rem;
+  }
+  .tag-implement { background: #d1fae5; color: #065f46; }
+
+  .wb-section { margin-bottom: 1.5rem; }
+  .wb-section-title {
+    font-size: .73rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--slate); margin-bottom: .65rem;
+    border-bottom: 1px solid #f1f5f9; padding-bottom: .3rem;
+    display: flex; align-items: center; gap: .4rem;
+  }
+  .wb-desc { font-size: .9rem; color: #475569; line-height: 1.8; }
+
+  /* checklist items */
+  .checklist { display: flex; flex-direction: column; gap: .45rem; margin-top: .75rem; }
+  .check-item {
+    display: flex; align-items: flex-start; gap: .65rem;
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: .5rem;
+    padding: .7rem 1rem; font-size: .85rem; color: #334155;
+    cursor: pointer; transition: all .2s; user-select: none;
+  }
+  .check-item:hover { background: var(--navy-pale); border-color: #bfdbfe; }
+  .check-item.checked { background: var(--green-pale); border-color: #6ee7b7; color: #065f46; }
+  .check-icon {
+    width: 18px; height: 18px; border-radius: 50%; border: 2px solid #cbd5e1;
+    flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center;
+    transition: all .2s; font-size: .6rem; color: transparent;
+  }
+  .check-item.checked .check-icon {
+    background: var(--green); border-color: var(--green); color: white;
+  }
+  .check-text { flex: 1; }
+
+  /* progress indicator in card */
+  .card-progress {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .72rem; color: var(--slate); margin-bottom: 1rem;
+    font-family: 'DM Mono', monospace;
+  }
+  .card-progress-bar {
+    flex: 1; height: 3px; background: #e2e8f0; border-radius: 2px; overflow: hidden;
+  }
+  .card-progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--green), #34d399);
+    border-radius: 2px; transition: width .4s ease;
+  }
+
+  .wb-nav-btns { display: flex; gap: .75rem; margin-top: 2rem; border-top: 1px solid #f1f5f9; padding-top: 1.5rem; align-items: center; }
+  .btn-prev, .btn-next {
+    display: inline-flex; align-items: center; gap: .4rem;
+    padding: .55rem 1.25rem; border-radius: .5rem; font-size: .85rem; cursor: pointer;
+    border: 1px solid; transition: all .18s; font-weight: 500;
+  }
+  .btn-prev { border-color: #e2e8f0; color: var(--slate); background: white; }
+  .btn-prev:hover:not(:disabled) { background: #f1f5f9; }
+  .btn-next { border-color: var(--navy); color: white; background: var(--navy); }
+  .btn-next:hover:not(:disabled) { background: var(--navy-light); box-shadow: 0 4px 12px rgba(30,58,138,.3); }
+  .btn-prev:disabled, .btn-next:disabled { opacity: .35; cursor: not-allowed; }
+  .btn-step-label { margin-left: auto; font-size: .72rem; color: var(--slate); font-family: 'DM Mono', monospace; }
+  
+  .btn-report { background: var(--gold-light); border-color: var(--gold); color: var(--navy-dark); font-weight: 700; }
+  .btn-report:hover { background: var(--gold); color: white; box-shadow: 0 4px 12px rgba(180,83,9,.25); }
+
+  /* ── REPORT / RADAR SECTION ── */
+  .report-section { background: white; display: none; }
+  .report-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 2.5rem; align-items: center; margin-top: 2rem; }
+  .radar-container { position: relative; width: 100%; max-width: 450px; margin: 0 auto; aspect-ratio: 1; }
+  .advice-box { background: #f8fafc; border-radius: 1rem; padding: 2rem; border: 1px solid #e2e8f0; }
+  .advice-item { background: white; border-left: 4px solid var(--gold-light); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .advice-item strong { color: var(--navy-dark); font-size: 0.9rem; display: block; margin-bottom: 0.3rem;}
+  .advice-item p { font-size: 0.85rem; color: #475569; margin: 0;}
+  .advice-success { border-left-color: var(--green); }
+
+  /* ── INSTRUMENTS / TOOLS ── */
+  .instruments-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+  .instrument-card {
+    background: white; border-radius: .85rem; padding: 1.75rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    transition: all .25s; cursor: default; position: relative; overflow: hidden;
+  }
+  .instrument-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, #10b981, #059669); /* Green accent for implementation */
+  }
+  .instrument-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,.1); transform: translateY(-3px); }
+  .instrument-icon { font-size: 1.5rem; margin-bottom: .75rem; }
+  .instrument-name { font-size: 1rem; font-weight: 700; color: var(--navy-dark); margin-bottom: .5rem; }
+  .instrument-desc { font-size: .85rem; color: #475569; line-height: 1.7; }
+  .instrument-domains { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1rem; }
+  .domain-tag {
+    font-size: .68rem; font-weight: 600; padding: .18rem .55rem; border-radius: 2rem;
+    background: var(--navy-pale); color: var(--navy);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy-dark); color: #64748b;
+    padding: 2.5rem 1.5rem; text-align: center;
+    font-size: .8rem; border-top: 2px solid rgba(251,191,36,.2);
+  }
+  footer strong { color: #94a3b8; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 999;
+    background: var(--navy-dark); color: white;
+    padding: .75rem 1.25rem; border-radius: .6rem;
+    font-size: .85rem; box-shadow: 0 4px 20px rgba(0,0,0,.3);
+    transform: translateY(100px); opacity: 0;
+    transition: all .3s cubic-bezier(.34,1.56,.64,1);
+    pointer-events: none; display: flex; align-items: center; gap: .5rem;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast-icon { font-size: 1rem; }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(24px); transition: all .55s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    .stepper-layout { grid-template-columns: 1fr; }
+    .stepper-nav { position: static; flex-direction: row; flex-wrap: wrap; gap: .4rem; }
+    .stepper-btn { flex: 1; min-width: 130px; transform: none !important; }
+    .hero-stats { gap: 1rem; }
+    .nav-progress { display: none; }
+    .report-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="main-nav">
+  <div class="nav-inner">
+    <div class="nav-brand">WHO <span>成癮醫療服務</span> 評估架構</div>
+    <div class="nav-right">
+      <div class="nav-progress">
+        <span id="nav-step-label">步驟 1/6</span>
+        <div class="nav-progress-bar">
+          <div class="nav-progress-fill" id="nav-progress-fill"></div>
+        </div>
+      </div>
+      <a href="WHO_MSD_MSB_Guide_13_developing.html" class="btn-return">← 返回主頁</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">🛠️ Workbook 2: Implementing Evaluations</div>
+    <h1>
+      第二階段：將規劃轉化為<br>
+      <span>具體的執行行動</span>
+    </h1>
+    <p class="hero-sub">
+      本手冊（Workbook 2）承接評估規劃的基礎，帶領您進入實際的評估落實階段。內容涵蓋資料蒐集的實務操作、資料的整理與統計分析，以及如何撰寫報告並將評估發現轉化為機構的具體改善行動。<br><br>
+      透過標準化的操作流程與嚴謹的數據解讀，這六個核心步驟將確保您的評估產出具備高度信效度與實用價值。
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-num">6</span>
+        <span class="hero-stat-label">執行步驟</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">4</span>
+        <span class="hero-stat-label">核心分析法</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">CQI</span>
+        <span class="hero-stat-label">持續品質改善</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="steps" style="background:#f0f4fb;">
+  <div class="section-inner">
+    <span class="section-label">🗂 The 6 Steps</span>
+    <h2 class="section-title reveal">執行評估的六大步驟</h2>
+    <p class="section-desc reveal">點擊左側步驟瀏覽各階段執行重點。勾選清單項目以追蹤完成進度，最後可產出您的執行診斷報告。</p>
+
+    <div class="stepper-layout">
+      <div class="stepper-nav" id="step-nav"></div>
+      <div id="step-content"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section report-section" id="report-section">
+  <div class="section-inner">
+    <span class="section-label">📊 Diagnosis Report</span>
+    <h2 class="section-title">執行階段診斷雷達圖與建議</h2>
+    <p class="section-desc">根據您在上方六大步驟中勾選的關鍵檢核項目，系統已為您產出視覺化的完成度雷達圖，並提供後續實務建議。</p>
+
+    <div class="report-grid">
+      <div class="radar-container">
+        <canvas id="radarChart"></canvas>
+      </div>
+      <div class="advice-box" id="advice-content">
+        </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="background:#f8fafc;" id="instruments">
+  <div class="section-inner">
+    <span class="section-label">📈 Analytical Methods</span>
+    <h2 class="section-title reveal">附錄：核心統計與分析工具</h2>
+    <p class="section-desc reveal">在第三步驟「分析資料」中，本手冊提到了多種常見的資料解讀方法。正確選擇工具將決定結論的準確性。</p>
+
+    <div class="instruments-grid reveal">
+      <div class="instrument-card">
+        <div class="instrument-icon">📊</div>
+        <div class="instrument-name">描述性統計 (Descriptive Stats)</div>
+        <div class="instrument-desc">
+          用於總結和描述數據集的基本特徵。最常運用於彙整個案的人口學變項或計畫的基本產出。
+        </div>
+        <div class="instrument-domains">
+          <span class="domain-tag">平均數 (Mean)</span>
+          <span class="domain-tag">中位數 (Median)</span>
+          <span class="domain-tag">標準差 (SD)</span>
+        </div>
+      </div>
+      <div class="instrument-card">
+        <div class="instrument-icon">⚖️</div>
+        <div class="instrument-name">T檢定 (T-Test)</div>
+        <div class="instrument-desc">
+          用於檢驗兩組連續型變數（如：戒斷天數、滿意度分數）的平均數是否存在統計上的顯著差異。常用於比較實驗組與對照組。
+        </div>
+        <div class="instrument-domains">
+          <span class="domain-tag">連續變項</span>
+          <span class="domain-tag">平均數比較</span>
+          <span class="domain-tag">解釋性分析</span>
+        </div>
+      </div>
+      <div class="instrument-card">
+        <div class="instrument-icon">🎲</div>
+        <div class="instrument-name">卡方檢定 (Chi-Square Test)</div>
+        <div class="instrument-desc">
+          用於檢定兩個類別變數（Nominal data，如：性別、是否復發）之間是否存在顯著關聯。評估各類別的觀測次數是否偏離期望值。
+        </div>
+        <div class="instrument-domains">
+          <span class="domain-tag">類別變項</span>
+          <span class="domain-tag">交叉比對</span>
+          <span class="domain-tag">解釋性分析</span>
+        </div>
+      </div>
+      <div class="instrument-card">
+        <div class="instrument-icon">📝</div>
+        <div class="instrument-name">質性資料分析 (Qualitative Analysis)</div>
+        <div class="instrument-desc">
+          處理開放式問卷或訪談逐字稿。透過演繹法（尋找預設主題）或歸納法（從文本生成新分類），發掘隱藏在數據背後的故事。
+        </div>
+        <div class="instrument-domains">
+          <span class="domain-tag">訪談逐字稿</span>
+          <span class="domain-tag">主題編碼</span>
+          <span class="domain-tag">演繹/歸納法</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>WHO MSD/MSB Framework Workbook 2 數位化導引</strong></p>
+  <p style="margin-top:.5rem;opacity:.6;">
+    本工具僅供學術與政策研究參考。<br>
+    Taiwan Mental Health and Addiction Policy Translation Center (TMAP)
+  </p>
+</footer>
+
+<div class="toast" id="toast">
+  <span class="toast-icon">✅</span>
+  <span id="toast-msg">已標記完成！</span>
+</div>
+
+<script>
+/* ──────────────────────────────────────
+   DATA (Workbook 2 specific)
+─────────────────────────────────────── */
+const stepsData = [
+  {
+    id: 1,
+    title: "準備資料蒐集",
+    sub: "Prepare for data collection",
+    desc: "在正式開始蒐集數據前，必須妥善處理倫理與隱私問題，並建立穩健的資料管理與前導測試計畫，以保護受試者並確保資料品質。",
+    points: [
+      "取得倫理委員會審查核准與參與者的知情同意 (Informed Consent)",
+      "建立嚴格的保密協定，確保資料匿名化與安全實體存放",
+      "指定專責的資料協調員並制定標準化資料管理流程",
+      "進行前導測試 (Pilot test) 以確認問卷與流程的可行性",
+      "將所有決策整合並撰寫最終版本的書面評估計畫"
+    ]
+  },
+  {
+    id: 2,
+    title: "蒐集資料",
+    sub: "Collect data",
+    desc: "落實標準化的資料蒐集程序，確保數據的信度與效度，並建立機制定期將原始資料轉化為可供電腦分析的數位格式。",
+    points: [
+      "對所有資料蒐集人員進行標準化施測程序的培訓",
+      "以一致且客觀的方式向個案施測或進行訪談",
+      "在資料建檔前，定期檢查回收表單中的遺漏值 (Missing data)",
+      "將編輯與清理後的資料安全地輸入至電腦資料庫中",
+      "持續監控蒐集過程，即時解決人員或流程障礙"
+    ]
+  },
+  {
+    id: 3,
+    title: "分析資料",
+    sub: "Analyse data",
+    desc: "數據需要解讀才有意義。依據研究問題的性質，選擇合適的描述性、解釋性統計方法或質性資料分析技術來處理您的數據。",
+    points: [
+      "確認分析目標為描述性 (Descriptive) 或是解釋性 (Explanatory)",
+      "運用平均數、中位數、標準差等指標描述樣本的基本特徵",
+      "針對類別變項，正確使用卡方檢定 (Chi-square test) 檢驗關聯性",
+      "針對連續變項，正確使用 T檢定 (t-test) 比較各組別差異",
+      "採用演繹或歸納法，對開放式回饋與訪談內容進行主題編碼"
+    ]
+  },
+  {
+    id: 4,
+    title: "報告結果",
+    sub: "Report results",
+    desc: "將複雜的分析結果轉化為利害關係人容易理解的資訊。需要針對不同受眾（如主管、一線人員）調整報告的形式與深度。",
+    points: [
+      "精確設定目標受眾，並決定最適合的報告形式（書面或口頭）",
+      "撰寫 1-2 頁的執行摘要 (Executive Summary) 供高階主管快速閱讀",
+      "在主報告中完整呈現研究背景、方法、結果發現與具體建議",
+      "善用長條圖、圓餅圖等視覺化工具呈現複雜數據",
+      "規劃口頭簡報或說明會，與團隊直接分享核心發現"
+    ]
+  },
+  {
+    id: 5,
+    title: "應用所學",
+    sub: "Make use of what was learned",
+    desc: "評估的最終目的在於帶來改變。這一步需要將評估發現轉化為具體的服務優化行動，讓研究不再只是紙上談兵。",
+    points: [
+      "與實際提供服務的一線工作人員深入討論評估結果",
+      "檢視數據結果是否達成原計畫邏輯模型設定的目標",
+      "針對流程落差或成效不佳處，提出具體的服務改善行動方案",
+      "適當地向參與計畫的個案或社區回饋評估帶來的正面影響",
+      "持續監測新推動的改善方案是否發揮預期效果"
+    ]
+  },
+  {
+    id: 6,
+    title: "重新開始",
+    sub: "Start again",
+    desc: "評估是一個生生不息的循環過程。完成一次評估後，應利用現有經驗與新發現的問題，啟動下一個階段的評估規劃。",
+    points: [
+      "團隊共同反思本次評估經驗，記錄成功與需改進之處",
+      "根據本次的評估結果，提出新的、具延伸性的服務研究問題",
+      "決定下一次要進行哪種類型（如：成效、滿意度）的評估",
+      "參閱相對應的評估專門手冊 (Workbooks 3-8) 進行深入規劃",
+      "將評估思維深植於機構文化中，形成持續品質改善 (CQI) 的常態"
+    ]
+  }
+];
+
+/* ──────────────────────────────────────
+   STATE
+─────────────────────────────────────── */
+let currentStep = 0;
+const checked = stepsData.map(s => s.points.map(() => false));
+let radarChartInstance = null;
+
+/* ──────────────────────────────────────
+   HELPERS
+─────────────────────────────────────── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function updateNavProgress() {
+  const pct = ((currentStep + 1) / stepsData.length) * 100;
+  document.getElementById('nav-progress-fill').style.width = pct + '%';
+  document.getElementById('nav-step-label').textContent = `步驟 ${currentStep + 1}/${stepsData.length}`;
+}
+
+function isDone(stepIdx) {
+  return checked[stepIdx].every(Boolean);
+}
+
+/* ──────────────────────────────────────
+   RENDER NAV
+─────────────────────────────────────── */
+function renderStepperNav() {
+  const nav = document.getElementById('step-nav');
+  nav.innerHTML = stepsData.map((step, i) => {
+    const done = isDone(i);
+    const cls = i === currentStep ? 'active' : done ? 'done' : '';
+    const icon = done ? '✓' : step.id;
+    return `
+      <button class="stepper-btn ${cls}" onclick="showStep(${i})">
+        <div class="stepper-num">${icon}</div>
+        <div>
+          <div class="stepper-btn-text">${step.title}</div>
+          <div class="stepper-btn-sub">${step.sub}</div>
+        </div>
+      </button>`;
+  }).join('');
+}
+
+/* ──────────────────────────────────────
+   RENDER CARD
+─────────────────────────────────────── */
+function renderCard() {
+  const step = stepsData[currentStep];
+  const doneCount = checked[currentStep].filter(Boolean).length;
+  const total = step.points.length;
+  const pct = total > 0 ? Math.round(doneCount / total * 100) : 0;
+
+  const checklistHtml = step.points.map((p, i) => {
+    const isChecked = checked[currentStep][i];
+    return `
+      <div class="check-item ${isChecked ? 'checked' : ''}" onclick="toggleCheck(${currentStep}, ${i})">
+        <div class="check-icon">${isChecked ? '✓' : ''}</div>
+        <span class="check-text">${p}</span>
+      </div>`;
+  }).join('');
+
+  const nextBtnHtml = currentStep === stepsData.length - 1 
+    ? `<button class="btn-next btn-report" onclick="generateReport()">📊 產生執行診斷報告</button>`
+    : `<button class="btn-next" onclick="showStep(${currentStep + 1})">下一步 →</button>`;
+
+  document.getElementById('step-content').innerHTML = `
+    <div class="workbook-card" id="wb-card">
+      <div class="wb-header">
+        <div class="wb-num-badge">
+          <div class="small">STEP</div>
+          <div class="big">${step.id}</div>
+        </div>
+        <div>
+          <div class="wb-title">${step.title}</div>
+          <div class="wb-subtitle">${step.sub}</div>
+          <span class="wb-tag tag-implement">執行核心階段</span>
+        </div>
+      </div>
+
+      <div class="card-progress">
+        <span>${doneCount}/${total} 項已完成</span>
+        <div class="card-progress-bar">
+          <div class="card-progress-fill" style="width:${pct}%"></div>
+        </div>
+        <span>${pct}%</span>
+      </div>
+
+      <div class="wb-section">
+        <div class="wb-section-title">💡 執行重點</div>
+        <p class="wb-desc">${step.desc}</p>
+      </div>
+
+      <div class="wb-section">
+        <div class="wb-section-title">✅ 關鍵檢核清單（點擊勾選）</div>
+        <div class="checklist">${checklistHtml}</div>
+      </div>
+
+      <div class="wb-nav-btns">
+        <button class="btn-prev" onclick="showStep(${currentStep - 1})" ${currentStep === 0 ? 'disabled' : ''}>
+          ← 上一步
+        </button>
+        ${nextBtnHtml}
+        <span class="btn-step-label">${currentStep + 1} / ${stepsData.length}</span>
+      </div>
+    </div>`;
+}
+
+/* ──────────────────────────────────────
+   INTERACTIONS
+─────────────────────────────────────── */
+function toggleCheck(stepIdx, itemIdx) {
+  checked[stepIdx][itemIdx] = !checked[stepIdx][itemIdx];
+  const wasAll = isDone(stepIdx);
+  renderCard();
+  renderStepperNav();
+  if (wasAll) showToast(`步驟 ${stepIdx + 1} 全部完成 🎉`);
+}
+
+function showStep(idx) {
+  if (idx < 0 || idx >= stepsData.length) return;
+  currentStep = idx;
+  renderStepperNav();
+  renderCard();
+  updateNavProgress();
+  if (window.innerWidth <= 768) {
+    document.getElementById('step-content').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+/* ──────────────────────────────────────
+   RADAR CHART & REPORT GENERATION
+─────────────────────────────────────── */
+function generateReport() {
+  const reportSection = document.getElementById('report-section');
+  reportSection.style.display = 'block';
+  
+  setTimeout(() => {
+    reportSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+
+  const scores = checked.map(stepChecks => {
+    const total = stepChecks.length;
+    const done = stepChecks.filter(Boolean).length;
+    return total === 0 ? 0 : Math.round((done / total) * 100);
+  });
+
+  const ctx = document.getElementById('radarChart').getContext('2d');
+  
+  if (radarChartInstance) {
+    radarChartInstance.destroy();
+  }
+
+  radarChartInstance = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['1.準備', '2.蒐集', '3.分析', '4.報告', '5.應用', '6.重啟'],
+      datasets: [{
+        label: '步驟完成度 (%)',
+        data: scores,
+        backgroundColor: 'rgba(5, 150, 105, 0.15)', // Green pale
+        borderColor: 'rgba(5, 150, 105, 0.8)',      // Green
+        pointBackgroundColor: 'rgba(251, 191, 36, 1)', // Gold
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgba(251, 191, 36, 1)'
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        r: {
+          angleLines: { color: 'rgba(0, 0, 0, 0.05)' },
+          grid: { color: 'rgba(0, 0, 0, 0.05)' },
+          pointLabels: {
+            font: { family: "'Noto Sans TC', sans-serif", size: 12, weight: '600' },
+            color: '#475569'
+          },
+          ticks: {
+            stepSize: 20, min: 0, max: 100, backdropColor: 'transparent',
+            font: { size: 10 }
+          }
+        }
+      },
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
+
+  const adviceContent = document.getElementById('advice-content');
+  let adviceHtml = `<h3 style="color: var(--navy-dark); font-size: 1.1rem; margin-bottom: 1.25rem;">系統診斷分析</h3>`;
+  
+  const lowScores = scores.map((score, index) => ({ score, index })).filter(item => item.score < 100);
+
+  if (lowScores.length === 0) {
+    adviceHtml += `
+      <div class="advice-item advice-success">
+        <strong>✨ 完美執行，成功落實！</strong>
+        <p>您的評估執行流程非常完整，六大步驟的關鍵要素皆已到位。這代表您已經將評估結果成功轉化為實務應用，並具備優良的持續品質改善（CQI）文化，請繼續保持並邁向進階專門評估！</p>
+      </div>`;
+  } else {
+    adviceHtml += `
+      <p style="font-size:0.9rem; color:var(--slate); margin-bottom:1rem;">
+        您目前還有 <strong>${lowScores.length}</strong> 個維度尚未完全落實。根據您的勾選狀況，系統優先提供以下實務建議：
+      </p>`;
+    
+    // Workbook 2 專屬建議庫
+    const adviceTexts = [
+      "資料蒐集的準備階段尚有缺漏。強烈建議在開始蒐集資料前，確保已通過倫理審查，並已實施前導測試以減少後續問卷作廢的風險。",
+      "資料蒐集過程可能缺乏標準化或品管機制。請確保所有訪員受過一致的訓練，並建立定期檢核遺漏值 (Missing data) 的流程。",
+      "資料分析階段的規劃未完全落實。建議與具備統計或質性分析經驗的研究人員確認，所選用的檢定方法 (如 t檢定、卡方檢定) 是否符合資料特性。",
+      "報告與溝通的準備不足。若只產出冗長學術報告，決策者可能無法吸收。請務必準備 1-2 頁的執行摘要，並善用圖表視覺化核心數據。",
+      "評估結果未能有效轉化為實務行動。評估的目的在於改善服務，請儘速召開跨部門團隊會議，根據數據找出可以立即優化的介入流程。",
+      "未能延續評估的循環。建議趁著團隊對本次評估還有記憶，立即討論下一個核心研究問題，讓「持續品質改善」成為機構常態運作的一部分。"
+    ];
+
+    let count = 0;
+    lowScores.sort((a, b) => a.score - b.score).forEach(item => {
+      if (count >= 3) return; 
+      count++;
+      const stepName = stepsData[item.index].title;
+      adviceHtml += `
+        <div class="advice-item">
+          <strong>需補強：${item.index + 1}. ${stepName} (完成度 ${item.score}%)</strong>
+          <p>${adviceTexts[item.index]}</p>
+        </div>`;
+    });
+  }
+
+  adviceContent.innerHTML = adviceHtml;
+}
+
+/* ──────────────────────────────────────
+   SCROLL REVEAL
+─────────────────────────────────────── */
+function initReveal() {
+  const els = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+  }, { threshold: .12 });
+  els.forEach(el => obs.observe(el));
+}
+
+/* ──────────────────────────────────────
+   INIT
+─────────────────────────────────────── */
+window.onload = () => {
+  renderStepperNav();
+  renderCard();
+  updateNavProgress();
+  initReveal();
+};
+</script>
+</body>
+</html>
