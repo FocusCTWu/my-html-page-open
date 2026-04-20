@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TMAP | 藥酒癮指定機構服務量能地圖</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <style>
+        /* 確保 Leaflet popup 內的樣式正常 */
+        .leaflet-popup-content-wrapper { border-radius: 0.5rem; }
+        .leaflet-popup-content { margin: 16px; font-family: inherit; }
+    </style>
+</head>
+<body class="flex h-screen w-screen overflow-hidden bg-slate-50 text-slate-800 font-sans">
+
+    <aside class="w-80 flex flex-col bg-white border-r border-slate-200 shadow-lg z-[1000] relative">
+        <div class="p-5 border-b border-slate-200 bg-slate-800 text-white">
+            <h1 class="text-lg font-bold tracking-wide">TMAP 政策評估系統</h1>
+            <p class="text-xs text-slate-300 mt-1">藥酒癮醫療服務空間分布查詢</p>
+        </div>
+
+        <div class="p-4 border-b border-slate-200 bg-slate-50">
+            <div id="status-message" class="text-sm font-medium text-blue-600 mb-2 flex items-center">
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                正在嘗試自動讀取資料...
+            </div>
+            <div class="mt-2">
+                <label class="block text-xs text-slate-500 mb-1">備用手動上傳 (若自動讀取失敗)</label>
+                <input type="file" id="csvFileInput" accept=".csv" class="block w-full text-sm text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
+            </div>
+        </div>
+
+        <div class="p-4 flex-1 overflow-y-auto">
+            <h2 class="text-sm font-bold text-slate-700 mb-3 uppercase tracking-wider">資料篩選</h2>
+            
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-slate-700 mb-1">縣市</label>
+                <select id="countyFilter" class="w-full rounded-md border border-slate-300 p-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">
+                    <option value="all">全台灣 (載入中...)</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-2">要求具備之服務 (AND邏輯)</label>
+                <div id="serviceFilters" class="space-y-2 text-sm">
+                    <p class="text-slate-400 italic text-xs">等待資料載入中...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-slate-200 bg-white">
+            <div class="flex justify-between items-center mb-3 text-sm">
+                <span class="text-slate-500">符合條件機構：</span>
+                <span id="resultCount" class="font-bold text-lg text-blue-600">0</span>
+            </div>
+            <button id="resetBtn" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-md transition-colors text-sm">
+                重設所有篩選
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 relative z-0">
+        <div id="map" class="h-full w-full"></div>
+    </main>
+
+    <script>
+        // 全局變數
+        let map, markerClusterGroup;
+        let globalData = [];
+        let serviceColumns = [];
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+            setupEventListeners();
+            autoLoadCSV();
+        });
+
+        // 1. 初始化地圖
+        function initMap() {
+            map = L.map('map').setView([23.6978, 120.9605], 8); // 預設視角：台灣中心
+            
+            // 使用 OpenStreetMap 底圖
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // 初始化群聚圖層
+            markerClusterGroup = L.markerClusterGroup({
+                chunkedLoading: true,
+                spiderfyOnMaxZoom: true
+            });
+            map.addLayer(markerClusterGroup);
+        }
+
+        // 2. 自動讀取 CSV
+        function autoLoadCSV() {
+            const fileName = 'drug_org_list_all_1150313.csv';
+            const statusEl = document.getElementById('status-message');
+
+            fetch(fileName)
+                .then(response => {
+                    if (!response.ok) throw new Error('網路回應錯誤或檔案不存在');
+                    return response.text();
+                })
+                .then(csvText => {
+                    statusEl.innerHTML = `<span class="text-green-600 font-bold">✔ 自動讀取成功</span>`;
+                    parseAndProcessCSV(csvText);
+                })
+                .catch(error => {
+                    console.warn("自動讀取失敗，請手動上傳：", error);
+                    statusEl.innerHTML = `<span class="text-red-500 font-bold">✘ 自動讀取失敗，請手動上傳</span>`;
+                });
+        }
+
+        // 3. 事件監聽 (手動上傳與篩選器變更)
+        function setupEventListeners() {
+            // 手動上傳
+            document.getElementById('csvFileInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const statusEl = document.getElementById('status-message');
+                statusEl.innerHTML = `<span class="text-blue-600">正在處理上傳檔案...</span>`;
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    parseAndProcessCSV(event.target.result);
+                    statusEl.innerHTML = `<span class="text-green-600 font-bold">✔ 手動載入成功</span>`;
+                };
+                reader.readAsText(file);
+            });
+
+            // 篩選器觸發地圖更新
+            document.getElementById('countyFilter').addEventListener('change', renderMap);
+            // reset 按鈕
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                document.getElementById('countyFilter').value = 'all';
+                document.querySelectorAll('#serviceFilters input').forEach(cb => cb.checked = false);
+                renderMap();
+            });
+        }
+
+        // 4. 解析 CSV 並建構 UI
+        function parseAndProcessCSV(csvString) {
+            Papa.parse(csvString, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    globalData = results.data;
+                    buildFilters(globalData);
+                    renderMap();
+                }
+            });
+        }
+
+        // 5. 動態建立篩選器 (縣市、服務類別)
+        function buildFilters(data) {
+            const counties = new Set();
+            const columns = Object.keys(data[0] || {});
+            
+            // 抓取具有 "藥癮_" 或 "酒癮_" 前綴的欄位作為服務篩選器
+            serviceColumns = columns.filter(col => col.startsWith('藥癮_') || col.startsWith('酒癮_'));
+
+            data.forEach(row => {
+                if (row['縣市']) counties.add(row['縣市']);
+            });
+
+            // 填充縣市選單
+            const countySelect = document.getElementById('countyFilter');
+            countySelect.innerHTML = '<option value="all">全台灣</option>';
+            Array.from(counties).sort().forEach(county => {
+                countySelect.innerHTML += `<option value="${county}">${county}</option>`;
+            });
+
+            // 填充服務 Checkbox
+            const serviceContainer = document.getElementById('serviceFilters');
+            serviceContainer.innerHTML = '';
+            serviceColumns.forEach((service, index) => {
+                // 美化標籤名稱，移除底線
+                const displayName = service.replace('_', ' - ');
+                const html = `
+                    <label class="flex items-start space-x-2 cursor-pointer hover:bg-slate-100 p-1 rounded">
+                        <input type="checkbox" value="${service}" class="service-checkbox mt-1 rounded text-blue-600 focus:ring-blue-500">
+                        <span class="text-slate-600 leading-tight">${displayName}</span>
+                    </label>
+                `;
+                serviceContainer.innerHTML += html;
+            });
+
+            // 綁定動態生成的 Checkbox 事件
+            document.querySelectorAll('.service-checkbox').forEach(cb => {
+                cb.addEventListener('change', renderMap);
+            });
+        }
+
+        // 6. 依據篩選條件繪製地圖
+        function renderMap() {
+            if (!globalData || globalData.length === 0) return;
+
+            // 清空當前群聚圖層
+            markerClusterGroup.clearLayers();
+
+            // 獲取當前篩選條件
+            const selectedCounty = document.getElementById('countyFilter').value;
+            const checkedServices = Array.from(document.querySelectorAll('.service-checkbox:checked')).map(cb => cb.value);
+
+            let validCount = 0;
+            const bounds = [];
+
+            globalData.forEach(row => {
+                // 檢查座標是否存在
+                const lat = parseFloat(row['緯度 (lat)'] || row['緯度'] || row['lat']);
+                const lng = parseFloat(row['經度 (lng)'] || row['經度'] || row['lng']);
+                if (isNaN(lat) || isNaN(lng)) return;
+
+                // 條件 1: 縣市比對
+                if (selectedCounty !== 'all' && row['縣市'] !== selectedCounty) return;
+
+                // 條件 2: 服務比對 (AND 邏輯：必須具備所有勾選的服務，值為 'V')
+                const hasAllServices = checkedServices.every(service => row[service] === 'V');
+                if (!hasAllServices) return;
+
+                // 產出地圖標記
+                validCount++;
+                bounds.push([lat, lng]);
+
+                // 建立 Popup 內容 (優化視覺排版)
+                let popupHtml = `
+                    <div class="min-w-[200px]">
+                        <h3 class="font-bold text-blue-800 text-base mb-1 border-b pb-1">${row['機構名稱'] || '未命名機構'}</h3>
+                        <div class="text-sm space-y-1 mt-2 text-slate-700">
+                            <p><b>📍 縣市：</b>${row['縣市'] || '未知'}</p>
+                            <p><b>🏠 地址：</b>${row['機構地址'] || '無'}</p>
+                            <p><b>📞 電話：</b>${row['聯絡電話'] || '無'}</p>
+                        </div>
+                        <div class="mt-3">
+                            <b class="text-xs text-slate-500 mb-1 block">提供之重點服務：</b>
+                            <div class="flex flex-wrap gap-1">
+                `;
+                
+                // 標示該機構有提供的服務 (Badge)
+                serviceColumns.forEach(service => {
+                    if (row[service] === 'V') {
+                        const shortName = service.split('_')[1] || service;
+                        const bgColor = service.startsWith('藥癮') ? 'bg-indigo-100 text-indigo-700' : 'bg-orange-100 text-orange-700';
+                        popupHtml += `<span class="px-2 py-0.5 text-[10px] rounded ${bgColor} border border-white font-medium">${shortName}</span>`;
+                    }
+                });
+
+                popupHtml += `</div></div></div>`;
+
+                const marker = L.marker([lat, lng]);
+                marker.bindPopup(popupHtml);
+                markerClusterGroup.addLayer(marker);
+            });
+
+            // 更新計數器
+            document.getElementById('resultCount').textContent = validCount;
+
+            // 動態調整地圖視角以聚焦結果
+            if (bounds.length > 0) {
+                map.fitBounds(L.latLngBounds(bounds), { padding: [50, 50], maxZoom: 14 });
+            }
+        }
+    </script>
+</body>
+</html>
