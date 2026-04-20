@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TMAP | 美沙冬跨區給藥資訊地圖</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <style>
+        html, body { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; }
+        body { display: flex; font-family: "Microsoft JhengHei", "PingFang TC", sans-serif; background: #f4f7f6; }
+        
+        #sidebar {
+            width: 350px; height: 100vh; background: #fff; border-right: 1px solid #d1d5db;
+            padding: 20px; box-shadow: 4px 0 15px rgba(0,0,0,0.05); z-index: 1001;
+            overflow-y: auto; flex-shrink: 0;
+        }
+
+        #map { flex-grow: 1; height: 100vh; background: #e5e7eb; }
+
+        h2 { font-size: 1.25rem; color: #1e40af; margin: 0 0 15px 0; border-bottom: 3px solid #1e40af; padding-bottom: 10px; }
+        .section { margin-bottom: 20px; }
+        .section-title { font-size: 0.95rem; font-weight: bold; color: #374151; margin-bottom: 10px; display: block; }
+
+        .layer-control { background: #eff6ff; padding: 12px; border-radius: 8px; border: 1px solid #bfdbfe; }
+        .checkbox-item { display: flex; align-items: center; margin-bottom: 8px; cursor: pointer; font-size: 14px; color: #1e3a8a; }
+        .checkbox-item input { margin-right: 10px; width: 18px; height: 18px; }
+
+        .upload-box { border: 2px dashed #93c5fd; padding: 15px; border-radius: 8px; text-align: center; background: #f8fafc; transition: 0.2s; }
+        .upload-box:hover { background: #f1f5f9; border-color: #3b82f6; }
+        input[type="file"] { width: 100%; font-size: 12px; margin-top: 10px; cursor: pointer; }
+
+        .btn-reset { margin-top: 15px; width: 100%; background: #ef4444; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-reset:hover { background: #dc2626; }
+
+        /* 彈窗樣式優化 */
+        .mmt-popup { width: 320px; font-size: 13px; line-height: 1.6; }
+        .mmt-title { font-size: 16px; font-weight: bold; color: #1e40af; border-bottom: 2px solid #3b82f6; margin-bottom: 8px; padding-bottom: 4px; }
+        .mmt-tag { display: inline-block; background: #dbeafe; color: #1e40af; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-bottom: 8px; }
+        .mmt-grid { display: grid; grid-template-columns: 80px 1fr; gap: 4px; margin-bottom: 10px; }
+        .mmt-label { color: #6b7280; font-weight: bold; }
+        .time-box { background: #f1f5f9; padding: 8px; border-radius: 4px; border-left: 3px solid #3b82f6; white-space: pre-line; margin-top: 5px; }
+        .fee-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+        .fee-table td { border: 1px solid #e5e7eb; padding: 4px 8px; }
+        .fee-header { background: #f9fafb; font-weight: bold; color: #4b5563; }
+    </style>
+</head>
+<body>
+
+<div id="sidebar">
+    <h2>美沙冬跨區給藥查詢</h2>
+    
+    <div class="section">
+        <span class="section-title">📍 圖層顯示控制</span>
+        <div class="layer-control">
+            <label class="checkbox-item">
+                <input type="checkbox" id="toggle-county" onchange="toggleLayer('county')"> 顯示縣市邊界
+            </label>
+            <label class="checkbox-item">
+                <input type="checkbox" id="toggle-town" onchange="toggleLayer('town')"> 顯示鄉鎮市區邊界
+            </label>
+        </div>
+    </div>
+
+    <div class="section">
+        <span class="section-title">📂 手動匯入行政界線 (JSON)</span>
+        <div class="upload-box">
+            <label style="font-size: 12px; font-weight: bold;">1. 縣市界線：</label>
+            <input type="file" accept=".json,.geojson" onchange="loadBoundary(event, 'county')">
+            <label style="font-size: 12px; font-weight: bold; margin-top:10px; display:block;">2. 鄉鎮市區界線：</label>
+            <input type="file" accept=".json,.geojson" onchange="loadBoundary(event, 'town')">
+        </div>
+    </div>
+
+    <div class="section">
+        <span class="section-title">📊 手動匯入給藥資訊 (CSV)</span>
+        <div class="upload-box">
+            <input type="file" id="csv-input" accept=".csv" onchange="handleMMTCSV(event)">
+            <p style="font-size: 11px; color: #64748b; margin-top: 8px;">若無法自動載入，請選擇包含給藥時間、費用與座標之 CSV 檔案</p>
+        </div>
+        <button class="btn-reset" onclick="clearMarkers()">清除地圖點位</button>
+    </div>
+
+    <div style="margin-top: 40px; font-size: 12px; color: #94a3b8; line-height: 1.6;">
+        <b>TMAP 政策轉譯研究中心</b><br>
+        本工具供學術研究與政策評估使用，請確保匯入資料之準確性。
+    </div>
+</div>
+
+<div id="map"></div>
+
+<script>
+    const map = L.map('map').setView([23.6, 121.0], 7);
+
+    // 底圖設定
+    const baseMaps = {
+        "標準地圖 (OSM)": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }),
+        "台灣電子地圖 (NLSC)": L.tileLayer('https://wmts.nlsc.gov.tw/wmts/EMAP/default/GoogleMapsCompatible/{z}/{y}/{x}', { attribution: '© NLSC' })
+    };
+    baseMaps["標準地圖 (OSM)"].addTo(map);
+    L.control.layers(baseMaps).addTo(map);
+
+    const layerGroups = {
+        county: L.layerGroup(),
+        town: L.layerGroup(),
+        markers: L.layerGroup().addTo(map)
+    };
+
+    const styles = {
+        county: { color: "#1e3a8a", weight: 2.5, fillColor: "#1e40af", fillOpacity: 0.05 },
+        town: { color: "#3b82f6", weight: 1, dashArray: '4, 4', fillColor: "#93c5fd", fillOpacity: 0.03 }
+    };
+
+    // 建立放大的 Marker 圖標 (為預設圖標的 1.5 倍)
+    const largeIcon = new L.Icon({
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconSize: [37, 61],
+        iconAnchor: [18, 61],
+        popupAnchor: [1, -45],
+        shadowSize: [61, 61]
+    });
+
+    function toggleLayer(type) {
+        if (document.getElementById(`toggle-${type}`).checked) {
+            layerGroups[type].addTo(map);
+        } else {
+            map.removeLayer(layerGroups[type]);
+        }
+    }
+
+    function loadBoundary(event, type) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                layerGroups[type].clearLayers();
+                L.geoJSON(data, {
+                    style: styles[type],
+                    onEachFeature: (f, l) => l.bindPopup(`區域：${f.properties.COUNTYNAME || f.properties.TOWNNAME}`)
+                }).addTo(layerGroups[type]);
+                document.getElementById(`toggle-${type}`).checked = true;
+                layerGroups[type].addTo(map);
+            } catch (err) { alert("JSON 格式錯誤"); }
+        };
+        reader.readAsText(file);
+    }
+
+    // 處理手動上傳的 CSV
+    function handleMMTCSV(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                processCSVData(results.data, false);
+            }
+        });
+    }
+
+    // 清洗並傳遞 CSV 資料 (抽出共用邏輯)
+    function processCSVData(data, isAuto = false) {
+        const cleanedData = data.map(row => {
+            const newRow = {};
+            for (let key in row) {
+                const cleanKey = key.replace(/[\r\n\s\"]/g, '');
+                newRow[cleanKey] = row[key];
+            }
+            return newRow;
+        });
+        addMMTMarkers(cleanedData, isAuto);
+    }
+
+    // 加入 Markers 
+    function addMMTMarkers(data, isAuto) {
+        layerGroups.markers.clearLayers();
+        const bounds = [];
+
+        data.forEach((item) => {
+            const lat = parseFloat(item["緯度(lat)"] || item["緯度"]);
+            const lng = parseFloat(item["經度(lng)"] || item["經度"]);
+
+            if (!isNaN(lat) && !isNaN(lng)) {
+                // 使用放大版的 icon
+                const marker = L.marker([lat, lng], { icon: largeIcon });
+                
+                const popupHTML = `
+                    <div class="mmt-popup">
+                        <div class="mmt-title">${item["機構名稱"] || '未知機構'}</div>
+                        <div class="mmt-tag">${item["縣市別"] || ''} | 區碼: ${item["區碼"] || '-'}</div>
+                        
+                        <div class="mmt-grid">
+                            <div class="mmt-label">地址</div><div>${item["機構地址"] || '-'}</div>
+                            <div class="mmt-label">聯絡電話</div><div>${item["聯絡電話"] || '-'}${item["分機"] ? ' 分機:'+item["分機"] : ''}</div>
+                        </div>
+
+                        <div class="mmt-label">🕒 平日給藥時間</div>
+                        <div class="time-box">${item["平日給藥時間"] || '未提供'}</div>
+                        
+                        <div class="mmt-label">📅 假日給藥時間</div>
+                        <div class="time-box">${item["假日給藥時間"] || '未提供'}</div>
+
+                        <div class="mmt-label">💰 費用說明</div>
+                        <table class="fee-table">
+                            <tr class="fee-header"><td>項目</td><td>金額</td></tr>
+                            <tr><td>跨區服務費</td><td>${item["跨區給藥服務費"] || '-'}</td></tr>
+                            <tr><td>跨區評估費</td><td>${item["跨區給藥評估費"] || '-'}</td></tr>
+                            <tr><td>轉入掛號費</td><td>${item["轉入掛號費"] || '-'}</td></tr>
+                            <tr><td>轉出掛號費</td><td>${item["轉出掛號費"] || '-'}</td></tr>
+                        </table>
+
+                        ${item["注意事項"] ? `<div class="mmt-label" style="margin-top:10px;">⚠️ 注意事項</div><div style="font-size:11px; color:#b91c1c;">${item["注意事項"]}</div>` : ''}
+                    </div>
+                `;
+                
+                marker.bindPopup(popupHTML);
+                layerGroups.markers.addLayer(marker);
+                bounds.push([lat, lng]);
+            }
+        });
+
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [50, 50] });
+            if (!isAuto) alert(`已成功匯入 ${bounds.length} 處美沙冬給藥點`);
+        } else {
+            if (!isAuto) alert("錯誤：CSV 中找不到有效的座標（緯度/經度）。請確認欄位名稱與資料內容。");
+        }
+    }
+
+    function clearMarkers() {
+        layerGroups.markers.clearLayers();
+    }
+
+    // ==========================================
+    // 自動載入機制 (抓不到即略過，不影響手動功能)
+    // ==========================================
+    async function autoLoadGeoJSON(filename, type) {
+        try {
+            const response = await fetch(filename);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            L.geoJSON(data, {
+                style: styles[type],
+                onEachFeature: (f, l) => l.bindPopup(`區域：${f.properties.COUNTYNAME || f.properties.TOWNNAME}`)
+            }).addTo(layerGroups[type]);
+            document.getElementById(`toggle-${type}`).checked = true;
+            layerGroups[type].addTo(map);
+            console.log(`✅ 自動載入 ${filename} 成功`);
+        } catch (error) {
+            console.warn(`⚠️ 無法自動載入 ${filename} (可能是找不到檔案)，請改用手動上傳。`);
+        }
+    }
+
+    async function autoLoadCSVFile(filename) {
+        try {
+            const response = await fetch(filename);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const csvText = await response.text();
+            Papa.parse(csvText, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    processCSVData(results.data, true); // true 表示是自動載入，不跳出 alert
+                    console.log(`✅ 自動載入 ${filename} 成功`);
+                }
+            });
+        } catch (error) {
+            console.warn(`⚠️ 無法自動載入 ${filename} (可能是找不到檔案)，請改用手動上傳。`);
+        }
+    }
+
+    // 當網頁載入完成後執行自動載入
+    window.addEventListener('DOMContentLoaded', () => {
+        autoLoadGeoJSON('COUNTY_MOI_1140318.json', 'county');
+        autoLoadGeoJSON('TOWN_MOI_1140318.json', 'town');
+        autoLoadCSVFile('cross_drug_org_list_1150206.csv');
+    });
+
+</script>
+
+</body>
+</html>
