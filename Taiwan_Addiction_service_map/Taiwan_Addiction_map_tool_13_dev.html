@@ -104,7 +104,7 @@
         let map, markerClusterGroup;
         let globalData = [];
         let serviceColumns = [];
-        let isFirstLoad = true;
+        let isInitialLoad = true; // 新增：用來判斷是否為第一次載入
 
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
@@ -117,7 +117,7 @@
         function initMap() {
             map = L.map('map', {
                 zoomControl: false // 移除預設放大縮小，稍後移至右下角以免被側邊欄擋住
-            }).setView([25.0330, 121.5654], 12);
+            }).setView([25.0330, 121.5654], 12); // 修改：改為台北市經緯度，縮放級別設為 12
             
             // 重新加入縮放控制在右下角
             L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -196,9 +196,16 @@
 
             // 篩選器變更觸發地圖更新
             document.getElementById('countyFilter').addEventListener('change', renderMap);
+            
+            // 重設按鈕
             document.getElementById('resetBtn').addEventListener('click', () => {
                 document.getElementById('countyFilter').value = 'all';
                 document.querySelectorAll('.service-checkbox').forEach(cb => cb.checked = false);
+                
+                // 將標記設回 true，並手動飛回台北，接著再渲染地圖
+                isInitialLoad = true; 
+                map.setView([25.0330, 121.5654], 12); 
+                
                 renderMap();
             });
         }
@@ -278,6 +285,7 @@
                 validCount++;
                 bounds.push([lat, lng]);
 
+                // 患者友善的 Popup 排版
                 let popupHtml = `
                     <div class="min-w-[220px]">
                         <h3 class="font-bold text-blue-800 text-[17px] mb-2 leading-tight">${row['機構名稱'] || '未命名機構'}</h3>
@@ -311,22 +319,22 @@
 
             document.getElementById('resultCount').textContent = validCount;
 
-            // --- 視角調整邏輯 ---
-            const currentCounty = document.getElementById('countyFilter').value;
-
-            // 只有在「不是第一次載入」或「使用者選擇了特定縣市」時才縮放
-            if (bounds.length > 0 && (!isFirstLoad || currentCounty !== 'all')) {
-                const isMobile = window.innerWidth < 768;
-                map.fitBounds(L.latLngBounds(bounds), { 
-                    paddingTopLeft: isMobile ? [10, 60] : [20, 20],
-                    paddingBottomRight: [20, 20],
-                    maxZoom: 15 
-                });
+            // 調整視角
+            if (bounds.length > 0) {
+                if (isInitialLoad) {
+                    // 如果是剛進頁面的第一次渲染，什麼都不做，保留在台北的視角
+                    isInitialLoad = false;
+                } else {
+                    // 使用者操作後的渲染，才進行縮放
+                    const isMobile = window.innerWidth < 768;
+                    map.fitBounds(L.latLngBounds(bounds), { 
+                        paddingTopLeft: isMobile ? [10, 60] : [20, 20],
+                        paddingBottomRight: [20, 20],
+                        maxZoom: 15 
+                    });
+                }
             }
-
-            // 標記第一次載入已完成
-            isFirstLoad = false;
-        } // 這裡是 renderMap 的結尾
+        }
     </script>
 </body>
 </html>
