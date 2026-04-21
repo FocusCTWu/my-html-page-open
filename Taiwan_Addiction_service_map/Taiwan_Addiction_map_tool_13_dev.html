@@ -278,7 +278,6 @@
                 validCount++;
                 bounds.push([lat, lng]);
 
-                // 患者友善的 Popup 排版
                 let popupHtml = `
                     <div class="min-w-[220px]">
                         <h3 class="font-bold text-blue-800 text-[17px] mb-2 leading-tight">${row['機構名稱'] || '未命名機構'}</h3>
@@ -312,11 +311,11 @@
 
             document.getElementById('resultCount').textContent = validCount;
 
-            // 調整視角
-            const selectedCounty = document.getElementById('countyFilter').value;
+            // --- 視角調整邏輯 ---
+            const currentCounty = document.getElementById('countyFilter').value;
 
-            // 只有在「不是第一次載入」或「使用者手動選了縣市」時，才自動縮放視角
-            if (bounds.length > 0 && (!isFirstLoad || selectedCounty !== 'all')) {
+            // 只有在「不是第一次載入」或「使用者選擇了特定縣市」時才縮放
+            if (bounds.length > 0 && (!isFirstLoad || currentCounty !== 'all')) {
                 const isMobile = window.innerWidth < 768;
                 map.fitBounds(L.latLngBounds(bounds), { 
                     paddingTopLeft: isMobile ? [10, 60] : [20, 20],
@@ -325,10 +324,9 @@
                 });
             }
 
-    // 執行完畢後，將第一次載入的狀態設為 false
-    isFirstLoad = false; 
-}
-        }
+            // 標記第一次載入已完成
+            isFirstLoad = false;
+        } // 這裡是 renderMap 的結尾
     </script>
 </body>
 </html>
