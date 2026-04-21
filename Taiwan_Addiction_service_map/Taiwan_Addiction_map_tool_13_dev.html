@@ -104,6 +104,7 @@
         let map, markerClusterGroup;
         let globalData = [];
         let serviceColumns = [];
+        let isFirstLoad = true;
 
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
@@ -312,8 +313,10 @@
             document.getElementById('resultCount').textContent = validCount;
 
             // 調整視角
-            if (bounds.length > 0) {
-                // 如果在手機上，視角可能要避開左上角的選單按鈕
+            const selectedCounty = document.getElementById('countyFilter').value;
+
+            // 只有在「不是第一次載入」或「使用者手動選了縣市」時，才自動縮放視角
+            if (bounds.length > 0 && (!isFirstLoad || selectedCounty !== 'all')) {
                 const isMobile = window.innerWidth < 768;
                 map.fitBounds(L.latLngBounds(bounds), { 
                     paddingTopLeft: isMobile ? [10, 60] : [20, 20],
@@ -321,6 +324,10 @@
                     maxZoom: 15 
                 });
             }
+
+    // 執行完畢後，將第一次載入的狀態設為 false
+    isFirstLoad = false; 
+}
         }
     </script>
 </body>
