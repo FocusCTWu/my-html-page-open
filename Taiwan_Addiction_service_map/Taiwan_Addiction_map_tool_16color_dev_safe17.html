@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>尋找協助：藥酒癮醫療與復健資源地圖</title>
+    
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'nonce-EDNENVB34928' https://unpkg.com https://cdnjs.cloudflare.com;
+        style-src 'self' 'unsafe-inline' https://unpkg.com;
+        img-src 'self' data: https://*.basemaps.cartocdn.com https://unpkg.com;
+        connect-src 'self' https://*.basemaps.cartocdn.com;
+        object-src 'none';
+        base-uri 'self';
+    ">
+    
+    <link rel="stylesheet" href="./output.css">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" nonce="EDNENVB34928"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" integrity="sha512-dfX5uYVXzyU8+X2/bK2mYk1+f85n4xN1PihLgqjU1s/hHk9UvHnZ7XqZ+GfG8+z9T3GzC+..." crossorigin="anonymous" nonce="EDNENVB34928"></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" nonce="EDNENVB34928"></script>
+</head>
+<body class="flex h-screen w-screen overflow-hidden bg-slate-50 text-slate-800 font-sans">
+
+    <button id="openSidebarBtn" aria-label="開啟選單" class="md:hidden absolute top-4 left-4 z-[1000] bg-white p-3 rounded-full shadow-lg text-blue-600 border border-slate-200 focus:outline-none">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+    </button>
+
+    <aside id="sidebar" class="w-80 h-full flex flex-col bg-white border-r border-slate-200 shadow-2xl md:shadow-none z-[1001] absolute md:relative transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+        <div class="p-5 border-b border-slate-200 bg-blue-700 text-white flex justify-between items-start">
+            <div>
+                <h1 class="text-xl font-bold tracking-wide">藥酒癮醫療與復健資源地圖</h1>
+                <p class="text-sm text-blue-100 mt-1">尋找離您最近的專業協助</p>
+            </div>
+            <button id="closeSidebarBtn" aria-label="關閉選單" class="md:hidden text-blue-100 hover:text-white p-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+
+        <div class="p-4 bg-blue-50 border-b border-slate-200 text-sm leading-relaxed">
+            <p class="font-semibold text-blue-800 mb-1.5 flex items-center"><span class="mr-1">💡</span> 快速上手指南</p>
+            <ul class="space-y-1.5 text-blue-700/90 pl-1">
+                <li class="flex items-start"><span class="mr-1.5 opacity-70">1.</span> 選擇縣市以縮小範圍。</li>
+                <li class="flex items-start"><span class="mr-1.5 opacity-70">2.</span> 勾選下方需要的特定服務。</li>
+                <li class="flex items-start"><span class="mr-1.5 opacity-70">3.</span> 點擊標記，查看詳細資訊。</li>
+            </ul>
+        </div>
+
+        <div id="upload-container" class="p-4 border-b border-slate-200 bg-amber-50">
+            <div id="status-message" class="text-sm font-medium text-amber-700 mb-2 flex items-center">
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-amber-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <span>系統正在載入最新資料...</span>
+            </div>
+            <div class="mt-3 space-y-3">
+                <div>
+                    <label class="block text-xs text-slate-500 mb-1">備援：上傳機構名單 (CSV)</label>
+                    <input type="file" id="csvFileInput" accept=".csv" aria-label="上傳機構名單 CSV" class="block w-full text-sm text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-amber-100 file:text-amber-800 hover:file:bg-amber-200 cursor-pointer" />
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-500 mb-1">備援：上傳縣市界線 (JSON)</label>
+                    <input type="file" id="jsonFileInput" accept=".json" aria-label="上傳縣市界線 JSON" class="block w-full text-sm text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-amber-100 file:text-amber-800 hover:file:bg-amber-200 cursor-pointer" />
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 flex-1 overflow-y-auto">
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-slate-600 mb-1">您所在的縣市</label>
+                <select id="countyFilter" aria-label="選擇縣市" class="w-full rounded-md border border-slate-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-slate-50">
+                    <option value="all">全台灣 (載入中...)</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-600 mb-2">需要的特定服務 (可複選，系統會篩選出「同時提供所選所有服務」的機構)</label>
+                <div id="serviceFilters" class="space-y-2.5 text-sm">
+                    <p id="serviceLoadingText" class="text-slate-400 italic text-xs">等待資料載入中...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-t border-slate-200 bg-slate-50">
+            <div class="p-4 border-b border-slate-200">
+                <div class="flex flex-col mb-3 text-sm">
+                    <span class="text-slate-600 font-medium mb-1">符合條件的機構數量：</span>
+                    <div id="resultCountContainer" class="flex flex-col">
+                         <span id="resultCountNumber" class="font-bold text-xl text-blue-600">0</span>
+                         <span id="resultHint" class="text-[13px] text-slate-500 font-normal mt-1 leading-relaxed hidden">建議您減少勾選特定的服務項目，或選擇「全台灣」來尋找其他縣市的資源。</span>
+                    </div>
+                </div>
+                <button id="resetBtn" class="w-full py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium rounded-md transition-colors text-sm shadow-sm">重新設定篩選條件</button>
+            </div>
+            <div class="p-3 text-[11px] leading-relaxed text-slate-500 bg-slate-100">
+                <p>資料來源：衛福部心健司 - 物質使用障礙症治療及生活重建業務指定機構名單</p>
+                <p class="mt-1">資料更新時間：115.3.13</p>
+            </div>
+        </div>
+    </aside>
+
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 z-[1000] hidden md:hidden transition-opacity"></div>
+    <main class="flex-1 relative z-0">
+        <div id="map" class="h-full w-full"></div>
+    </main>
+
+    <script nonce="EDNENVB34928">
+        window.DATA_CONFIG = {
+            csvUrl: './drug_org_list_all_1150313.csv', 
+            geoJsonUrl: './COUNTY_MOI_1140318.json',
+            maxFileSize: 2 * 1024 * 1024,
+            maxStringLength: 150
+        };
+
+        function sanitizeText(str) {
+            if (str === null || str === undefined) return '';
+            let s = Array.from(String(str)).slice(0, window.DATA_CONFIG.maxStringLength).join(''); 
+            return s.replace(/[&<>"']/g, function(match) {
+                const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+                return escapeMap[match];
+            });
+        }
+
+        // --- 針對美沙冬與丁基原啡因的特別處理函數 ---
+        // 確保這兩種藥物名稱能夠清楚顯示在畫面上
+        function getServiceDisplayName(rawKey) {
+            // 1. 先去掉「藥癮_」或「酒癮_」前綴
+            let displayName = rawKey.replace('藥癮_', '').replace('酒癮_', '');
+    
+            // 2. 針對特定長欄位進行優化命名（確保每個原始欄位名稱對應唯一的顯示名稱）
+            const customNames = {
+                '維持治療_美沙冬': '美沙冬維持治療',
+                '維持治療_丁基原啡因': '丁基原啡因維持治療',
+                '美沙冬跨區給藥': '美沙冬跨區給藥服務',
+                '美沙冬給藥點': '美沙冬給藥點',
+                '藥物治療': '專科藥物治療',
+                '心理治療': '心理治療/諮商',
+                '生活重建': '生活重建資源'
+            };
+
+            // 如果在對照表中有定義，就使用優化後的名稱
+            if (customNames[displayName]) {
+                displayName = customNames[displayName];
+            } else {
+                // 如果沒有定義，就把底線轉成空格，保持資料原意
+                displayName = displayName.replace(/_/g, ' ');
+            }
+    
+            return sanitizeText(displayName);
+        }
+
+        let map, markerClusterGroup, countyBoundaryLayer;
+        let globalData = []; 
+        let serviceColumns = [];
+        let isInitialLoad = true; 
+        let countyGeoJsonData = null; 
+
+        const statusEl = document.getElementById('status-message');
+        const countySelect = document.getElementById('countyFilter');
+        const serviceContainer = document.getElementById('serviceFilters');
+        const resultCountNumber = document.getElementById('resultCountNumber');
+        const resultHint = document.getElementById('resultHint');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+            setupEventListeners();
+            loadDefaultData();
+        });
+
+        function initMap() {
+            const taiwanBounds = L.latLngBounds(L.latLng(21.5, 118.0), L.latLng(25.5, 122.5));
+            map = L.map('map', {
+                zoomControl: false,
+                maxBounds: taiwanBounds,
+                maxBoundsViscosity: 1.0,
+                minZoom: 7
+            }).setView([23.6978, 120.9605], 8);
+            
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '© OpenStreetMap © CARTO',
+                subdomains: 'abcd', maxZoom: 20
+            }).addTo(map);
+
+            markerClusterGroup = L.markerClusterGroup({
+                chunkedLoading: true, spiderfyOnMaxZoom: true, showCoverageOnHover: false
+            });
+            map.addLayer(markerClusterGroup);
+        }
+
+        function updateStatus(msg, isError = false) {
+            statusEl.textContent = msg;
+            statusEl.className = isError ? "text-sm font-bold text-red-500 mb-2" : "text-sm font-medium text-blue-600 mb-2";
+        }
+
+        function checkAllDataLoaded() {
+            if (globalData.length > 0 && countyGeoJsonData) {
+                document.getElementById('upload-container').style.display = 'none';
+            }
+        }
+
+        function loadDefaultData() {
+            fetch(window.DATA_CONFIG.csvUrl)
+                .then(res => { if (!res.ok) throw new Error(); return res.text(); })
+                .then(text => { parseAndProcessCSV(text); })
+                .catch(e => updateStatus('✘ 預設 CSV 載入失敗，請手動上傳', true));
+            
+            fetch(window.DATA_CONFIG.geoJsonUrl)
+                .then(res => res.json())
+                .then(data => { processGeoJson(data); })
+                .catch(e => updateStatus('✘ 縣市界載入失敗，請手動上傳', true));
+        }
+
+        function processGeoJson(data) {
+            if (!data || !data.features || !Array.isArray(data.features)) throw new Error('Invalid GeoJSON');
+            countyGeoJsonData = data;
+            drawBoundaries('all'); 
+            checkAllDataLoaded();
+        }
+
+        function parseAndProcessCSV(csvString) {
+            Papa.parse(csvString, {
+                header: true, skipEmptyLines: true,
+                complete: function(results) {
+                    if (results.errors.length > 0) return updateStatus('✘ CSV 解析錯誤', true);
+                    
+                    const cols = results.meta.fields || [];
+                    if (!['機構名稱', '縣市'].every(c => cols.includes(c))) return updateStatus('✘ 缺少必要欄位', true);
+                    
+                    serviceColumns = cols.filter(col => col.startsWith('藥癮_') || col.startsWith('酒癮_'));
+
+                    globalData = results.data.reduce((acc, row) => {
+                        const lat = parseFloat(row['緯度 (lat)'] || row['緯度'] || row['lat']);
+                        const lng = parseFloat(row['經度 (lng)'] || row['經度'] || row['lng']);
+                        
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            const activeServices = new Set(serviceColumns.filter(s => row[s] === 'V'));
+                            const rawPhone = row['聯絡電話'] || '';
+                            
+                            acc.push({
+                                lat: lat, 
+                                lng: lng,
+                                rawCounty: row['縣市'] || '', 
+                                county: sanitizeText(row['縣市'] || ''), 
+                                name: sanitizeText(row['機構名稱'] || '未命名機構'),
+                                address: sanitizeText(row['機構地址'] || ''),
+                                phoneDisplay: sanitizeText(rawPhone),
+                                phoneLink: rawPhone.replace(/[^\d+()#-]/g, ''), 
+                                services: activeServices
+                            });
+                        }
+                        return acc;
+                    }, []);
+
+                    buildFilters();
+                    renderMap();
+                    checkAllDataLoaded();
+                }
+            });
+        }
+
+        function buildFilters() {
+            const counties = new Set(globalData.map(item => item.rawCounty).filter(Boolean));
+            
+            while (countySelect.firstChild) countySelect.removeChild(countySelect.firstChild);
+            const allOpt = document.createElement('option');
+            allOpt.value = 'all'; allOpt.textContent = '全台灣所有縣市';
+            countySelect.appendChild(allOpt);
+
+            Array.from(counties).sort().forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c; opt.textContent = sanitizeText(c); 
+                countySelect.appendChild(opt);
+            });
+
+            const loadingText = document.getElementById('serviceLoadingText');
+            if(loadingText) {
+                serviceContainer.removeChild(loadingText);
+                serviceColumns.forEach(service => {
+                    const rawKey = service; 
+                    // 使用特別處理函數來取得乾淨且明確的顯示名稱
+                    const displayName = getServiceDisplayName(rawKey);
+                    
+                    const label = document.createElement('label');
+                    label.className = "flex items-start space-x-3 cursor-pointer hover:bg-slate-100 p-2 rounded-md transition-colors border border-transparent hover:border-slate-200";
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = rawKey; 
+                    checkbox.className = "service-checkbox mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500";
+                    checkbox.addEventListener('change', debounceRenderMap); 
+                    
+                    const span = document.createElement('span');
+                    span.className = "text-slate-700 leading-tight";
+                    
+                    // 在側邊欄也加上 [藥] 或 [酒] 的前綴，方便辨識
+                    let prefix = "";
+                    if (rawKey.startsWith('藥癮')) prefix = "[藥癮] ";
+                    if (rawKey.startsWith('酒癮')) prefix = "[酒癮] ";
+                    span.textContent = prefix + displayName;
+
+                    label.appendChild(checkbox);
+                    label.appendChild(span);
+                    serviceContainer.appendChild(label);
+                });
+            }
+        }
+
+        function drawBoundaries(selectedCountyName) {
+            if (!countyGeoJsonData) return;
+            if (countyBoundaryLayer) map.removeLayer(countyBoundaryLayer);
+
+            countyBoundaryLayer = L.geoJSON(countyGeoJsonData, {
+                filter: feature => (selectedCountyName === 'all' || feature.properties.COUNTYNAME === selectedCountyName),
+                style: feature => ({
+                    color: "#64748b", weight: 2.5, opacity: 0.7,
+                    fillColor: "#3b82f6", fillOpacity: selectedCountyName === 'all' ? 0.02 : 0.08 
+                })
+            }).addTo(map);
+
+            if (selectedCountyName !== 'all') {
+                const bounds = countyBoundaryLayer.getBounds();
+                if (bounds.isValid()) {
+                    map.fitBounds(bounds, {
+                        paddingTopLeft: window.innerWidth < 768 ? [10, 60] : [20, 20],
+                        paddingBottomRight: [20, 20], maxZoom: 13
+                    });
+                }
+            } else if (!isInitialLoad) {
+                map.setView([23.6978, 120.9605], 8);
+            }
+        }
+
+        let renderTimer;
+        function debounceRenderMap() {
+            clearTimeout(renderTimer);
+            renderTimer = setTimeout(renderMap, 150); 
+        }
+
+        function renderMap() {
+            if (globalData.length === 0) return;
+            markerClusterGroup.clearLayers();
+
+            const selectedCounty = countySelect.value; 
+            const checkedServices = Array.from(document.querySelectorAll('.service-checkbox:checked')).map(cb => cb.value);
+
+            drawBoundaries(selectedCounty);
+
+            const filteredData = globalData.filter(item => {
+                if (selectedCounty !== 'all' && item.rawCounty !== selectedCounty) return false;
+                if (checkedServices.length > 0) {
+                    if (!checkedServices.every(s => item.services.has(s))) return false;
+                }
+                return true;
+            });
+
+            filteredData.forEach(item => {
+                const popupContainer = document.createElement('div');
+                popupContainer.className = "min-w-[220px]";
+
+                const title = document.createElement('h3');
+                title.className = "font-bold text-blue-800 text-[17px] mb-2 leading-tight";
+                title.textContent = item.name;
+                popupContainer.appendChild(title);
+
+                const infoBox = document.createElement('div');
+                infoBox.className = "bg-slate-50 p-2 rounded-md border border-slate-100 text-sm space-y-2 text-slate-700 mb-3";
+                
+                const addrP = document.createElement('p');
+                addrP.className = "flex items-start";
+                const addrIcon = document.createElement('span');
+                addrIcon.className = "mr-1.5 mt-0.5";
+                addrIcon.textContent = "📍";
+                const addrText = document.createElement('span');
+                addrText.textContent = `${item.county} ${item.address}`;
+                addrP.appendChild(addrIcon);
+                addrP.appendChild(addrText);
+                infoBox.appendChild(addrP);
+
+                if(item.phoneDisplay) {
+                    const phoneP = document.createElement('p');
+                    phoneP.className = "flex items-center";
+                    const phoneIcon = document.createElement('span');
+                    phoneIcon.className = "mr-1.5";
+                    phoneIcon.textContent = "📞";
+                    const phoneLink = document.createElement('a');
+                    phoneLink.href = `tel:${item.phoneLink}`;
+                    phoneLink.className = "text-blue-600 font-medium hover:underline";
+                    phoneLink.textContent = item.phoneDisplay;
+                    phoneP.appendChild(phoneIcon);
+                    phoneP.appendChild(phoneLink);
+                    infoBox.appendChild(phoneP);
+                }
+                popupContainer.appendChild(infoBox);
+
+                if (item.services.size > 0) {
+                    const tagContainer = document.createElement('div');
+                    const tagHeader = document.createElement('b');
+                    tagHeader.className = "text-[11px] text-slate-500 mb-1.5 block";
+                    tagHeader.textContent = "此機構提供之服務：";
+                    tagContainer.appendChild(tagHeader);
+
+                    const tagFlex = document.createElement('div');
+                    tagFlex.className = "flex flex-wrap gap-1.5";
+                    
+                    item.services.forEach(rawServiceKey => {
+                        const isDrug = rawServiceKey.startsWith('藥癮');
+                        const isAlcohol = rawServiceKey.startsWith('酒癮');
+                        
+                        // 使用特別處理函數取得顯示名稱
+                        const shortName = getServiceDisplayName(rawServiceKey);
+                        
+                        let prefix = "";
+                        let badgeStyle = "bg-slate-50 text-slate-700 border-slate-200"; 
+                        
+                        if (isDrug) {
+                            prefix = "[藥癮] ";
+                            badgeStyle = "bg-indigo-50 text-indigo-800 border-indigo-200";
+                        } else if (isAlcohol) {
+                            prefix = "[酒癮] ";
+                            badgeStyle = "bg-orange-50 text-orange-800 border-orange-200";
+                        }
+                        
+                        const span = document.createElement('span');
+                        span.className = `px-2 py-1 text-[11px] rounded-md ${badgeStyle} border font-medium`;
+                        span.textContent = prefix + shortName;
+                        tagFlex.appendChild(span);
+                    });
+                    tagContainer.appendChild(tagFlex);
+                    popupContainer.appendChild(tagContainer);
+                }
+
+                // 導航按鈕已被移除
+
+                const marker = L.marker([item.lat, item.lng]);
+                marker.bindPopup(popupContainer, { maxWidth: 280, minWidth: 220 });
+                markerClusterGroup.addLayer(marker);
+            });
+
+            const validCount = filteredData.length;
+            resultCountNumber.textContent = validCount;
+            if (validCount === 0) {
+                resultCountNumber.className = "font-bold text-xl text-amber-600";
+                resultHint.classList.remove('hidden');
+                document.getElementById('resetBtn').classList.add('ring-2', 'ring-amber-300', 'border-amber-400');
+            } else {
+                resultCountNumber.className = "font-bold text-xl text-blue-600";
+                resultHint.classList.add('hidden');
+                document.getElementById('resetBtn').classList.remove('ring-2', 'ring-amber-300', 'border-amber-400');
+            }
+            
+            isInitialLoad = false;
+        }
+
+        function setupEventListeners() {
+            const toggleSidebar = () => {
+                document.getElementById('sidebar').classList.toggle('-translate-x-full');
+                document.getElementById('sidebarOverlay').classList.toggle('hidden');
+            };
+
+            document.getElementById('openSidebarBtn').addEventListener('click', toggleSidebar);
+            document.getElementById('closeSidebarBtn').addEventListener('click', toggleSidebar);
+            document.getElementById('sidebarOverlay').addEventListener('click', toggleSidebar);
+
+            document.getElementById('csvFileInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                if (file.size > window.DATA_CONFIG.maxFileSize) return updateStatus('✘ CSV 檔案過大', true);
+                
+                updateStatus('正在處理 CSV...');
+                const reader = new FileReader();
+                reader.onload = e => parseAndProcessCSV(e.target.result);
+                reader.readAsText(file);
+            });
+
+            document.getElementById('jsonFileInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                if (file.size > window.DATA_CONFIG.maxFileSize * 5) return updateStatus('✘ JSON 檔案過大', true);
+
+                updateStatus('正在處理 JSON...');
+                const reader = new FileReader();
+                reader.onload = e => {
+                    try { processGeoJson(JSON.parse(e.target.result)); updateStatus('✔ JSON 載入成功！'); } 
+                    catch(err) { updateStatus('✘ JSON 格式錯誤', true); }
+                };
+                reader.readAsText(file);
+            });
+
+            countySelect.addEventListener('change', debounceRenderMap);
+            
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                countySelect.value = 'all';
+                document.querySelectorAll('.service-checkbox').forEach(cb => cb.checked = false);
+                isInitialLoad = false; 
+                renderMap();
+            });
+        }
+    </script>
+</body>
+</html>
