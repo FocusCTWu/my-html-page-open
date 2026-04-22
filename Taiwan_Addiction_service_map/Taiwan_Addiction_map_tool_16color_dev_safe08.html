@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>尋找協助：藥酒癮醫療與復健資源地圖</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" crossorigin="anonymous" />
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js" crossorigin="anonymous"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <style>
+        /* 確保 Leaflet popup 圓角與樣式一致，優化手機點擊體驗 */
+        .leaflet-popup-content-wrapper { border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .leaflet-popup-content { margin: 16px; font-family: inherit; }
+        .leaflet-control-container .leaflet-top { z-index: 999; } /* 確保不擋住側邊欄 */
+    </style>
+</head>
+<body class="flex h-screen w-screen overflow-hidden bg-slate-50 text-slate-800 font-sans">
+
+    <button id="openSidebarBtn" class="md:hidden absolute top-4 left-4 z-[1000] bg-white p-3 rounded-full shadow-lg text-blue-600 border border-slate-200 focus:outline-none">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        </svg>
+    </button>
+
+    <aside id="sidebar" class="w-80 h-full flex flex-col bg-white border-r border-slate-200 shadow-2xl md:shadow-none z-[1001] absolute md:relative transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+        
+        <div class="p-5 border-b border-slate-200 bg-blue-700 text-white flex justify-between items-start">
+            <div>
+                <h1 class="text-xl font-bold tracking-wide">藥酒癮醫療與復健資源地圖</h1>
+                <p class="text-sm text-blue-100 mt-1">尋找離您最近的專業協助</p>
+            </div>
+            <button id="closeSidebarBtn" class="md:hidden text-blue-100 hover:text-white p-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="p-4 bg-blue-50 border-b border-slate-200 text-sm leading-relaxed">
+            <p class="font-semibold text-blue-800 mb-1.5 flex items-center">
+                <span class="mr-1">💡</span> 快速上手指南
+            </p>
+            <ul class="space-y-1.5 text-blue-700/90 pl-1">
+                <li class="flex items-start"><span class="mr-1.5 opacity-70">1.</span> 選擇您所在的<b>縣市</b>以縮小範圍。</li>
+                <li class="flex items-start"><span class="mr-1.5 opacity-70">2.</span> 勾選下方需要的<b>特定服務</b>。</li>
+                <li class="flex items-start"><span class="mr-1.5 opacity-70">3.</span> 點擊地圖上的標記，查看機構聯絡方式。</li>
+            </ul>
+        </div>
+
+        <div id="upload-container" class="p-4 border-b border-slate-200 bg-amber-50">
+            <div id="status-message" class="text-sm font-medium text-amber-700 mb-2 flex items-center">
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-amber-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                系統正在載入最新資料...
+            </div>
+            <div class="mt-3 space-y-3">
+                <div>
+                    <label class="block text-xs text-slate-500 mb-1">備援：手動上傳機構名單 (CSV)</label>
+                    <input type="file" id="csvFileInput" accept=".csv" class="block w-full text-sm text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-amber-100 file:text-amber-800 hover:file:bg-amber-200 cursor-pointer" />
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-500 mb-1">備援：手動上傳縣市界線 (JSON)</label>
+                    <input type="file" id="jsonFileInput" accept=".json" class="block w-full text-sm text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-amber-100 file:text-amber-800 hover:file:bg-amber-200 cursor-pointer" />
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 flex-1 overflow-y-auto">
+            <div class="mb-4">
+                <h2 class="text-base font-bold text-slate-700">我們能幫上什麼忙？</h2>
+                <p class="text-[13px] text-slate-500 mt-0.5">請告訴我們您的位置與需求，系統會為您篩選合適的機構。</p>
+            </div>
+            
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-slate-600 mb-1">您所在的縣市</label>
+                <select id="countyFilter" class="w-full rounded-md border border-slate-300 p-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-slate-50">
+                    <option value="all">全台灣 (載入中...)</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-600 mb-2">需要的特定服務 (可複選)</label>
+                <div id="serviceFilters" class="space-y-2.5 text-sm">
+                    <p class="text-slate-400 italic text-xs">等待資料載入中...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-t border-slate-200 bg-slate-50">
+            <div class="p-4 border-b border-slate-200">
+                <div class="flex flex-col mb-3 text-sm">
+                    <span class="text-slate-600 font-medium mb-1">符合條件的機構數量：</span>
+                    <div id="resultCount" class="font-bold text-xl text-blue-600 flex flex-wrap items-baseline">
+                        0
+                    </div>
+                </div>
+                <button id="resetBtn" class="w-full py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium rounded-md transition-colors text-sm shadow-sm">
+                    重新設定篩選條件
+                </button>
+            </div>
+            
+            <div class="p-3 text-[11px] leading-relaxed text-slate-500 bg-slate-100">
+                <p class="mb-1 font-semibold text-slate-600">資料來源：</p>
+                <p>衛福部心健司 - 物質使用障礙症治療及生活重建業務指定機構名單(含美沙冬給藥點)</p>
+                <p class="mt-1">資料更新時間：115.3.13</p>
+            </div>
+        </div>
+    </aside>
+
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 z-[1000] hidden md:hidden transition-opacity"></div>
+
+    <main class="flex-1 relative z-0">
+        <div id="map" class="h-full w-full"></div>
+    </main>
+
+    <script>
+        // --- 資安修正：輔助函數，跳脫 HTML 特殊字元防禦 XSS 攻擊 ---
+        function escapeHTML(str) {
+            if (str === null || str === undefined) return '';
+            return String(str).replace(/[&<>"']/g, function(match) {
+                const escapeMap = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                };
+                return escapeMap[match];
+            });
+        }
+
+        // 全局變數
+        let map, markerClusterGroup;
+        let globalData = [];
+        let serviceColumns = [];
+        let isInitialLoad = true; 
+        
+        // GeoJSON 變數
+        let countyGeoJsonData = null; 
+        let countyBoundaryLayer = null;
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+            setupEventListeners();
+            autoLoadCSV();
+            loadCountyBoundaries();
+        });
+
+        // 1. 初始化地圖
+        function initMap() {
+            map = L.map('map', {
+                zoomControl: false 
+            }).setView([23.6978, 120.9605], 8);
+            
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 20
+            }).addTo(map);
+
+            markerClusterGroup = L.markerClusterGroup({
+                chunkedLoading: true,
+                spiderfyOnMaxZoom: true,
+                showCoverageOnHover: false
+            });
+            map.addLayer(markerClusterGroup);
+        }
+
+        // 2. 自動讀取 CSV
+        function autoLoadCSV() {
+            const fileName = 'drug_org_list_all_1150313.csv';
+            
+            fetch(fileName)
+                .then(response => {
+                    if (!response.ok) throw new Error('網路回應錯誤或檔案不存在');
+                    return response.text();
+                })
+                .then(csvText => {
+                    parseAndProcessCSV(csvText);
+                    checkAllDataLoaded();
+                })
+                .catch(error => {
+                    console.warn("CSV 自動讀取失敗，顯示手動上傳介面：", error);
+                    updateStatusMessage('✘ 機構名單載入失敗，請手動上傳 CSV', true);
+                });
+        }
+
+        // 3. 自動載入縣市界 GeoJSON
+        function loadCountyBoundaries() {
+            fetch('COUNTY_MOI_1140318.json')
+                .then(response => {
+                    if (!response.ok) throw new Error('縣市界檔案載入失敗');
+                    return response.json();
+                })
+                .then(data => {
+                    countyGeoJsonData = data;
+                    drawBoundaries('all'); 
+                    checkAllDataLoaded();
+                })
+                .catch(error => {
+                    console.warn("縣市界自動載入失敗，等待手動上傳：", error);
+                    updateStatusMessage('✘ 縣市界載入失敗，請手動上傳 JSON', true);
+                });
+        }
+
+        function checkAllDataLoaded() {
+            if (globalData.length > 0 && countyGeoJsonData) {
+                document.getElementById('upload-container').style.display = 'none';
+            }
+        }
+
+        function updateStatusMessage(msg, isError = false) {
+            const statusEl = document.getElementById('status-message');
+            if (isError) {
+                statusEl.innerHTML += `<br><span class="text-red-500 font-bold text-xs mt-1">${msg}</span>`;
+            } else {
+                statusEl.innerHTML = `<span class="text-blue-600">${msg}</span>`;
+            }
+        }
+
+        // 4. 繪製縣市界線與自動縮放
+        function drawBoundaries(selectedCountyName) {
+            if (!countyGeoJsonData) return;
+
+            if (countyBoundaryLayer) {
+                map.removeLayer(countyBoundaryLayer);
+            }
+
+            countyBoundaryLayer = L.geoJSON(countyGeoJsonData, {
+                filter: function(feature) {
+                    if (selectedCountyName === 'all') return true;
+                    return feature.properties.COUNTYNAME === selectedCountyName;
+                },
+                style: function (feature) {
+                    return {
+                        color: "#64748b",
+                        weight: 2.5,      
+                        opacity: 0.7,
+                        fillColor: "#3b82f6", 
+                        fillOpacity: selectedCountyName === 'all' ? 0.02 : 0.08 
+                    };
+                }
+            }).addTo(map);
+
+            if (selectedCountyName !== 'all') {
+                const bounds = countyBoundaryLayer.getBounds();
+                if (bounds.isValid()) {
+                    const isMobile = window.innerWidth < 768;
+                    map.fitBounds(bounds, {
+                        paddingTopLeft: isMobile ? [10, 60] : [20, 20],
+                        paddingBottomRight: [20, 20],
+                        maxZoom: 13
+                    });
+                }
+            } else if (!isInitialLoad) {
+                map.setView([23.6978, 120.9605], 8);
+            }
+        }
+
+        // 5. 事件監聽
+        function setupEventListeners() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            const toggleSidebar = () => {
+                const isOpen = !sidebar.classList.contains('-translate-x-full');
+                if (isOpen) {
+                    sidebar.classList.add('-translate-x-full');
+                    overlay.classList.add('hidden');
+                } else {
+                    sidebar.classList.remove('-translate-x-full');
+                    overlay.classList.remove('hidden');
+                }
+            };
+
+            document.getElementById('openSidebarBtn').addEventListener('click', toggleSidebar);
+            document.getElementById('closeSidebarBtn').addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+
+            document.getElementById('csvFileInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                updateStatusMessage('正在處理 CSV 檔案...');
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    parseAndProcessCSV(event.target.result);
+                    checkAllDataLoaded();
+                };
+                reader.readAsText(file);
+            });
+
+            document.getElementById('jsonFileInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                updateStatusMessage('正在處理 JSON 檔案...');
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        countyGeoJsonData = JSON.parse(event.target.result);
+                        drawBoundaries(document.getElementById('countyFilter').value);
+                        checkAllDataLoaded();
+                        updateStatusMessage('JSON 載入成功！');
+                    } catch(err) {
+                        alert("JSON 格式錯誤");
+                        updateStatusMessage('JSON 格式錯誤', true);
+                    }
+                };
+                reader.readAsText(file);
+            });
+
+            document.getElementById('countyFilter').addEventListener('change', renderMap);
+            
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                document.getElementById('countyFilter').value = 'all';
+                document.querySelectorAll('.service-checkbox').forEach(cb => cb.checked = false);
+                
+                isInitialLoad = false; 
+                renderMap();
+            });
+        }
+
+        // 6. 解析 CSV
+        function parseAndProcessCSV(csvString) {
+            Papa.parse(csvString, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    globalData = results.data;
+                    buildFilters(globalData);
+                    renderMap();
+                }
+            });
+        }
+
+        // 7. 建立篩選器
+        function buildFilters(data) {
+            const counties = new Set();
+            const columns = Object.keys(data[0] || {});
+            
+            serviceColumns = columns.filter(col => col.startsWith('藥癮_') || col.startsWith('酒癮_'));
+
+            data.forEach(row => {
+                if (row['縣市']) counties.add(row['縣市']);
+            });
+
+            const countySelect = document.getElementById('countyFilter');
+            const currentSelection = countySelect.value;
+            
+            countySelect.innerHTML = '<option value="all">全台灣所有縣市</option>';
+            Array.from(counties).sort().forEach(county => {
+                countySelect.innerHTML += `<option value="${county}">${county}</option>`;
+            });
+            if(counties.has(currentSelection)) countySelect.value = currentSelection;
+
+            const serviceContainer = document.getElementById('serviceFilters');
+            if(serviceContainer.innerHTML.includes('等待資料載入中')) {
+                serviceContainer.innerHTML = '';
+                serviceColumns.forEach(service => {
+                    const displayName = escapeHTML(service.replace('_', '：')); // 資安修正
+                    const safeValue = escapeHTML(service); // 資安修正
+                    const html = `
+                        <label class="flex items-start space-x-3 cursor-pointer hover:bg-slate-100 p-2 rounded-md transition-colors border border-transparent hover:border-slate-200">
+                            <input type="checkbox" value="${safeValue}" class="service-checkbox mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-slate-700 leading-tight">${displayName}</span>
+                        </label>
+                    `;
+                    serviceContainer.innerHTML += html;
+                });
+
+                document.querySelectorAll('.service-checkbox').forEach(cb => {
+                    cb.addEventListener('change', renderMap);
+                });
+            }
+        }
+
+        // 8. 渲染地圖與標記
+        function renderMap() {
+            if (!globalData || globalData.length === 0) return;
+
+            markerClusterGroup.clearLayers();
+
+            const selectedCounty = document.getElementById('countyFilter').value;
+            const checkedServices = Array.from(document.querySelectorAll('.service-checkbox:checked')).map(cb => cb.value);
+
+            drawBoundaries(selectedCounty);
+
+            let validCount = 0;
+            const bounds = [];
+
+            globalData.forEach(row => {
+                const lat = parseFloat(row['緯度 (lat)'] || row['緯度'] || row['lat']);
+                const lng = parseFloat(row['經度 (lng)'] || row['經度'] || row['lng']);
+                if (isNaN(lat) || isNaN(lng)) return;
+
+                if (selectedCounty !== 'all' && row['縣市'] !== selectedCounty) return;
+
+                const hasAllServices = checkedServices.every(service => row[service] === 'V');
+                if (!hasAllServices) return;
+
+                validCount++;
+                bounds.push([lat, lng]);
+
+                // --- 資安修正：XSS 防護，跳脫所有來自 CSV 的變數 ---
+                const safeName = escapeHTML(row['機構名稱'] || '未命名機構');
+                const safeCounty = escapeHTML(row['縣市'] || '');
+                const safeAddress = escapeHTML(row['機構地址'] || '未提供地址');
+                const safePhone = escapeHTML(row['聯絡電話'] || '未提供電話');
+                const safePhoneHref = encodeURI(row['聯絡電話'] || ''); // 處理電話連結，避免 javascript: 注入
+
+                let popupHtml = `
+                    <div class="min-w-[220px]">
+                        <h3 class="font-bold text-blue-800 text-[17px] mb-2 leading-tight">${safeName}</h3>
+                        <div class="bg-slate-50 p-2 rounded-md border border-slate-100 text-sm space-y-2 text-slate-700 mb-3">
+                            <p class="flex items-start"><span class="mr-1.5 mt-0.5">📍</span><span>${safeCounty} ${safeAddress}</span></p>
+                            <p class="flex items-center"><span class="mr-1.5">📞</span><a href="tel:${safePhoneHref}" class="text-blue-600 font-medium hover:underline">${safePhone}</a></p>
+                        </div>
+                        <div>
+                            <b class="text-[11px] text-slate-500 mb-1.5 block">此機構提供之服務：</b>
+                            <div class="flex flex-wrap gap-1.5">
+                `;
+                
+                serviceColumns.forEach(service => {
+                    if (row[service] === 'V') {
+                        const isDrug = service.startsWith('藥癮');
+                        // 資安修正：處理動態生成的標籤名稱
+                        const shortName = escapeHTML(service.split('_')[1] || service); 
+                        const badgeStyle = isDrug ? 
+                            'bg-indigo-50 text-indigo-700 border-indigo-200' : 
+                            'bg-orange-50 text-orange-700 border-orange-200';
+                        
+                        popupHtml += `<span class="px-2 py-1 text-[11px] rounded-md ${badgeStyle} border font-medium">${shortName}</span>`;
+                    }
+                });
+
+                popupHtml += `</div></div></div>`;
+
+                const marker = L.marker([lat, lng]);
+                marker.bindPopup(popupHtml);
+                markerClusterGroup.addLayer(marker);
+            });
+
+            const resultCountEl = document.getElementById('resultCount');
+            if (validCount === 0) {
+                resultCountEl.innerHTML = `
+                    <span class="text-amber-600">0</span> 
+                    <div class="text-[13px] text-slate-500 font-normal mt-1 block w-full leading-relaxed">
+                        建議您減少勾選特定的服務項目，或選擇「全台灣」來尋找其他縣市的資源。
+                    </div>
+                `;
+                document.getElementById('resetBtn').classList.add('ring-2', 'ring-amber-300', 'border-amber-400');
+            } else {
+                resultCountEl.textContent = validCount;
+                document.getElementById('resetBtn').classList.remove('ring-2', 'ring-amber-300', 'border-amber-400');
+            }
+            
+            isInitialLoad = false;
+        }
+    </script>
+</body>
+</html>
