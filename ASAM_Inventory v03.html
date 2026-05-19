@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>整合性藥癮醫療示範計畫 模式量能盤點表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 統一基礎字體設定，確保表單元件也繼承 */
+        body { 
+            font-family: 'Helvetica Neue', Helvetica, Arial, 'Microsoft JhengHei', sans-serif; 
+            background-color: #f3f4f6; 
+            color: #1f2937; /* text-gray-800 */
+        }
+        input, select, textarea, button {
+            font-family: inherit;
+        }
+        
+        .container { max-width: 900px; margin: 2rem auto; background: white; padding: 3rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 8px; }
+        
+        /* 區塊標題字體大小統一 */
+        .section-title { 
+            background-color: #e5e7eb; 
+            padding: 0.5rem 1rem; 
+            font-weight: 700; 
+            font-size: 1.125rem; /* 18px text-lg */
+            color: #111827; /* text-gray-900 */
+            margin-top: 2rem; 
+            border-left: 4px solid #3b82f6; 
+        }
+        
+        .form-row { margin-bottom: 1rem; }
+        
+        /* 輸入框字體大小統一為 16px，避免行動版放大 */
+        input[type="text"], input[type="number"], input[type="date"], select {
+            border: 1px solid #d1d5db; 
+            border-radius: 4px; 
+            padding: 0.375rem 0.5rem; 
+            width: 100%; 
+            box-sizing: border-box; 
+            transition: border-color 0.2s;
+            font-size: 1rem; /* 16px text-base */
+        }
+        input[type="text"]:focus, input[type="number"]:focus, select:focus { 
+            outline: none; 
+            border-color: #3b82f6; 
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.2); 
+        }
+        .inline-input { 
+            display: inline-block; 
+            width: auto; 
+            border: none !important; 
+            border-bottom: 1px solid #9ca3af !important; 
+            border-radius: 0 !important; 
+            padding: 0 0.5rem !important; 
+            background-color: transparent;
+        }
+        
+        /* 表格字體與間距統一 */
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 1rem; }
+        th, td { border: 1px solid #d1d5db; padding: 0.625rem 0.5rem; text-align: center; vertical-align: middle; }
+        th { background-color: #f9fafb; font-weight: 600; color: #374151; }
+        .text-left { text-align: left; }
+        
+        /* 列印與下載 PDF 時的樣式設定 */
+        @media print {
+            body { background-color: white; margin: 0; padding: 0; color: #000; }
+            .container { box-shadow: none; margin: 0 auto; padding: 0; width: 100%; max-width: 100%; border-radius: 0; }
+            .no-print { display: none !important; }
+            input[type="text"], input[type="number"], input[type="date"], select {
+                border: none; border-bottom: 1px solid #000; border-radius: 0; padding: 0; background: transparent;
+            }
+            .section-title { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            th { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body class="text-base">
+
+<div class="container">
+    <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold text-gray-900">整合性藥癮醫療示範計畫 模式量能盤點表</h1>
+        <p class="text-base text-gray-600 mt-2">(Substance Addiction Program Capability & Capacity Inventory)</p>
+        <p class="text-sm text-gray-700 mt-4 text-left bg-blue-50 p-3 rounded border border-blue-100 leading-relaxed">
+            <strong>填寫說明：</strong> 本盤點表旨在協助評估貴機構所提之藥癮服務方案，是否具備對應 SBIRT定位、ASAM 照護層級之臨床能力、人力配置與結構化服務時數。請依據實際營運規劃與臨床現況如實填列。(TMAP center 項目6.5 建立整合性藥癮醫療示範計畫品質管理與成效提升機制)
+        </p>
+    </div>
+
+    <form id="inventoryForm">
+        <div class="section-title">第一區塊：方案模式基本資料 (SECTION 1: PROGRAM BASIC INFO)</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div class="form-row">
+                <label class="block font-bold text-base text-gray-800 mb-2">1. 計畫方案名稱 (Program Name):</label>
+                <input type="text" placeholder="請填寫方案名稱">
+            </div>
+            <div class="form-row">
+                <label class="block font-bold text-base text-gray-800 mb-2">2. 執行/營運單位 (Operating Agency):</label>
+                <input type="text" placeholder="請填寫機構-單位名稱">
+            </div>
+            <div class="form-row">
+                <label class="block font-bold text-base text-gray-800 mb-2">3. 計畫主持人 (Program Director):</label>
+                <div class="flex gap-2">
+                    <input type="text" placeholder="姓名" class="w-1/2">
+                    <input type="text" placeholder="職稱" class="w-1/2">
+                </div>
+            </div>
+            <div class="form-row">
+                <label class="block font-bold text-base text-gray-800 mb-2">4. 服務模式地理位置 (Service Location):</label>
+                <div class="flex flex-wrap gap-4 mt-2 text-base text-gray-700">
+                    <label class="flex items-center gap-1"><input type="radio" name="location"> 醫院附設</label>
+                    <label class="flex items-center gap-1"><input type="radio" name="location"> 社區門診/診所</label>
+                    <label class="flex items-center gap-1"><input type="radio" name="location"> 住宿型機構</label>
+                    <label class="flex items-center gap-1"><input type="radio" name="location"> 復元/中途之家</label>
+                    <label class="flex items-center gap-2"><input type="radio" name="location"> 其他: <input type="text" class="inline-input w-32"></label>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">第二區塊：方案適用對象條件 (SECTION 2: TARGET POPULATION)</div>
+        <div class="form-row mt-4">
+            <label class="block font-bold text-base text-gray-800 mb-2">1. 適用年齡層 (Target Age Group) - 可複選:</label>
+            <div class="flex flex-wrap gap-4 text-base text-gray-700">
+                <label class="flex items-center gap-1"><input type="checkbox"> 適用兒童及青少年 (18歲以下)</label>
+                <label class="flex items-center gap-1"><input type="checkbox"> 適用青年 (18-24歲)</label>
+                <label class="flex items-center gap-1"><input type="checkbox"> 適用成人 (25-64歲)</label>
+                <label class="flex items-center gap-1"><input type="checkbox"> 適用高齡者 (65歲以上)</label>
+            </div>
+        </div>
+        <div class="form-row mt-4">
+            <label class="block font-bold text-base text-gray-800 mb-2">2. 適用性別 (Target Gender Group):</label>
+            <div class="flex flex-wrap gap-4 text-base text-gray-700">
+                <label class="flex items-center gap-1"><input type="radio" name="gender_type"> 無特別限制</label>
+                <label class="flex items-center gap-1"><input type="radio" name="gender_type"> 適用男性</label>
+                <label class="flex items-center gap-1"><input type="radio" name="gender_type"> 適用女性</label>
+                <label class="flex items-center gap-1"><input type="radio" name="gender_type"> 適用非二元性別</label>
+            </div>
+        </div>
+        <div class="form-row mt-4">
+            <label class="block font-bold text-base text-gray-800 mb-2">3. 針對之主要成癮物質 (Primary Substances Targeted) - 可複選:</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-base text-gray-700">
+                <label class="flex items-center gap-1"><input type="checkbox"> 鴉片類 (海洛因、非處方止痛藥)</label>
+                <label class="flex items-center gap-1"><input type="checkbox"> 中樞神經興奮劑 (安非他命等)</label>
+                <label class="flex items-center gap-1"><input type="checkbox"> 酒精 (Alcohol)</label>
+                <label class="flex items-center gap-1"><input type="checkbox"> 鎮靜安眠藥物 (BZD/Z-drugs)</label>
+                <label class="flex items-center gap-1"><input type="checkbox"> 大麻類 (Cannabis)</label>
+            </div>
+        </div>
+        <div class="form-row mt-4">
+            <label class="block font-bold text-base text-gray-800 mb-2">4. 共病與特殊照護能力 (Co-Occurring & Special Populations):</label>
+            <div class="space-y-3 text-base text-gray-700">
+                <label class="flex items-start gap-2 cursor-pointer">
+                    <input type="checkbox" class="mt-1"> 
+                    <span><strong>雙重診斷/精神共病:</strong> 具備處理輕/中度精神共病（如憂鬱、焦慮）之能力。</span>
+                </label>
+                <label class="flex items-start gap-2 cursor-pointer">
+                    <input type="checkbox" class="mt-1"> 
+                    <span><strong>孕產婦:</strong> 具備孕期藥癮照護與轉介婦產科網絡。</span>
+                </label>
+                <label class="flex items-start gap-2 cursor-pointer">
+                    <input type="checkbox" class="mt-1"> 
+                    <span><strong>司法處遇個案:</strong> 具備緩起訴/保護管束個案之通報與處遇對接經驗。</span>
+                </label>
+                <label class="flex items-start gap-2 cursor-pointer">
+                    <input type="checkbox" class="mt-1"> 
+                    <span><strong>藥物注射者 (PWID):</strong> 具備血液傳染病（HIV/HCV）衛教、篩檢與轉介能力。</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="section-title">第三區塊：服務期程與容量盤點 (SECTION 3: DURATION & CAPACITY)</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+            <div class="form-row">
+                <label class="block font-bold text-base text-gray-800 mb-2">1. 方案服務期程規劃:</label>
+                <div class="flex items-center gap-2 mt-2 text-base">
+                    預估平均期程： 
+                    <input type="number" class="inline-input w-20 text-center"> 
+                    <select class="border p-1 rounded bg-white"><option>週</option><option>個月</option></select>
+                </div>
+                <div class="flex flex-wrap gap-4 mt-4 text-base text-gray-700">
+                    <label class="flex items-center gap-1"><input type="radio" name="duration_type"> 急性介入</label>
+                    <label class="flex items-center gap-1"><input type="radio" name="duration_type"> 中長期復元</label>
+                    <label class="flex items-center gap-1"><input type="radio" name="duration_type"> 長期緩解監測 (Level 1.0)</label>
+                </div>
+            </div>
+            <div class="form-row">
+                <label class="block font-bold text-base text-gray-800 mb-2">2. 收案容量 (Program Capacity):</label>
+                <div class="flex items-center gap-2 mt-2 text-base">
+                    同時最大收案量上限： <input type="number" class="inline-input w-20 text-center"> 人
+                </div>
+                <div class="flex items-center gap-2 mt-4 text-base">
+                    預期每月新收案量： <input type="number" class="inline-input w-20 text-center"> 人
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">第四區塊：SBIRT 定位、ASAM 照護層級與維度判定機制 (SECTION 4: ASAM CRITERIA ALIGNMENT)</div>
+
+        <div class="form-row mt-6 pt-2">
+            <label class="block font-bold text-base text-gray-800 mb-2">1. SBIRT 定位 (SBIRT Positioning)</label>
+            
+            <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-5 shadow-sm text-sm">
+                <p class="text-gray-800 mb-2"><strong>1、目的：</strong>標示方案在 SBIRT 定位。</p>
+                <div class="text-gray-800 mb-2">
+                    <strong>2、填寫說明：</strong>
+                    <ul class="list-disc list-inside ml-2 mt-1 space-y-1 text-gray-700">
+                        <li>轉介或本身提供中長期藥癮核心治療才算 RT。S/BI/BT 是前端或短期介入。</li>
+                        <li>判定參考（詳見下方附錄一）。</li>
+                    </ul>
+                </div>
+                <p class="text-gray-700 bg-white p-2 rounded border border-blue-50 mt-2">
+                    <strong class="text-gray-800">3、範例：</strong><br>
+                    情境「若方案先做量表評估風險 screening（S），但主要內容是 4 次 BI，且只偶爾把人帶往醫療院所」。<br>
+                    👉 勾選：<span class="font-medium text-blue-700">S + BI</span>；轉介僅偶發，不需勾選 RT。
+                </p>
+            </div>
+
+            <div class="space-y-4 pl-2 mb-4 text-base">
+                <label class="flex items-center gap-3 cursor-pointer w-max">
+                    <input type="checkbox" name="sbirt_s" class="text-blue-600 rounded border-gray-300">
+                    <span class="font-bold text-gray-800">S (篩檢 Screening)</span>
+                </label>
+    
+                <div class="flex items-center gap-3 flex-wrap">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="sbirt_bi" class="text-blue-600 rounded border-gray-300">
+                        <span class="font-bold text-gray-800">BI (簡易介入 Brief Intervention)</span>
+                    </label>
+                    <span class="text-gray-700 flex items-center gap-2  whitespace-nowrap">
+                        次數 <input type="number" class="inline-input w-16 text-center font-bold text-blue-600" placeholder="1-4"> 次
+                    </span>
+                </div>
+
+                <div class="flex items-center gap-3 flex-wrap">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="sbirt_bt" class="text-blue-600 rounded border-gray-300">
+                        <span class="font-bold text-gray-800">BT (短期治療 Brief Treatment)</span>
+                    </label>
+                    <span class="text-gray-700 flex items-center gap-2  whitespace-nowrap">
+                        次數 <input type="number" class="inline-input w-16 text-center font-bold text-blue-600"> 次
+                    </span>
+                </div>
+
+                <label class="flex items-center gap-3 cursor-pointer w-max">
+                    <input type="checkbox" name="sbirt_rt" class="text-blue-600 rounded border-gray-300">
+                    <span class="font-bold text-gray-800">RT (轉介治療 Referral to Treatment)</span>
+                </label>
+            </div>
+
+            <details class="group bg-gray-50 rounded-lg border border-gray-200 no-print mt-2">
+                <summary class="cursor-pointer p-3 font-medium text-gray-700 hover:text-blue-700 transition-colors list-none flex justify-between items-center text-base">
+                    <span>📖 附錄一、 SBIRT 各類別操作型定義與判定標準 (點擊展開)</span>
+                    <span class="group-open:rotate-180 transition-transform duration-200">▼</span>
+                </summary>
+                <div class="p-4 border-t border-gray-200 text-sm text-gray-700 space-y-4 bg-white rounded-b-lg">
+                    <div class="pl-3 border-l-4 border-blue-400">
+                        <h4 class="font-bold text-gray-900 mb-1 text-base">篩檢 (Screening, S)</h4>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li><strong>標準：</strong>必須包含「量化風險評估」。</li>
+                            <li><strong>判定準則：</strong>僅詢問「有沒有用藥」不構成 S。必須使用如 DAST-10、WHO ASSIST 等工具並記錄分數。</li>
+                            <li><strong>指引：</strong>若該業務是為了「分流」，請勾選於此定位。</li>
+                        </ul>
+                    </div>
+
+                    <div class="pl-3 border-l-4 border-green-400">
+                        <h4 class="font-bold text-gray-900 mb-1 text-base">簡易介入 (Brief Intervention, BI)</h4>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li><strong>標準：</strong>核心在於 MI (動機式晤談)。</li>
+                            <li><strong>判定準則：</strong>超過 30 分鐘的心理治療不屬於 BI。BI 應是「短小精悍」且具備 FRAMES 架構。</li>
+                            <li><strong>指引：</strong>若該服務是在診間、病房床邊進行的短暫動機增強，請勾選於此定位。</li>
+                        </ul>
+                    </div>
+
+                    <div class="pl-3 border-l-4 border-yellow-400">
+                        <h4 class="font-bold text-gray-900 mb-1 text-base">短期結構化治療 (Brief Treatment, BT)</h4>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li><strong>標準：</strong>通常 6–20 次結構化、限時、專業治療。</li>
+                            <li><strong>判定準則：</strong>使用證據為本模式（CBT、MET、SFT 等）處理較深層的議題。</li>
+                            <li><strong>指引：</strong>目的在於減少物質使用問題並建立長期改變。</li>
+                        </ul>
+                    </div>
+
+                    <div class="pl-3 border-l-4 border-red-400">
+                        <h4 class="font-bold text-gray-900 mb-1 text-base">轉介治療 (Referral to Treatment, RT) <span class="text-gray-500 font-normal text-sm">/ 包含治療 (Treatment, T)</span></h4>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li><strong>RT 標準：</strong>強調「主動性」與「追蹤性」。必須包含主動的橋接行為並有專人負責。</li>
+                            <li><strong>T 標準：</strong>非屬 BT 的中長期「藥癮核心治療」醫療處置。</li>
+                            <li><strong>T 判定準則：</strong>具備明確的中長期「療程計畫 (Treatment Plan)」。中長期結構化團體治療應歸類於此。</li>
+                        </ul>
+                    </div>
+                </div>
+            </details>
+        </div>
+
+        <div class="form-row mt-6">
+            <label class="block font-bold text-base text-gray-800 mb-2">2. 宣告之 ASAM 照護層級 (Declared ASAM Level of Care):</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-base text-gray-700">
+                <label class="flex items-center gap-2"><input type="checkbox"> <span><strong>Level 1：</strong> 一般門診 (<9小時/週)</span></label>
+                <label class="flex items-center gap-2"><input type="checkbox"> <span><strong>Level 2.1：</strong> 密集門診 (9-19小時/週)</span></label>
+                <label class="flex items-center gap-2"><input type="checkbox"> <span><strong>Level 2.5：</strong> 日間留院/部分住院 (≥20小時/週)</span></label>
+                <label class="flex items-center gap-2"><input type="checkbox"> <span><strong>Level 3.1：</strong> 臨床管理低強度住宿</span></label>
+                <label class="flex items-center gap-2"><input type="checkbox"> <span><strong>Level 3.5：</strong> 臨床管理高強度住宿</span></label>
+            </div>
+        </div>
+
+        <div class="form-row mt-6">
+            <label class="block font-bold text-base text-gray-800 mb-2">3. 藥物輔助治療 (MAT) 整合現況:</label>
+            <div class="space-y-2 text-base text-gray-700">
+                <label class="flex items-center gap-2"><input type="radio" name="mat"> <span>本機構內部可直接開立 MAT 藥物。</span></label>
+                <label class="flex items-center gap-2"><input type="radio" name="mat"> <span>本機構無 MAT 醫師，但已與外部醫療機構簽署轉介 MOU。</span></label>
+                <label class="flex items-center gap-2"><input type="radio" name="mat"> <span>本方案不涉及 MAT 需求。</span></label>
+            </div>
+        </div>
+
+        <div class="form-row mt-6">
+            <label class="block font-bold text-base text-gray-800 mb-2">4. 六大維度評估工具建置 (請填寫使用的評估工具名稱):</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-base">
+                <label class="flex items-center gap-2">1. 急性戒斷/生理風險: <input type="text" class="flex-1"></label>
+                <label class="flex items-center gap-2">2. 生物醫學共病: <input type="text" class="flex-1"></label>
+                <label class="flex items-center gap-2">3. 情緒/行為/認知: <input type="text" class="flex-1"></label>
+                <label class="flex items-center gap-2">4. 改變動機/準備度: <input type="text" class="flex-1"></label>
+                <label class="flex items-center gap-2">5. 復發/繼續使用風險: <input type="text" class="flex-1"></label>
+                <label class="flex items-center gap-2">6. 復元及居住環境: <input type="text" class="flex-1"></label>
+            </div>
+        </div>
+
+        <div class="section-title">第五區塊：方案服務人力構成 (SECTION 5: STAFFING COMPOSITION)</div>
+        <div class="overflow-x-auto mt-4">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="w-1/5">職務角色</th>
+                        <th class="w-1/6">配置人數</th>
+                        <th class="w-1/6">聘用型態</th>
+                        <th class="w-1/3">具備之專業證照/核心訓練</th>
+                        <th class="w-1/6">領域平均資歷</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="font-bold text-left text-gray-800">專科/精神科醫師</td>
+                        <td><input type="number" class="w-full text-center"></td>
+                        <td><select class="w-full bg-transparent border-none text-center"><option>專任</option><option>兼任</option><option>無配置</option></select></td>
+                        <td><input type="text" class="w-full text-center border-none"></td>
+                        <td><div class="flex items-center justify-center"><input type="number" class="w-12 text-center inline-input"> 年</div></td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-left text-gray-800">臨床/諮商心理師</td>
+                        <td><input type="number" class="w-full text-center"></td>
+                        <td><select class="w-full bg-transparent border-none text-center"><option>專任</option><option>兼任</option><option>無配置</option></select></td>
+                        <td><input type="text" class="w-full text-center border-none"></td>
+                        <td><div class="flex items-center justify-center"><input type="number" class="w-12 text-center inline-input"> 年</div></td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-left text-gray-800">社會工作師</td>
+                        <td><input type="number" class="w-full text-center"></td>
+                        <td><select class="w-full bg-transparent border-none text-center"><option>專任</option><option>兼任</option><option>無配置</option></select></td>
+                        <td><input type="text" class="w-full text-center border-none"></td>
+                        <td><div class="flex items-center justify-center"><input type="number" class="w-12 text-center inline-input"> 年</div></td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-left text-gray-800">成癮個案管理員</td>
+                        <td><input type="number" class="w-full text-center"></td>
+                        <td><select class="w-full bg-transparent border-none text-center"><option>專任</option><option>兼任</option><option>無配置</option></select></td>
+                        <td><input type="text" class="w-full text-center border-none"></td>
+                        <td><div class="flex items-center justify-center"><input type="number" class="w-12 text-center inline-input"> 年</div></td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-left text-gray-800">護理人員</td>
+                        <td><input type="number" class="w-full text-center"></td>
+                        <td><select class="w-full bg-transparent border-none text-center"><option>專任</option><option>兼任</option><option>無配置</option></select></td>
+                        <td><input type="text" class="w-full text-center border-none"></td>
+                        <td><div class="flex items-center justify-center"><input type="number" class="w-12 text-center inline-input"> 年</div></td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-left text-gray-800">同儕支持員 (Peer)</td>
+                        <td><input type="number" class="w-full text-center"></td>
+                        <td><select class="w-full bg-transparent border-none text-center"><option>專任</option><option>兼任</option><option>無配置</option></select></td>
+                        <td><input type="text" class="w-full text-center border-none"></td>
+                        <td><div class="flex items-center justify-center"><input type="number" class="w-12 text-center inline-input"> 年</div></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section-title">第六區塊：人力時數配置與服務結構 (SECTION 6: HOURS & SERVICE ALLOCATION)</div>
+        <div class="overflow-x-auto mt-4">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="w-1/4">臨床服務項目</th>
+                        <th class="w-1/5">負責執行之專業人員</th>
+                        <th class="w-1/6">每位個案<br>平均時數/週</th>
+                        <th class="w-auto">預期執行內容概述 / 實證療法<br>(如: CBT, MET, 衛教)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="font-bold text-left text-gray-800">1. 個別心理諮商/治療</td>
+                        <td><input type="text" class="w-full text-center border-none"></td>
+                        <td><div class="flex items-center justify-center"><input type="number" class="w-16 text-center inline-input"> hr</div></td>
+                        <td><input type="text" class="w-full border-none"></td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-left text-gray-800">2. 團體心理治療/諮商</td>
+                        <td><input type="text" class="w-full text-center border-none"></td>
+                        <td><div class="flex items-center justify-center"><input type="number" class="w-16 text-center inline-input"> hr</div></td>
+                        <td><input type="text" class="w-full border-none"></td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-left text-gray-800">3. 個案管理與資源連結</td>
+                        <td><input type="text" class="w-full text-center border-none"></td>
+                        <td><div class="flex items-center justify-center"><input type="number" class="w-16 text-center inline-input"> hr</div></td>
+                        <td><input type="text" class="w-full border-none"></td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-left text-gray-800">4. 成癮衛教/生活技能</td>
+                        <td><input type="text" class="w-full text-center border-none"></td>
+                        <td><div class="flex items-center justify-center"><input type="number" class="w-16 text-center inline-input"> hr</div></td>
+                        <td><input type="text" class="w-full border-none"></td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-left text-gray-800">5. 藥物管理與醫療評估</td>
+                        <td><input type="text" class="w-full text-center border-none"></td>
+                        <td><div class="flex items-center justify-center"><input type="number" class="w-16 text-center inline-input"> hr</div></td>
+                        <td><input type="text" class="w-full border-none"></td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-left text-gray-800">6. 同儕/復元支持團體</td>
+                        <td><input type="text" class="w-full text-center border-none"></td>
+                        <td><div class="flex items-center justify-center"><input type="number" class="w-16 text-center inline-input"> hr</div></td>
+                        <td><input type="text" class="w-full border-none"></td>
+                    </tr>
+                    <tr class="bg-gray-50">
+                        <td colspan="2" class="text-right pr-4 font-bold text-gray-900">總計核心服務時數：</td>
+                        <td><div class="flex items-center justify-center text-blue-700 font-bold"><input type="number" class="w-16 text-center inline-input font-bold text-blue-700"> hr/週</div></td>
+                        <td class="text-left text-sm text-gray-600 pl-2">*(請將此加總數值帶入第七區塊之核心方案)*</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section-title">第七區塊：介入強度與客觀照護等級判定 (SECTION 7: INTENSITY & OBJECTIVE LEVEL)</div>
+        
+        <div class="form-row mt-4">
+            <label class="block font-bold text-base text-gray-800 mb-2">1. 每週介入強度 (Weekly Intensity):</label>
+            <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-4 shadow-sm text-sm">
+                <p class="text-gray-800 mb-2"><strong>1、目的：</strong><br>
+                    (1) 量化BT/RT方案介入密度，支援 ASAM 等級自動判定。<br>
+                    (2) 不同類型接觸可分別分析強度與效果。
+                </p>
+                <div class="text-gray-800 mb-2">
+                    <strong>2、填寫說明：</strong>
+                    <ul class="list-disc list-inside ml-2 mt-1 space-y-1 text-gray-700">
+                        <li>若僅為S或BI請填NA。</li>
+                        <li><strong>核心方案 (Core)：</strong> 實體心理治療、團體治療與工作坊之實際時數加總（直接引用第六區塊加總）。</li>
+                        <li><strong>門診藥管 (Medical)：</strong> 精神科看診、藥物調整等醫療介入（參考參數：0.75 - 1.0小時/週）。</li>
+                        <li><strong>個管追蹤 (Case Management)：</strong> 危機處置、跨機構協調與資源連結（參考參數：0.5 - 2.0 小時/週）。</li>
+                        <li><strong>臨床監測 (Monitoring)：</strong> 採尿、檢驗數據回饋與諮詢（參考參數：0.5 - 1.0 小時/週）。</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="space-y-4 pl-2 text-base text-gray-700">
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-gray-800">1、個案每週接觸總時數</span>
+                    <input type="text" class="inline-input w-20 text-center font-bold text-blue-600"> 小時/週
+                </div>
+                <div>
+                    <span class="font-bold text-gray-800">2、細項時數：</span>
+                    <div class="ml-4 mt-2 space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-64">(A) 核心方案 Core:</span>
+                            <input type="text" class="inline-input w-16 text-center"> 小時/週
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-64">(B) 門診藥管 Medical:</span>
+                            <input type="text" class="inline-input w-16 text-center"> 小時/週
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-64">(C) 個管追蹤 Case Management:</span>
+                            <input type="text" class="inline-input w-16 text-center"> 小時/週
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-64">(D) 臨床監測 Monitoring:</span>
+                            <input type="text" class="inline-input w-16 text-center"> 小時/週
+                        </div>
+                        <div class="flex items-center gap-2 font-bold text-blue-700 pt-2">
+                            總和 = (A)+(B)+(C)+(D)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row mt-8">
+            <label class="block font-bold text-base text-gray-800 mb-2">2. 核心治療累積劑量 TCD (Targeted Cumulative Dose):</label>
+            <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-4 shadow-sm text-sm">
+                <p class="text-gray-800 mb-2"><strong>1、目的：</strong><br>
+                    (1) 作為治療深度與方案穩定性輔助指標。<br>
+                    (2) 可支援特例分類（如長期總量高但單週時稍低）。
+                </p>
+                <div class="text-gray-800 mb-2">
+                    <strong>2、填寫說明：</strong>
+                    <ul class="list-disc list-inside ml-2 mt-1 space-y-1 text-gray-700">
+                        <li>計算公式：TCD = 核心方案每週時數(A) × 方案期程(週)。<span class="text-gray-500">※ 方案期程請參考上方第三區塊</span></li>
+                        <li>若僅為S或BI請填NA。</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 pl-2 text-base text-gray-700">
+                <span class="font-bold text-gray-800">個案核心總接觸時數</span>
+                <input type="text" class="inline-input w-24 text-center font-bold text-blue-600"> 小時
+            </div>
+        </div>
+
+        <div class="form-row mt-8">
+            <label class="block font-bold text-base text-gray-800 mb-2">3. 客觀評定之藥癮核心治療照護等級 (Objective ASAM Level):</label>
+            <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-4 shadow-sm text-sm">
+                <p class="text-gray-800 mb-2"><strong>1、目的：</strong>依每週強度(項目1)與核心治療累積劑量(項目2)客觀分類，建立強度介入標準，並與第四區塊之「宣告層級」作對照檢視，避免主觀判定。</p>
+                <div class="text-gray-800 mb-2">
+                    <strong>2、填寫說明：</strong>
+                    <ul class="list-disc list-inside ml-2 mt-1 space-y-1 text-gray-700">
+                        <li>若僅為S或BI請填NA。</li>
+                        <li>判定參考詳附錄二。</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 pl-2 text-base text-gray-700 mb-4">
+                <span class="font-bold text-gray-800">ASAM Level</span>
+                <input type="text" class="inline-input w-32 text-center font-bold text-blue-600">
+            </div>
+
+            <details class="group bg-gray-50 rounded-lg border border-gray-200 no-print mt-2">
+                <summary class="cursor-pointer p-3 font-medium text-gray-700 hover:text-blue-700 transition-colors list-none flex justify-between items-center text-base">
+                    <span>📖 附錄二、 ASAM 照護等級對應基準 (點擊展開)</span>
+                    <span class="group-open:rotate-180 transition-transform duration-200">▼</span>
+                </summary>
+                <div class="p-4 border-t border-gray-200 text-sm text-gray-700 bg-white rounded-b-lg">
+                    <p class="mb-2 text-gray-700">透過量化數據，將國內現有方案客觀對應至連續性照護模型，以利辨識系統缺口。</p>
+                    <div class="overflow-x-auto mt-2">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="w-1/6">照護等級歸類</th>
+                                    <th class="w-1/4">每週強度基準 (Intensity)</th>
+                                    <th class="w-1/5">核心治療累積劑量 (TCD)</th>
+                                    <th class="w-auto">模式定位說明</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-bold text-gray-800">Level 1</td>
+                                    <td>未滿 9 小時</td>
+                                    <td>無門檻</td>
+                                    <td class="text-left">一般門診治療（目前國內方案多數落於此區間）。</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-gray-800">Level 2.1 (IOP)</td>
+                                    <td>9 至未滿 20 小時</td>
+                                    <td>無門檻</td>
+                                    <td class="text-left">密集門診治療。個案中度風險，在某些維度（如心理社會壓力）結構化臨床服務與同儕支持。</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-gray-800">Level 2.1+</td>
+                                    <td>6.5 至未滿 9 小時</td>
+                                    <td>達 100 小時以上</td>
+                                    <td class="text-left">特例歸類：單週時數稍低，但屬長期且總量體高之穩定方案。</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-gray-800">Level 2.5<br>(HIOP)</td>
+                                    <td>大於等於 20 小時</td>
+                                    <td>NA</td>
+                                    <td class="text-left">近乎每日的門診介入，個案高度風險，有顯著的情緒或行為問題。</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-gray-800">Level 3.5</td>
+                                    <td>24 小時臨床管理</td>
+                                    <td>NA</td>
+                                    <td class="text-left">高強度住宅治療，個案嚴重功能受損，有明顯的認知或行為問題，或具備較高的危險性，無法在非結構化環境中維持戒絕。</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-gray-800">Level 3.7</td>
+                                    <td>24 小時醫療監督與護理</td>
+                                    <td>NA</td>
+                                    <td class="text-left">醫療管理住宅治療，個案亞急性併發症風險，有嚴重的生理或精神共病，且戒斷症狀較重。</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-gray-800">Level 4.0</td>
+                                    <td>24 小時生命體徵監測與即時急救</td>
+                                    <td>NA</td>
+                                    <td class="text-left">急性住院治療，個案危急風險，有生命危險的急性中毒、嚴重戒斷症狀（如震顫性譫妄）或嚴重自殺風險者。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </details>
+        </div>
+
+        <div class="flex flex-col md:flex-row justify-end gap-8 mt-12 mb-4 text-base">
+            <div class="flex items-end gap-2">
+                <span class="font-bold text-gray-800">計畫盤點人簽章：</span>
+                <input type="text" class="inline-input w-48">
+            </div>
+            <div class="flex items-end gap-2">
+                <span class="font-bold text-gray-800">盤點日期：</span>
+                <input type="date" class="inline-input w-40">
+            </div>
+        </div>
+
+        <div class="text-center mt-10 no-print border-t border-gray-200 pt-6">
+            <button type="button" onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition-colors flex inline-flex items-center gap-2 mx-auto text-base">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                匯出/下載為 PDF (列印)
+            </button>
+            <p class="text-gray-500 mt-3 text-sm">提示：點擊後請將「目的地」選擇為「另存為 PDF」。</p>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>
