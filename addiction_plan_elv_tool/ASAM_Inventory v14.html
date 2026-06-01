@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>整合性藥癮醫療示範計畫 模式量能盤點表</title>
+
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+
+    <script src="https://cdn.tailwindcss.com" crossorigin="anonymous"></script>
+    <style>
+        /* 統一基礎字體設定，確保表單元件也繼承 */
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, 'Microsoft JhengHei', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            /* 統一全域基礎字體大小為 text-base (16px) */
+            font-size: 1rem;
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            font-family: inherit;
+            /* 確保所有輸入、選擇、文字區域的字體大小與主文完全一致 (16px) */
+            font-size: 1rem !important;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 2.5rem auto;
+            background: #ffffff;
+            padding: 3.25rem;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.10);
+            border-radius: 18px;
+            border: 1px solid #e5e7eb;
+        }
+
+        /* 區塊標題字體大小統一 (維持原設計 1.125rem 以區隔大區塊，內文填寫區皆已統一) */
+        /* 📋 填寫說明收合區塊的專屬樣式修正：設定為精緻的淡藍色底色與外框 */
+        .collapsible-hint {
+            background-color: #eff6ff !important;
+            /* Tailwind blue-50 (優雅的淡藍底) */
+            border: 1px solid #bfdbfe !important;
+            /* Tailwind blue-200 (淡藍邊框) */
+            border-radius: 0.375rem;
+            /* 圓角設定 */
+            padding: 1rem;
+            /* 內文留白 */
+            margin-bottom: 1.5rem;
+            /* 與下方區塊的間距 */
+        }
+
+        /* 區塊標題字體大小統一 */
+        .section-title {
+            background-color: #e5e7eb;
+            padding: 0.5rem 1rem;
+            font-weight: 700;
+            font-size: 1.125rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #3b82f6;
+        }
+
+        /* 2026 安全標準：修正後的限定選擇器，精準排除動態區塊 (.inline-input 與 .inline-select) */
+        .container form input[type="text"]:not(.inline-input),
+        .container form input[type="number"]:not(.inline-input),
+        .container form input[type="date"],
+        .container form select:not(.inline-select):not(.field-intervention-type) {
+            width: 100%;
+        }
+
+        /* === 新增：表格與表頭外框設定 === */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* 確保表頭 (th) 與單元格 (td) 皆有明確外框線 */
+        table th,
+        table td {
+            border: 1px solid #d1d5db !important;
+            /* gray-300 外框 */
+            padding: 0.75rem;
+            vertical-align: middle;
+        }
+
+        table th {
+            background-color: #f9fafb;
+            /* 淺灰表頭底色 */
+            font-weight: 700;
+            text-align: center;
+        }
+
+        /* === 新增：可填區域顏色動態切換 (純 CSS 靜態部分) === */
+        /* 預設未填寫狀態（有 placeholder 且顯示時）：淡橘底 */
+        input:placeholder-shown,
+        textarea:placeholder-shown {
+            background-color: #fff7ed !important;
+            /* orange-50 */
+            border: 1px solid #fed7aa;
+            /* orange-200 */
+        }
+
+        /* 當焦點移入（正在填寫）：維持清晰的白底或淡藍暈開，提升無障礙閱讀性 */
+        input:focus,
+        select:focus,
+        textarea:focus {
+            background-color: #ffffff !important;
+            outline: 2px solid #3b82f6;
+            border-color: transparent;
+        }
+
+        /* 針對沒有 placeholder 的 select 元件：預設初始狀態為淡橘底 */
+        select {
+            background-color: #fff7ed !important;
+            border: 1px solid #fed7aa;
+        }
+
+        /* ===== 替換起始：全域高級專業排版與選項卡片化，不變更資安設定 ===== */
+
+        .dynamic-section .inline-flex {
+            display: inline-flex !important;
+            align-items: center !important;
+            flex-wrap: nowrap !important;
+        }
+
+        body {
+            font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+            color: #111827;
+            line-height: 1.75;
+            letter-spacing: 0.015em;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.97);
+            border: 1px solid #dbe3ef;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.12);
+        }
+
+        h1 {
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            line-height: 1.35;
+            color: #0f172a;
+        }
+
+        .section-title {
+            background: linear-gradient(90deg, #eff6ff 0%, #f8fafc 100%);
+            border-left: 5px solid #1d4ed8;
+            border-radius: 0 0.5rem 0.5rem 0;
+            color: #0f172a;
+            font-size: 1.05rem;
+            font-weight: 800;
+            letter-spacing: 0.035em;
+            line-height: 1.5;
+            padding: 0.7rem 1rem;
+            box-shadow: inset 0 -1px 0 rgba(148, 163, 184, 0.25);
+        }
+
+        p,
+        li,
+        span,
+        td,
+        label {
+            line-height: 1.7;
+        }
+
+        .form-row>label.block {
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: 0.025em;
+            margin-bottom: 0.65rem;
+        }
+
+        .flex.flex-wrap,
+        .grid,
+        .space-y-3 {
+            gap: 0.9rem !important;
+        }
+
+        /* 長文字避免太擠 */
+        .space-y-3 label {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+
+
+        /* ===== 修正起始：精緻版 checkbox/radio，不影響其他文字輸入框 ===== */
+
+        label:has(> input[type="checkbox"]),
+        label:has(> input[type="radio"]) {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 0.55rem !important;
+
+            padding: 0.45rem 0.7rem !important;
+            min-height: 2.4rem;
+
+            line-height: 1.55 !important;
+            letter-spacing: 0.01em;
+
+            background: #f8fafc;
+            border: 1px solid #dbe4ef;
+            border-radius: 0.65rem;
+            box-shadow: none !important;
+        }
+
+        label:has(> input[type="checkbox"]):hover,
+        label:has(> input[type="radio"]):hover {
+            background: #ffffff;
+            border-color: #bfdbfe;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.045) !important;
+        }
+
+        label:has(> input[type="checkbox"])>input[type="checkbox"],
+        label:has(> input[type="radio"])>input[type="radio"] {
+            width: 0.95rem !important;
+            height: 0.95rem !important;
+            margin: 0 !important;
+            transform: none !important;
+            flex: 0 0 auto;
+        }
+
+        label:has(> input[type="checkbox"])>span,
+        label:has(> input[type="radio"])>span {
+            line-height: 1.55 !important;
+            letter-spacing: 0.01em;
+        }
+
+        /* 有「其他：輸入框」的選項，讓輸入框維持正常寬度 */
+        label:has(.inline-input) {
+            display: inline-flex !important;
+            align-items: center !important;
+            flex-wrap: nowrap !important;
+            width: auto !important;
+        }
+
+        label:has(.inline-input) .inline-input {
+            width: 8rem !important;
+            min-width: 8rem !important;
+            height: 2.1rem !important;
+            padding: 0.35rem 0.5rem !important;
+        }
+
+        .form-row .flex.flex-wrap {
+            gap: 0.65rem !important;
+        }
+
+        .form-row .grid,
+        .form-row .space-y-3 {
+            gap: 0.75rem !important;
+        }
+
+        /* 第三區塊選項更緊湊，避免像大按鈕 */
+        .grid.grid-cols-1.md\\:grid-cols-3 label {
+            padding: 0.45rem 0.6rem !important;
+            min-height: 2.25rem;
+            border-radius: 0.55rem;
+        }
+
+        /* ===== 修正結束：精緻版 checkbox/radio，不影響其他文字輸入框 ===== */
+        /* ===== 修正起始：SECTION 5 動態評估工具卡片排版 ===== */
+
+        #section-5 label:has(> input[type="checkbox"]) {
+            width: auto !important;
+            max-width: 100% !important;
+            min-height: 2.25rem !important;
+            padding: 0.35rem 0.6rem !important;
+        }
+
+        #section-5 label:has(.inline-input) {
+            grid-column: 1 / -1;
+            width: 100% !important;
+        }
+
+        #section-5 label:has(.inline-input) .inline-input {
+            width: 16rem !important;
+            min-width: 16rem !important;
+        }
+
+        #section-5 textarea {
+            width: 100% !important;
+            max-width: none !important;
+            box-sizing: border-box;
+            display: block;
+        }
+
+        /* ===== 修正起始：SECTION 5 卡片式動態欄位排版 ===== */
+
+        #section-5 .section5-card {
+            background: #ffffff;
+            border: 1px solid #dbe4ef;
+            border-radius: 0.9rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+        }
+
+        #section-5 .section5-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        #section-5 .section5-card-title {
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        #section-5 .section5-field {
+            margin-bottom: 1rem;
+        }
+
+        #section-5 .section5-checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.5rem;
+        }
+
+        #section-5 label:has(> input[type="checkbox"]) {
+            width: auto !important;
+            min-height: 2.2rem !important;
+            padding: 0.35rem 0.6rem !important;
+        }
+
+        #section-5 label:has(.inline-input) {
+            grid-column: 1 / -1;
+            width: 100% !important;
+        }
+
+        #section-5 label:has(.inline-input) .inline-input {
+            width: 16rem !important;
+            min-width: 16rem !important;
+        }
+
+        #section-5 textarea {
+            width: 100% !important;
+            max-width: none !important;
+            display: block;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 768px) {
+            #section-5 .section5-checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== 修正起始：SECTION 5 可複選下拉選單排版 ===== */
+
+        #section-5 .section5-multiselect {
+            position: relative;
+            width: 100%;
+        }
+
+        #section-5 .section5-multiselect summary {
+            cursor: pointer;
+            list-style: none;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 0.45rem;
+            padding: 0.55rem 0.75rem;
+            color: #374151;
+        }
+
+        #section-5 .section5-multiselect summary::-webkit-details-marker {
+            display: none;
+        }
+
+        #section-5 .section5-dropdown-panel {
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            background: #ffffff;
+            border: 1px solid #dbe4ef;
+            border-radius: 0.65rem;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+        }
+
+        #section-5 .section5-dropdown-panel label:has(> input[type="checkbox"]) {
+            display: flex !important;
+            align-items: center !important;
+            width: 100% !important;
+            min-height: 2rem !important;
+            padding: 0.35rem 0.45rem !important;
+            background: transparent !important;
+            border: 0 !important;
+            box-shadow: none !important;
+        }
+
+        #section-5 .section5-dropdown-panel label:has(.inline-input) {
+            width: 100% !important;
+        }
+
+        #section-5 .section5-dropdown-panel .inline-input {
+            width: 16rem !important;
+            min-width: 16rem !important;
+        }
+
+        /* ===== 修正結束：SECTION 5 可複選下拉選單排版 ===== */
+        /* ===== 修正起始：第六區塊表格欄寬與間距，不變更資安設定 ===== */
+
+        /* 第六區塊 table 不讓 input/select 撐爆欄位 */
+        #tbody-funded-staff input,
+        #tbody-funded-staff select,
+        #tbody-contracted-staff input,
+        #tbody-contracted-staff select,
+        #tbody-unpaid-support input,
+        #tbody-unpaid-support select {
+            width: 100% !important;
+            min-width: 0 !important;
+            box-sizing: border-box;
+        }
+
+        /* 表格欄位對齊 */
+        #tbody-funded-staff td,
+        #tbody-contracted-staff td,
+        #tbody-unpaid-support td {
+            vertical-align: middle;
+        }
+
+        /* 操作欄固定避免擠壓 */
+        #tbody-funded-staff td:last-child,
+        #tbody-contracted-staff td:last-child,
+        #tbody-unpaid-support td:last-child {
+            width: 72px;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        /* 人數欄不要過寬 */
+        #tbody-funded-staff input[type="number"] {
+            max-width: 88px;
+            margin: 0 auto;
+        }
+
+        /* 避免 placeholder 撐開 */
+        #tbody-funded-staff input,
+        #tbody-contracted-staff input,
+        #tbody-unpaid-support input {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 表格更穩定 */
+        #tbody-funded-staff table,
+        #tbody-contracted-staff table,
+        #tbody-unpaid-support table {
+            table-layout: fixed;
+        }
+
+        /* ===== 修正結束：第六區塊表格欄寬與間距，不變更資安設定 ===== */
+        /* ===== 修正起始：SECTION 7 其他欄位與補充說明寬度 ===== */
+
+        #section-7 textarea {
+            width: 100% !important;
+            max-width: none !important;
+            box-sizing: border-box;
+        }
+
+        #section-7 label:has(.inline-input) {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+
+        #section-7 label:has(.inline-input) .inline-input {
+            width: 14rem !important;
+            min-width: 14rem !important;
+        }
+
+        /* ===== 修正結束：SECTION 7 其他欄位與補充說明寬度 ===== */
+        /* ===== 替換結束：全域高級專業排版與選項卡片化，不變更資安設定 ===== */
+        /* ===== 修正起始：列印與 PDF 匯出樣式 ===== */
+
+        @media print {
+            body {
+                background: #ffffff !important;
+            }
+
+            .container {
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 0.5cm !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+
+            .no-print,
+            button {
+                display: none !important;
+            }
+
+            details {
+                break-inside: avoid;
+            }
+
+            .section-title,
+            .section5-card,
+            table,
+            tr,
+            fieldset {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            input,
+            select,
+            textarea {
+                border: 1px solid #999 !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
+        }
+
+        /* ===== 修正結束：列印與 PDF 匯出樣式 ===== */
+    </style>
+</head>
+
+<body class="text-base">
+
+    <div class="container">
+        <div class="text-center mb-8">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 tracking-wide mb-4 text-center">整合性藥癮醫療示範計畫 模式量能盤點表
+            </h1>
+            <details class="collapsible-hint text-left max-w-3xl mx-auto shadow-sm" open>
+                <summary
+                    class="font-bold text-blue-800 cursor-pointer hover:text-blue-900 list-none flex items-center justify-between">
+                    <span>📋 【填寫說明】(點擊可收合)</span><span class="text-xs font-normal text-blue-500">▼</span>
+                </summary>
+                <div class="mt-3 text-sm text-gray-700 space-y-3 leading-relaxed border-t border-blue-100 pt-3">
+                    <p><strong>1.
+                            背景介紹：</strong>本盤點表係財團法人國家衛生研究院〔心理健康與成癮醫療政策研究與轉譯中心〕受衛生福利部心理健康司正式委託辦理，針對現行各藥癮示範計畫之「模式方案量能規劃」進行通盤盤點。
+                    </p>
+                    <p><strong>2. 填寫單位定義
+                            (Program-Based)：</strong>本表<strong>「非」以醫院/機構為單位</strong>填寫，而是<strong>以「服務方案/補助計畫項目（Program）」為最小填寫單位</strong>。<em>(範例：若貴機構同時執行
+                            3 項示範計畫方案，請分別填寫 3 份獨立的盤點表，切勿將不同方案的數據混淆填寫。)</em></p>
+                    <p><strong>3. 核心填寫指引：</strong>本盤點表旨在收集最客觀的臨床營運物理量，包含方案之「核心定位」、「整體療程週數」、「總執行次數」及「單次服務時間（分鐘）」。<br>•
+                        <strong>名詞定義：</strong>本表所指之「物質使用障礙（SUD）」涵蓋使用一種或多種精神活性物質導致的精神或行為障礙。<br>•
+                        <strong>彈性保留（其他描述欄）：</strong>若貴方案之臨床介入模式屬於變動型、複合型，無法直接透過固定的量化欄位表達，請務必於各項目的「其他 /
+                        臨床實務補充敘述」自由文字框中進行詳細說明。本系統一律保留文字敘述空間，請安心填寫。
+                    </p>
+                    <p><strong>4. 資料用途聲明：</strong>本表所搜集之數據僅供心理健康司進行整體政策評估，用以呈現台灣現行藥癮示範方案之實質服務能量。</p>
+                </div>
+            </details>
+        </div>
+
+        <form id="inventoryForm">
+            <div class="section-title">第一區塊：方案模式基本資料 (SECTION 1: PROGRAM BASIC INFO)</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div class="form-row">
+                    <label class="block font-bold text-base text-gray-800 mb-2">1. 計畫方案名稱 (Program Name):</label>
+                    <input type="text" placeholder="請填寫方案名稱">
+                </div>
+                <div class="form-row">
+                    <label class="block font-bold text-base text-gray-800 mb-2">2. 執行/營運單位 (Operating Agency):</label>
+                    <input type="text" placeholder="請填寫機構-單位名稱">
+                </div>
+                <div class="form-row">
+                    <label class="block font-bold text-base text-gray-800 mb-2">3. 計畫主持人 (Program Director):</label>
+                    <div class="flex gap-2">
+                        <input type="text" placeholder="姓名" class="w-1/2">
+                        <input type="text" placeholder="職稱" class="w-1/2">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label class="block font-bold text-base text-gray-800 mb-2">4. 服務模式地理位置 (Service Location):</label>
+                    <div class="flex flex-wrap gap-4 mt-2 text-base text-gray-700">
+                        <label class="flex items-center gap-1"><input type="radio" name="location"> 醫院附設</label>
+                        <label class="flex items-center gap-1"><input type="radio" name="location"> 社區門診/診所</label>
+                        <label class="flex items-center gap-1"><input type="radio" name="location"> 住宿型機構</label>
+                        <label class="flex items-center gap-1"><input type="radio" name="location"> 復元/中途之家</label>
+                        <label class="flex items-center gap-2"><input type="radio" name="location"> 其他: <input
+                                type="text" class="inline-input w-32"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row mt-6">
+                <label class="block font-bold text-base text-gray-800 mb-3">
+                    5. 收案容量 (Program Capacity):
+                </label>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            同時最大收案量上限
+                        </label>
+
+                        <div class="flex items-center gap-2 flex-nowrap">
+                            <input type="number" class="inline-input w-20 text-center font-bold text-blue-700"
+                                placeholder="0">
+                            <span class="text-slate-600 whitespace-nowrap">人</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            預期每月新收案量
+                        </label>
+
+                        <div class="flex items-center gap-2 flex-nowrap">
+                            <input type="number" class="inline-input w-20 text-center font-bold text-blue-700"
+                                placeholder="0">
+                            <span class="text-slate-600 whitespace-nowrap">人/月</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="section-title">第二區塊：方案適用對象條件 (SECTION 2: TARGET POPULATION)</div>
+            <div class="form-row mt-4">
+                <label class="block font-bold text-base text-gray-800 mb-2">1. 適用對象 (Recipient) - 可複選:</label>
+                <div class="flex flex-wrap gap-4 text-base text-gray-700">
+                    <label class="flex items-center gap-1"><input type="checkbox"> 適用個案本身</label>
+                    <label class="flex items-center gap-1"><input type="checkbox"> 適用家屬</label>
+                </div>
+            </div>
+            <div class="form-row mt-4">
+                <label class="block font-bold text-base text-gray-800 mb-2">2. 適用年齡層 (Target Age Group) - 可複選:</label>
+                <div class="flex flex-wrap gap-4 text-base text-gray-700">
+                    <label class="flex items-center gap-1"><input type="checkbox"> 適用兒童及青少年 (18歲以下)</label>
+                    <label class="flex items-center gap-1"><input type="checkbox"> 適用青年 (18-24歲)</label>
+                    <label class="flex items-center gap-1"><input type="checkbox"> 適用成人 (25-64歲)</label>
+                    <label class="flex items-center gap-1"><input type="checkbox"> 適用高齡者 (65歲以上)</label>
+                </div>
+            </div>
+            <div class="form-row mt-4">
+                <label class="block font-bold text-base text-gray-800 mb-2">3. 適用性別 (Target Gender Group):</label>
+                <div class="flex flex-wrap gap-4 text-base text-gray-700">
+                    <label class="flex items-center gap-1"><input type="radio" name="gender_type"> 無特別限制</label>
+                    <label class="flex items-center gap-1"><input type="radio" name="gender_type"> 適用男性</label>
+                    <label class="flex items-center gap-1"><input type="radio" name="gender_type"> 適用女性</label>
+                    <label class="flex items-center gap-1"><input type="radio" name="gender_type"> 適用非二元性別</label>
+                </div>
+            </div>
+            <div class="form-row mt-4">
+                <label class="block font-bold text-base text-gray-800 mb-2">4. 針對之主要成癮物質 (Primary Substances Targeted) -
+                    可複選:</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-base text-gray-700">
+                    <label class="flex items-center gap-1"><input type="checkbox"> 鴉片類 (海洛因、非處方止痛藥)</label>
+                    <label class="flex items-center gap-1"><input type="checkbox"> 中樞神經興奮劑 (安非他命等)</label>
+                    <label class="flex items-center gap-1"><input type="checkbox"> 酒精 (Alcohol)</label>
+                    <label class="flex items-center gap-1"><input type="checkbox"> 鎮靜安眠藥物 (BZD/Z-drugs)</label>
+                    <label class="flex items-center gap-1"><input type="checkbox"> 大麻類 (Cannabis)</label>
+                </div>
+            </div>
+            <div class="form-row mt-4">
+                <label class="block font-bold text-base text-gray-800 mb-2">5. 共病與特殊照護能力 (Co-Occurring & Special
+                    Populations):</label>
+                <div class="space-y-3 text-base text-gray-700">
+                    <label class="flex items-start gap-2 cursor-pointer">
+                        <input type="checkbox" class="mt-1">
+                        <span><strong>雙重診斷/精神共病:</strong> 具備處理輕/中度精神共病（如憂鬱、焦慮）之能力。</span>
+                    </label>
+                    <label class="flex items-start gap-2 cursor-pointer">
+                        <input type="checkbox" class="mt-1">
+                        <span><strong>孕產婦:</strong> 具備孕期藥癮照護與轉介婦產科網絡。</span>
+                    </label>
+                    <label class="flex items-start gap-2 cursor-pointer">
+                        <input type="checkbox" class="mt-1">
+                        <span><strong>司法處遇個案:</strong> 具備緩起訴/保護管束個案之通報與處遇對接經驗。</span>
+                    </label>
+                    <label class="flex items-start gap-2 cursor-pointer">
+                        <input type="checkbox" class="mt-1">
+                        <span><strong>藥物注射者 (PWID):</strong> 具備血液傳染病（HIV/HCV）衛教、篩檢與轉介能力。</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="border-b border-gray-200 pb-6 mb-6">
+                <div class="section-title mb-4">第三區塊：方案基礎定位 (SECTION 3: PROGRAM FOUNDATION & SCOPE)</div>
+                <p class="text-sm text-gray-600 mb-4">請依據本方案之實務運作性質，勾選對應的核心基礎定位（可複選）。勾選後下方第四區塊將自動展開相應的個案療程規劃填寫區。</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <div class="p-3 bg-white rounded shadow-sm border border-gray-100">
+                        <span class="font-bold text-blue-800 block mb-2 border-b pb-1 text-base">1. 篩檢與臨床評估</span>
+                        <label class="flex items-start gap-2 mb-2 cursor-pointer text-sm">
+                            <input type="checkbox" id="matrix-1a"
+                                class="matrix-checkbox mt-1 rounded text-blue-600 focus:ring-blue-500" value="1a">
+                            <span>1a. 物質使用障礙-篩檢評估</span>
+                        </label>
+                        <label class="flex items-start gap-2 mb-2 cursor-pointer text-sm">
+                            <input type="checkbox" id="matrix-1b"
+                                class="matrix-checkbox mt-1 rounded text-blue-600 focus:ring-blue-500" value="1b">
+                            <span>1b. 心理健康共病-篩檢評估</span>
+                        </label>
+                        <label class="flex items-start gap-2 cursor-pointer text-sm">
+                            <input type="checkbox" id="matrix-1c"
+                                class="matrix-checkbox mt-1 rounded text-blue-600 focus:ring-blue-500" value="1c">
+                            <span>1c. 生理健康共病-篩檢評估</span>
+                        </label>
+                    </div>
+
+                    <div class="p-3 bg-white rounded shadow-sm border border-gray-100">
+                        <span class="font-bold text-green-800 block mb-2 border-b pb-1 text-base">2. 短期介入與健康衛教</span>
+                        <label class="flex items-start gap-2 mb-2 cursor-pointer text-sm">
+                            <input type="checkbox" id="matrix-2a"
+                                class="matrix-checkbox mt-1 rounded text-green-600 focus:ring-green-500" value="2a">
+                            <span>2a. 物質使用障礙-短期介入/衛教</span>
+                        </label>
+                        <label class="flex items-start gap-2 mb-2 cursor-pointer text-sm">
+                            <input type="checkbox" id="matrix-2b"
+                                class="matrix-checkbox mt-1 rounded text-green-600 focus:ring-green-500" value="2b">
+                            <span>2b. 心理健康共病-衛教</span>
+                        </label>
+                        <label class="flex items-start gap-2 cursor-pointer text-sm">
+                            <input type="checkbox" id="matrix-2c"
+                                class="matrix-checkbox mt-1 rounded text-green-600 focus:ring-green-500" value="2c">
+                            <span>2c. 生理健康共病-衛教</span>
+                        </label>
+                    </div>
+
+                    <div class="p-3 bg-white rounded shadow-sm border border-gray-100">
+                        <span class="font-bold text-indigo-800 block mb-2 border-b pb-1 text-base">3. 深度專業治療</span>
+                        <label class="flex items-start gap-2 mb-2 cursor-pointer text-sm">
+                            <input type="checkbox" id="matrix-3a"
+                                class="matrix-checkbox mt-1 rounded text-indigo-600 focus:ring-indigo-500" value="3a">
+                            <span>3a. 物質使用障礙-深度專業治療</span>
+                        </label>
+                        <label class="flex items-start gap-2 mb-2 cursor-pointer text-sm">
+                            <input type="checkbox" id="matrix-3b"
+                                class="matrix-checkbox mt-1 rounded text-indigo-600 focus:ring-indigo-500" value="3b">
+                            <span>3b. 心理健康共病-專業治療</span>
+                        </label>
+                        <label class="flex items-start gap-2 cursor-pointer text-sm">
+                            <input type="checkbox" id="matrix-3c"
+                                class="matrix-checkbox mt-1 rounded text-indigo-600 focus:ring-indigo-500" value="3c">
+                            <span>3c. 生理健康共病-專業治療</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="border-b border-gray-200 pb-6 mb-6">
+                    <div class="section-title mb-4">第四區塊：方案具體規劃 (SECTION 4: PROGRAM SERVICE PLANNING)</div>
+                    <div id="dynamic-program-container" class="space-y-8">
+                        <p id="dynamic-placeholder"
+                            class="text-gray-400 italic text-center py-6 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                            請於上方「第三區塊」勾選核心基礎定位，系統將自動產生對應的方案療程規劃表。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- ==================== SECTION 5 START: Outcome Monitoring & Measurement-Based Care Infrastructure ==================== -->
+                <div id="section-5">
+                    <div class="section-title">
+                        第五區塊：測量導向與成效監測照護架構
+                        (SECTION 5: MEASUREMENT-BASED & OUTCOME MONITORING CARE INFRASTRUCTURE)
+                    </div>
+
+                    <p class="text-sm text-gray-500 mt-2 mb-6 leading-relaxed">
+                        本區盤點方案使用哪些量表型工具、生化檢查、影像檢查或其他客觀監測資料，
+                        以及這些資料是否實際進入臨床回饋、個案管理、品質改善或資訊系統整合流程。
+                    </p>
+
+                    <div class="space-y-8">
+
+                        <!-- 5A -->
+                        <div class="border-l-4 border-blue-500 pl-4">
+                            <h3 class="text-base font-bold text-blue-900 mb-3">
+                                5A. 量表型工具與實際運作方式
+                            </h3>
+
+                            <p class="text-xs text-gray-500 mb-3">
+                                請逐項新增方案實際使用之量表或臨床評估工具。
+                            </p>
+
+                            <div id="section5-scale-tool-container" class="space-y-4"></div>
+
+                            <button type="button" id="add-section5-scale-tool-btn"
+                                class="mt-3 bg-gray-800 hover:bg-gray-900 text-white font-medium py-1 px-3 rounded text-xs">
+                                + 新增量表型工具
+                            </button>
+                        </div>
+
+                        <!-- 5B -->
+                        <div class="border-l-4 border-emerald-500 pl-4">
+                            <h3 class="text-base font-bold text-emerald-900 mb-3">
+                                5B. 生理、影像與其他醫療評估項目
+                            </h3>
+
+                            <p class="text-xs text-gray-500 mb-3">
+                                請逐項新增方案實際使用之生化檢查、毒物監測、感染風險檢查、影像或其他醫療評估項目。
+                            </p>
+
+                            <div id="section5-objective-monitor-container" class="space-y-4"></div>
+
+                            <button type="button" id="add-section5-objective-monitor-btn"
+                                class="mt-3 bg-gray-800 hover:bg-gray-900 text-white font-medium py-1 px-3 rounded text-xs">
+                                + 新增醫療評估項目
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- ==================== SECTION 5 END: Outcome Monitoring & Measurement-Based Care Infrastructure ==================== -->
+
+                <!-- ===== 替換起始：第六區塊 6A 方案人力投入來源，不變更資安設定 ===== -->
+
+                <div class="section-title">第六區塊：方案服務人力構成 (SECTION 6: STAFFING COMPOSITION)</div>
+
+                <p class="text-sm text-gray-600 mb-4">
+                    請依本方案實際動用之人力資源填寫。不同人力來源請分開填寫；主持人/專任以「每人填一行」，業務費/講師費以「場次、頻率、費用或用途描述」為主。
+                </p>
+
+                <div class="space-y-6 mt-4">
+
+                    <!-- 6A-1 -->
+                    <div class="bg-white border border-gray-200 rounded-lg p-4">
+                        <h3 class="font-bold text-gray-800 mb-2 border-l-4 border-blue-600 pl-2">
+                            6A. 方案主持人／專任支薪人力
+                        </h3>
+                        <p class="text-xs text-gray-500 mb-3">
+                            適用於由本方案主持人或全額支應薪資之人力，請填寫職務角色與年資等內容。
+                        </p>
+
+                        <div class="overflow-x-auto">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th class="w-1/5">支薪型態</th>
+                                        <th class="w-1/5">職務角色</th>
+                                        <th class="w-1/12">專業年資</th>
+                                        <th class="w-1/5">主要執行內容</th>
+                                        <th class="w-1/5">背景資歷 / 專業要求</th>
+                                        <th class="w-1/12">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-funded-staff">
+                                    <!-- JS 產生 -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <button type="button" id="add-funded-staff-btn"
+                            class="mt-3 bg-gray-800 hover:bg-gray-900 text-white font-medium py-1 px-3 rounded text-xs">
+                            + 新增下一筆
+                        </button>
+                    </div>
+
+                    <!-- 6A-2 -->
+                    <div class="bg-white border border-gray-200 rounded-lg p-4">
+                        <h3 class="font-bold text-gray-800 mb-2 border-l-4 border-green-600 pl-2">
+                            6B. 方案業務費／講師費／外聘治療費
+                        </h3>
+                        <p class="text-xs text-gray-500 mb-3">
+                            針對非固定薪資、使用業務費聘請的專家，從事這個方案相關的培訓、服務以及研究的人員。
+                        </p>
+
+                        <div class="overflow-x-auto">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th class="w-1/5">外聘角色</th>
+                                        <th class="w-1/6">職稱</th>
+                                        <th class="w-1/5">對應第四區塊流程名稱</th>
+                                        <th class="w-1/5">執行內容說明</th>
+                                        <th class="w-1/5">費用描述</th>
+                                        <th class="w-1/12">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-contracted-staff">
+                                    <!-- JS 產生 -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <button type="button" id="add-contracted-staff-btn"
+                            class="mt-3 bg-gray-800 hover:bg-gray-900 text-white font-medium py-1 px-3 rounded text-xs">
+                            + 新增下一筆
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ===== 替換結束：第六區塊 6A 方案人力投入來源，不變更資安設定 ===== -->
+                <!-- ==================== SECTION 7 START: Workforce Sustainability & Capacity Ecology ==================== -->
+                <div id="section-7">
+                    <div class="section-title">
+                        第七區塊：職場永續、人力生態韌性 (SECTION 7: WORKFORCE SUSTAINABILITY & CAPACITY ECOLOGY)
+                    </div>
+
+                    <p class="text-sm text-gray-500 mt-2 mb-6 leading-relaxed">
+                        本區為選填式生態反思題，協助了解服務團隊在專業培植、職場安全、心理支持、
+                        服務脆弱性與資源永續上的真實需求。請依實際情況勾選，可選擇性補充說明。
+                    </p>
+
+                    <div class="space-y-8">
+
+                        <!-- 7A -->
+                        <div class="border-l-4 border-indigo-500 pl-4">
+                            <h3 class="text-base font-bold text-indigo-900 mb-3">
+                                7A. 人力培植、團隊支持與職場安全
+                            </h3>
+
+                            <fieldset class="space-y-3">
+                                <legend class="text-sm font-semibold text-gray-800 mb-2">
+                                    目前貴方案透過哪些方式支持或培養服務人力？（可複選）
+                                </legend>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
+                                    <label><input type="checkbox" name="s7a_workforce_support" value="senior_mentoring"
+                                            class="mr-2">新進人員由資深人員帶領</label>
+                                    <label><input type="checkbox" name="s7a_workforce_support"
+                                            value="interdisciplinary_case_discussion" class="mr-2">跨專業個案討論</label>
+                                    <label><input type="checkbox" name="s7a_workforce_support"
+                                            value="regular_clinical_supervision" class="mr-2">定期臨床督導</label>
+                                    <label><input type="checkbox" name="s7a_workforce_support"
+                                            value="external_expert_supervision" class="mr-2">外部專家督導</label>
+                                    <label><input type="checkbox" name="s7a_workforce_support"
+                                            value="addiction_training" class="mr-2">成癮相關教育訓練</label>
+                                    <label><input type="checkbox" name="s7a_workforce_support" value="peer_learning"
+                                            class="mr-2">同儕學習或讀書會</label>
+                                    <label><input type="checkbox" name="s7a_workforce_support"
+                                            value="cross_institution_exchange" class="mr-2">跨機構交流</label>
+                                    <label><input type="checkbox" name="s7a_workforce_support" value="internal_eap"
+                                            class="mr-2">院內 EAP 或員工支持資源</label>
+                                    <label><input type="checkbox" name="s7a_workforce_support"
+                                            value="external_anonymous_support" class="mr-2">外部匿名心理支持 / 第三方 EAP</label>
+                                    <label><input type="checkbox" name="s7a_workforce_support" value="no_fixed_support"
+                                            class="mr-2">尚未形成固定支持機制</label>
+                                    <label>
+                                        <input type="checkbox" name="s7a_workforce_support" value="other" class="mr-2">
+                                        其他：
+                                        <input type="text" name="s7a_workforce_support_other" class="inline-input ml-2"
+                                            placeholder="請說明">
+                                    </label>
+                                </div>
+
+                                <textarea name="s7a_optional_note" rows="4"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base mt-3"
+                                    placeholder="補充說明（選填）：目前最困難的人力培養、工作支持或心理安全需求為何？"></textarea>
+                            </fieldset>
+                        </div>
+
+                        <!-- 7B -->
+                        <div class="border-l-4 border-amber-500 pl-4">
+                            <h3 class="text-base font-bold text-amber-900 mb-3">
+                                7B. 服務脆弱性與隱形依賴
+                            </h3>
+
+                            <fieldset class="space-y-3">
+                                <legend class="text-sm font-semibold text-gray-800 mb-2">
+                                    目前哪些服務或運作模式最容易出現人力不穩定，或高度依賴特定資源？（可複選）
+                                </legend>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
+                                    <label><input type="checkbox" name="s7b_fragility_dependency"
+                                            value="case_management" class="mr-2">個案管理</label>
+                                    <label><input type="checkbox" name="s7b_fragility_dependency" value="psychotherapy"
+                                            class="mr-2">心理治療</label>
+                                    <label><input type="checkbox" name="s7b_fragility_dependency" value="group_therapy"
+                                            class="mr-2">團體治療</label>
+                                    <label><input type="checkbox" name="s7b_fragility_dependency" value="family_work"
+                                            class="mr-2">家屬工作</label>
+                                    <label><input type="checkbox" name="s7b_fragility_dependency" value="outreach"
+                                            class="mr-2">外展服務</label>
+                                    <label><input type="checkbox" name="s7b_fragility_dependency"
+                                            value="night_weekend_service" class="mr-2">夜間或假日服務</label>
+                                    <label><input type="checkbox" name="s7b_fragility_dependency"
+                                            value="crisis_management" class="mr-2">危機處理</label>
+                                    <label><input type="checkbox" name="s7b_fragility_dependency"
+                                            value="community_transition" class="mr-2">社區轉銜</label>
+                                    <label><input type="checkbox" name="s7b_fragility_dependency"
+                                            value="supervision_training" class="mr-2">督導與教育訓練</label>
+                                    <label><input type="checkbox" name="s7b_fragility_dependency"
+                                            value="administrative_coordination" class="mr-2">行政協調</label>
+                                    <label><input type="checkbox" name="s7b_fragility_dependency"
+                                            value="core_staff_commitment" class="mr-2">依賴少數核心人員維持</label>
+                                    <label><input type="checkbox" name="s7b_fragility_dependency"
+                                            value="informal_overtime" class="mr-2">依賴非正式加班</label>
+                                    <label><input type="checkbox" name="s7b_fragility_dependency"
+                                            value="cross_department_support" class="mr-2">依賴跨科支援</label>
+                                    <label><input type="checkbox" name="s7b_fragility_dependency"
+                                            value="external_experts" class="mr-2">依賴外聘專家或講師</label>
+                                    <label><input type="checkbox" name="s7b_fragility_dependency"
+                                            value="short_term_funding" class="mr-2">依賴短期計畫經費</label>
+                                    <label><input type="checkbox" name="s7b_fragility_dependency"
+                                            value="no_obvious_fragility" class="mr-2">目前較無明顯脆弱性</label>
+                                    <label>
+                                        <input type="checkbox" name="s7b_fragility_dependency" value="other"
+                                            class="mr-2">
+                                        其他：
+                                        <input type="text" name="s7b_fragility_dependency_other"
+                                            class="inline-input ml-2" placeholder="請說明">
+                                    </label>
+                                </div>
+
+                                <textarea name="s7b_optional_note" rows="4"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-base mt-3"
+                                    placeholder="補充說明（選填）：哪些服務若支援中斷，最容易受影響？"></textarea>
+                            </fieldset>
+                        </div>
+
+                        <!-- 7C -->
+                        <div class="border-l-4 border-emerald-500 pl-4">
+                            <h3 class="text-base font-bold text-emerald-900 mb-3">
+                                7C. 長期資源與政策投資需求
+                            </h3>
+
+                            <fieldset class="space-y-3">
+                                <legend class="text-sm font-semibold text-gray-800 mb-2">
+                                    若未來要提升服務穩定性與品質，最需要哪些長期支持？（可複選）
+                                </legend>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
+                                    <label><input type="checkbox" name="s7c_long_term_support"
+                                            value="case_management_staffing" class="mr-2">提高個案管理人力支持</label>
+                                    <label><input type="checkbox" name="s7c_long_term_support"
+                                            value="external_supervision_funding" class="mr-2">長期外部督導經費</label>
+                                    <label><input type="checkbox" name="s7c_long_term_support"
+                                            value="third_party_anonymous_support" class="mr-2">第三方匿名心理支持 / EAP</label>
+                                    <label><input type="checkbox" name="s7c_long_term_support"
+                                            value="addiction_training_system" class="mr-2">成癮專業訓練制度</label>
+                                    <label><input type="checkbox" name="s7c_long_term_support"
+                                            value="cross_institution_learning_network" class="mr-2">跨機構學習網絡</label>
+                                    <label><input type="checkbox" name="s7c_long_term_support"
+                                            value="outreach_transition_resources" class="mr-2">外展與社區轉銜資源</label>
+                                    <label><input type="checkbox" name="s7c_long_term_support"
+                                            value="admin_data_support" class="mr-2">行政與資料管理支持</label>
+                                    <label><input type="checkbox" name="s7c_long_term_support"
+                                            value="salary_retention_incentives" class="mr-2">薪資或留任誘因</label>
+                                    <label><input type="checkbox" name="s7c_long_term_support"
+                                            value="career_development_system" class="mr-2">專業職涯發展制度</label>
+                                    <label>
+                                        <input type="checkbox" name="s7c_long_term_support" value="other" class="mr-2">
+                                        其他：
+                                        <input type="text" name="s7c_long_term_support_other" class="inline-input ml-2"
+                                            placeholder="請說明">
+                                    </label>
+                                </div>
+
+                                <textarea name="s7c_optional_note" rows="4"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 text-base mt-3"
+                                    placeholder="補充說明（選填）：哪一項支持若能優先改善，對服務穩定性幫助最大？"></textarea>
+                            </fieldset>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- ==================== SECTION 7 END: Workforce Sustainability & Capacity Ecology ==================== -->
+
+
+                <div class="flex flex-col md:flex-row justify-end gap-8 mt-12 mb-4 text-base">
+                    <div class="flex items-end gap-2">
+                        <span class="font-bold text-gray-800">計畫盤點人簽章：</span>
+                        <input type="text" class="inline-input w-48">
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <span class="font-bold text-gray-800">盤點日期：</span>
+                        <input type="date" class="inline-input w-40">
+                    </div>
+                </div>
+
+                <div class="text-center mt-10 no-print border-t border-gray-200 pt-6">
+                    <button type="button" id="secure-print-btn"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition-colors flex inline-flex items-center gap-2 mx-auto text-base">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        列印 / 匯出 PDF
+                    </button>
+                </div>
+        </form>
+
+        <script src="app.js"></script>
+</body>
+
+</html>
