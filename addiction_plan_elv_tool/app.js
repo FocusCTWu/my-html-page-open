@@ -889,7 +889,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { value: "paper_excel", text: "紙本或 Excel 為主" },
                 { value: "hospital_system", text: "院內資訊系統（如 HIS / 個管系統）" },
                 { value: "independent_database", text: "獨立資料庫或研究系統" },
-                { value: "substance_medical_management_system", text: "酒藥癮個管系統" },
+                { value: "substance_medical_management_system", text: "藥酒癮個管系統" },
                 { value: "other", text: "其他" }
             ]);
         }
