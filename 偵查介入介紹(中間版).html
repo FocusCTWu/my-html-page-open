@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'none'; img-src 'self' data:; style-src 'nonce-ppdip20260626v2'; script-src 'nonce-ppdip20260626v2'; connect-src 'none'; font-src 'none'; media-src 'none'; manifest-src 'none'; worker-src 'none'; upgrade-insecure-requests">
+  <meta name="color-scheme" content="light">
+  <title>偵查階段藥癮防治介入方案｜臺東地區經驗</title>
+  <style nonce="ppdip20260626v2">
+    :root {
+      --bg: #f7f3ea;
+      --paper: #fffdf8;
+      --ink: #17202a;
+      --muted: #65717f;
+      --line: #dfd4c3;
+      --teal: #285d64;
+      --teal2: #5f908b;
+      --gold: #9a6a32;
+      --soft: #eaf3f1;
+      --soft2: #f5eadc;
+      --shadow: 0 24px 70px rgba(23, 32, 42, .13);
+      --r: 26px;
+      --max: 1160px;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      line-height: 1.7;
+      background: radial-gradient(circle at 8% 0, #e5f1ee 0, #f7f3ea 34%, #f2e5d4 100%)
+    }
+
+    a {
+      color: inherit
+    }
+
+    .skip {
+      position: absolute;
+      left: -999px
+    }
+
+    .skip:focus {
+      left: 1rem;
+      top: 1rem;
+      z-index: 30;
+      background: #fff;
+      padding: .6rem 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--line)
+    }
+
+    .wrap {
+      max-width: var(--max);
+      margin: auto;
+      padding: 0 1.05rem
+    }
+
+    .hero {
+      min-height: 92vh;
+      display: grid;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      padding: 4rem 0 3rem
+    }
+
+    .hero:before {
+      content: "";
+      position: absolute;
+      inset: 4% 3%;
+      border: 1px solid rgba(40, 93, 100, .22);
+      border-radius: 42px;
+      pointer-events: none
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 2rem;
+      align-items: center;
+      position: relative;
+      z-index: 1
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      background: rgba(255, 253, 248, .78);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--teal);
+      font-weight: 850;
+      padding: .36rem .8rem;
+      font-size: .93rem
+    }
+
+    .eyebrow:before {
+      content: "";
+      width: .55rem;
+      height: .55rem;
+      border-radius: 50%;
+      background: var(--teal2)
+    }
+
+    h1 {
+      font-size: clamp(2.35rem, 5.7vw, 5.45rem);
+      line-height: 1.04;
+      letter-spacing: -.065em;
+      margin: 1rem 0 .9rem;
+      font-weight: 950
+    }
+
+    .lead {
+      font-size: clamp(1.06rem, 2vw, 1.32rem);
+      color: #3b4652;
+      max-width: 58ch;
+      margin: 0 0 1rem
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: .7rem;
+      flex-wrap: wrap;
+      margin-top: 1.2rem
+    }
+
+    .btn {
+      border: 1px solid var(--teal);
+      background: var(--teal);
+      color: white;
+      border-radius: 999px;
+      padding: .72rem 1rem;
+      font-weight: 850;
+      text-decoration: none
+    }
+
+    .btn.secondary {
+      background: rgba(255, 253, 248, .75);
+      color: var(--teal)
+    }
+
+    .identity {
+      background: rgba(255, 253, 248, .9);
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      padding: 1.3rem
+    }
+
+    .identity .label {
+      color: var(--gold);
+      font-size: .82rem;
+      font-weight: 900;
+      letter-spacing: .12em
+    }
+
+    .identity h2 {
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      margin: .2rem 0;
+      letter-spacing: -.04em
+    }
+
+    .identity p {
+      margin: .35rem 0;
+      color: #3c4854
+    }
+
+    .role-card {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 1rem;
+      align-items: center;
+      margin-top: 1.1rem;
+      padding: 1rem;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--soft), #fff);
+      border: 1px solid var(--line)
+    }
+
+    .seal {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--teal);
+      color: white;
+      font-size: 2rem;
+      font-weight: 950;
+      letter-spacing: -.08em
+    }
+
+    .meta {
+      display: flex;
+      gap: .45rem;
+      flex-wrap: wrap;
+      margin-top: .8rem
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      padding: .28rem .65rem;
+      color: #465461;
+      font-weight: 750;
+      font-size: .9rem
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(247, 243, 234, .88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line)
+    }
+
+    .navin {
+      max-width: var(--max);
+      margin: auto;
+      display: flex;
+      gap: .5rem;
+      overflow: auto;
+      padding: .65rem 1rem
+    }
+
+    nav button {
+      border: 1px solid var(--line);
+      background: var(--paper);
+      border-radius: 999px;
+      padding: .55rem .85rem;
+      white-space: nowrap;
+      cursor: pointer;
+      color: #2e3b47;
+      font-weight: 750
+    }
+
+    nav button[aria-current="true"] {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: white
+    }
+
+    main {
+      padding: 2.2rem 0 4.5rem
+    }
+
+    .section {
+      margin: 4.2rem 0
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: end;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: .9rem;
+      margin-bottom: 1.2rem
+    }
+
+    .kicker {
+      color: var(--gold);
+      font-weight: 950;
+      letter-spacing: .12em;
+      font-size: .82rem
+    }
+
+    .section h2 {
+      font-size: clamp(1.75rem, 3vw, 3rem);
+      line-height: 1.12;
+      letter-spacing: -.045em;
+      margin: .15rem 0
+    }
+
+    .note {
+      color: var(--muted);
+      max-width: 48ch;
+      margin: 0
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem
+    }
+
+    .card,
+    .panel,
+    .step,
+    .callout {
+      background: rgba(255, 253, 248, .88);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 1.2rem;
+      box-shadow: 0 12px 32px rgba(23, 32, 42, .06)
+    }
+
+    .card h3,
+    .panel h3,
+    .step h3 {
+      margin: .05rem 0 .45rem;
+      font-size: 1.17rem
+    }
+
+    .card p,
+    .panel p,
+    .step p {
+      margin: .35rem 0;
+      color: #40505d
+    }
+
+    .number {
+      font-size: 2.4rem;
+      line-height: 1;
+      color: var(--teal);
+      font-weight: 950;
+      letter-spacing: -.05em
+    }
+
+    .number small {
+      font-size: 1rem;
+      color: var(--muted);
+      letter-spacing: 0;
+      font-weight: 800
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: .75rem
+    }
+
+    .step {
+      position: relative;
+      min-height: 168px
+    }
+
+    .step:not(:last-child):after {
+      content: "→";
+      position: absolute;
+      right: -.66rem;
+      top: 46%;
+      font-weight: 950;
+      color: var(--teal)
+    }
+
+    .step strong {
+      display: block;
+      color: var(--teal);
+      font-size: .9rem;
+      letter-spacing: .08em
+    }
+
+    .decision {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem
+    }
+
+    .callout {
+      background: linear-gradient(135deg, var(--teal), #24444c);
+      color: white
+    }
+
+    .callout p {
+      color: #e9f4f2
+    }
+
+    .callout .pill {
+      border-color: rgba(255, 255, 255, .32);
+      background: rgba(255, 255, 255, .08);
+      color: white
+    }
+
+    .compliance {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem
+    }
+
+    .big {
+      padding: 1.45rem;
+      border-radius: 26px;
+      background: linear-gradient(180deg, #fff, #f7f2e8);
+      border: 1px solid var(--line)
+    }
+
+    .big b {
+      display: block;
+      font-size: clamp(2.4rem, 5vw, 4.6rem);
+      line-height: 1;
+      color: var(--teal);
+      letter-spacing: -.08em
+    }
+
+    .big span {
+      color: var(--muted);
+      font-weight: 750
+    }
+
+    .list {
+      display: grid;
+      gap: .75rem
+    }
+
+    .item {
+      display: flex;
+      gap: .8rem;
+      align-items: flex-start;
+      padding: .9rem;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--paper)
+    }
+
+    .dot {
+      flex: 0 0 1.55rem;
+      width: 1.55rem;
+      height: 1.55rem;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--soft);
+      color: var(--teal);
+      font-weight: 950
+    }
+
+    .item p {
+      margin: 0;
+      color: #3d4b57
+    }
+
+    .quiet {
+      background: #f8efe5;
+      border-left: 5px solid var(--gold);
+      border-radius: 0 20px 20px 0;
+      padding: 1rem 1.1rem;
+      color: #3d4b57
+    }
+
+    .footer {
+      border-top: 1px solid var(--line);
+      padding: 1.6rem 1rem 2.2rem;
+      color: var(--muted);
+      font-size: .92rem
+    }
+
+    @media(max-width:900px) {
+
+      .hero-grid,
+      .decision,
+      .compliance {
+        grid-template-columns: 1fr
+      }
+
+      .cards {
+        grid-template-columns: 1fr
+      }
+
+      .flow {
+        grid-template-columns: 1fr
+      }
+
+      .step:not(:last-child):after {
+        content: "↓";
+        right: 1rem;
+        top: auto;
+        bottom: -1.1rem
+      }
+
+      .hero {
+        min-height: auto
+      }
+
+      .section-head {
+        display: block
+      }
+
+      .note {
+        margin-top: .5rem
+      }
+    }
+
+    @media(max-width:560px) {
+      .role-card {
+        grid-template-columns: 1fr
+      }
+
+      .seal {
+        width: 74px;
+        height: 74px;
+        font-size: 1.55rem
+      }
+
+      .hero-actions .btn {
+        width: 100%;
+        text-align: center
+      }
+
+      .wrap {
+        padding: 0 .9rem
+      }
+    }
+
+    @media print {
+
+      nav,
+      .skip,
+      .hero-actions {
+        display: none
+      }
+
+      .hero {
+        min-height: auto
+      }
+
+      .card,
+      .panel,
+      .step,
+      .callout,
+      .identity {
+        box-shadow: none;
+        break-inside: avoid
+      }
+
+      body {
+        background: white
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <a class="skip" href="#main">跳至主要內容</a>
+  <header class="hero" id="top">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">臺東地區經驗｜偵查階段前端介入</span>
+        <h1>在司法程序前端，建立可回饋裁量的藥癮防治介入。</h1>
+        <p class="lead">以短期密集衛教與出席紀錄，形成可觀察的客觀遵從性資料，供檢察官後續裁量參考。</p>
+        <div class="hero-actions">
+          <a class="btn" href="#decision">看裁量參考重點</a>
+          <a class="btn secondary" href="#model">看方案流程</a>
+        </div>
+      </div>
+      <aside class="identity" aria-label="計畫主持人資訊">
+        <div class="label">PRINCIPAL INVESTIGATOR</div>
+        <h2>王聲昌</h2>
+        <p><strong>計畫主持人</strong></p>
+        <p>國家衛生研究院神經及精神醫學研究中心副研究員級主治醫師，推動臺東地區偵查階段藥癮防治介入方案之研究與跨機構合作。</p>
+        <div class="role-card">
+          <div class="seal" aria-hidden="true">目標</div>
+          <div>
+            <strong>核心任務</strong>
+            <p>將「貫穿式保護」從政策概念，轉化為偵查階段可執行、可記錄、可回饋的前端介入流程。</p>
+          </div>
+        </div>
+        <div class="meta"><span class="pill">偵查階段</span><span class="pill">前端介入</span><span
+            class="pill">偏遠地區</span><span class="pill">跨機構合作</span></div>
+      </aside>
+    </div>
+  </header>
+  <nav aria-label="頁面導覽">
+    <div class="navin">
+      <button type="button" data-target="why">為什麼</button>
+      <button type="button" data-target="model">方案流程</button>
+      <button type="button" data-target="decision">裁量參考</button>
+      <button type="button" data-target="data">資料呈現</button>
+      <button type="button" data-target="scale">推廣條件</button>
+    </div>
+  </nav>
+  <main id="main" class="wrap">
+    <section class="section" id="why">
+      <div class="section-head">
+        <div>
+          <div class="kicker">FIRST PRINCIPLE</div>
+          <h2>關鍵不是多做一個活動，而是讓偵查期間不再是處遇空窗。</h2>
+        </div>
+        <p class="note">毒品施用案件在司法程序前端即可能形成介入契機；真正需要設計的是「誰轉介、何時開案、如何觀察、如何回覆」。</p>
+      </div>
+      <div class="cards">
+        <article class="card">
+          <div class="number">01</div>
+          <h3>前端啟動</h3>
+          <p>在偵查階段即導入藥癮防治衛教，使處遇資訊能更早進入司法判斷流程。</p>
+        </article>
+        <article class="card">
+          <div class="number">02</div>
+          <h3>客觀紀錄</h3>
+          <p>以出席次數、是否達完成標準、是否中途退出等資料，呈現個案對社區處遇規範的遵從性。</p>
+        </article>
+        <article class="card">
+          <div class="number">03</div>
+          <h3>裁量回饋</h3>
+          <p>結案時將出席資料回覆地檢署，作為檢察官評估後續處分與分流安排的參考。</p>
+        </article>
+      </div>
+    </section>
+    <section class="section" id="model">
+      <div class="section-head">
+        <div>
+          <div class="kicker">PROGRAM FLOW</div>
+          <h2>臺東方案流程：從地檢署轉介到毒防中心結案回覆。</h2>
+        </div>
+        <p class="note">執行量與成效數據待正式發表與公布。</p>
+      </div>
+      <div class="flow" aria-label="方案流程">
+        <div class="step"><strong>STEP 01</strong>
+          <h3>地檢署轉介</h3>
+          <p>針對偵查中第一、二級毒品施用被告，經檢察官確認方案參與意願後轉介。</p>
+        </div>
+        <div class="step"><strong>STEP 02</strong>
+          <h3>毒防中心開案</h3>
+          <p>由毒防中心承接個案，啟動短期密集介入與出席管理。</p>
+        </div>
+        <div class="step"><strong>STEP 03</strong>
+          <h3>團體衛教</h3>
+          <p>固定時段辦理藥癮防治衛教，結合在地與遠距專業人力。</p>
+        </div>
+        <div class="step"><strong>STEP 04</strong>
+          <h3>出席紀錄</h3>
+          <p>記錄每次出席、請假、中斷與完成情形，形成遵從性資料。</p>
+        </div>
+        <div class="step"><strong>STEP 05</strong>
+          <h3>結案回覆</h3>
+          <p>回覆出席資料與完成情形，提供檢察官裁量參考。</p>
+        </div>
+      </div>
+      <div class="callout" role="note">
+        <h3>本方案的核心定位</h3>
+        <p>結案回覆的重點是「出席資料作為客觀遵從性資訊」，不是將尿液檢驗結果作為裁量依據。(尿液檢驗結果是作為未來醫療強度分流處遇所使用)</p>
+        <span class="pill">出席紀錄</span><span class="pill">完成與否</span><span class="pill">客觀遵從性</span><span
+          class="pill">裁量參考</span>
+      </div>
+    </section>
+    <section class="section" id="decision">
+      <div class="section-head">
+        <div>
+          <div class="kicker">FOR PROSECUTORIAL DISCRETION</div>
+          <h2>提供檢察官的，不是單一檢驗結果，而是個案是否能遵從社區處遇規範。</h2>
+        </div>
+        <p class="note">第一性原則：司法裁量需要的是可採信、可比較、可回溯的行為資訊。</p>
+      </div>
+      <div class="decision">
+        <div class="panel">
+          <h3>結案回覆可呈現</h3>
+          <div class="list">
+            <div class="item"><span class="dot">1</span>
+              <p>是否完成規定期程內的衛教出席要求。</p>
+            </div>
+            <div class="item"><span class="dot">2</span>
+              <p>實際出席次數、缺席次數與是否中途退出。</p>
+            </div>
+            <div class="item"><span class="dot">3</span>
+              <p>個案是否能配合固定時間、固定地點或指定方式接受介入。</p>
+            </div>
+            <div class="item"><span class="dot">4</span>
+              <p>是否具備接受後續社區處遇、緩起訴附條件處分或其他分流安排的基本遵從性。</p>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>裁量上的實務價值</h3>
+          <p>相較於偵查初期只能依賴靜態調查紀錄，出席資料能呈現個案在一段期間內對規範的實際反應。這種動態行為資料，可協助檢察官判斷個案是否適合接受社區處遇，以及後續處遇強度是否需要調整。</p>
+          <div class="quiet">
+            更符合RNR（Risk-Need-Responsivity）模式，一種國際廣泛推崇的實證成癮與犯罪防治治療框架。它的核心精神是根據個案的再犯風險高低（Risk）、個人需求（Need）與學習反應度（Responsivity）來量身打造戒癮計畫，能有效降低高達
+            40-60% 的再犯與復發率。。</div>
+        </div>
+      </div>
+    </section>
+    <section class="section" id="data">
+      <div class="section-head">
+        <div>
+          <div class="kicker">DATA GOVERNANCE</div>
+          <h2>資料反饋。</h2>
+        </div>
+      </div>
+      <div class="compliance">
+        <div class="big"><b>6<span>次</span></b><span>完成標準為「至少六次參加衛教／出席率達 75%」的制度設計。</span></div>
+        <div class="big"><b>30<span>日</span></b><span>介入期程-每周兩次衛教。</span></div>
+      </div>
+
+    </section>
+    <section class="section" id="scale">
+      <div class="section-head">
+        <div>
+          <div class="kicker">SCALING LOGIC</div>
+          <h2>可推廣的不是臺東的所有細節，而是「前端介入＋客觀遵從性回饋」的機制。</h2>
+        </div>
+      </div>
+      <div class="cards">
+        <article class="card">
+          <h3>跨機構共同語言</h3>
+          <p>衛政、毒防中心與地檢署需先定義：哪些資料要回覆、何時回覆、如何被裁量使用。</p>
+        </article>
+        <article class="card">
+          <h3>行政流程標準化</h3>
+          <p>出席紀錄、結案格式與回文流程愈標準化，前端介入越能真正支援司法時效。</p>
+        </article>
+        <article class="card">
+          <h3>逐步擴充評估</h3>
+          <p>在出席遵從性之外，後續可再發展更完整的需求評估、處遇強度分流與中長期追蹤。</p>
+        </article>
+      </div>
+    </section>
+  </main>
+  <footer class="footer wrap">
+    <p>資料來源：〈施用毒品案件在偵查階段執行藥癮防治介入方案之可行性：臺東地區經驗〉。此頁為對外介紹用轉譯版本；正式公開會於文章接受發表後再發布。</p>
+  </footer>
+  <script nonce="ppdip20260626v2">
+    (function () {
+      'use strict';
+      var buttons = [].slice.call(document.querySelectorAll('nav button[data-target]'));
+      buttons.forEach(function (btn) { btn.addEventListener('click', function () { var el = document.getElementById(btn.dataset.target); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }); });
+      var sections = buttons.map(function (b) { return document.getElementById(b.dataset.target); }).filter(Boolean);
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) { entries.forEach(function (entry) { if (entry.isIntersecting) { buttons.forEach(function (b) { b.setAttribute('aria-current', b.dataset.target === entry.target.id ? 'true' : 'false'); }); } }); }, { rootMargin: '-35% 0px -55% 0px', threshold: 0 });
+        sections.forEach(function (s) { io.observe(s); });
+      }
+    })();
+  </script>
+</body>
+
+</html>
