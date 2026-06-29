@@ -1287,7 +1287,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const tdRequirement = document.createElement('td');
         tdRequirement.appendChild(createAutoTextarea(
-            '如：成癮訓練、MI、CBT、年資',
+            '如：成癮訓練、MI、CBT',
             'w-full text-left border-none resize-none'
         ));
 
