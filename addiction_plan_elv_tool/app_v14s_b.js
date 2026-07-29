@@ -416,8 +416,8 @@ document.addEventListener('DOMContentLoaded', () => {
             ]
         },
         '衛生福利部嘉南療養院': {
-            directorName: '吳文正',
-            directorTitle: '院長',
+            directorName: '張耿嘉',
+            directorTitle: '代理院長',
             programs: [
                 {
                     label: '非鴉片類藥癮治療多元處遇（腦心智融合正念預防復發、藥愛團體、ID智能小團體、Satir家族關係探索團體、賦能成長敘事團體、水川模式繪畫敘事治療團體）',
