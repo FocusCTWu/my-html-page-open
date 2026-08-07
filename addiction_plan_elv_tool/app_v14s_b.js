@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     meta: '方案一、基本承作+選作'
                 },
                 {
-                    label: '以神經功能的心理治療取向',
+                    label: '發展以神經復元為核心的戒癮模式',
                     meta: '方案二、基本承作'
                 },
                 {
