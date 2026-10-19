@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light">
+
+<title>精神支持服務地圖｜v4.6</title>
+
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-fyK/Cc43M2HN6TdxSy7lF2MB/uyvBEcJk6bYpmRQ3bA=' https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://tiles.openfreemap.org https://assets.openfreemap.com https://unpkg.com https://cdn.jsdelivr.net; connect-src 'self' https://tiles.openfreemap.org https://assets.openfreemap.com; font-src 'self' data: https://assets.openfreemap.com; media-src 'none'; object-src 'none'; frame-src 'none'; worker-src blob:; child-src blob:; manifest-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
+
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.9.0/dist/maplibre-gl.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+<script src="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.9.0/dist/maplibre-gl.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<style>
+:root{
+  --ui-scale:1;
+  --ink:#13233a;--ink2:#314158;--muted:#68778b;--line:#dfe6ee;--panel:rgba(255,255,255,.94);
+  --blue:#2367d1;--blue-50:#eef5ff;--blue-100:#d9e9ff;
+  --purple:#7857c7;--purple-50:#f5f1ff;--purple-100:#e9e0ff;
+  --green:#2b8a66;--green-50:#edf9f4;--green-100:#d8f2e6;
+  --amber:#c98414;--amber-50:#fff8e8;--orange:#d97706;
+  --shadow:0 14px 44px rgba(31,51,77,.14);
+  --shadow-soft:0 7px 24px rgba(31,51,77,.10);
+  --radius:18px;--radius-sm:12px;
+}
+*{box-sizing:border-box}
+html{font-size:calc(16px * var(--ui-scale))}
+html,body{width:100%;height:100%;margin:0}
+body{
+  overflow:hidden;background:#dfe6ea;color:var(--ink);
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Noto Sans TC",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+button,select,input{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+
+/* MAP */
+#map{position:fixed;inset:0;z-index:0}
+.leaflet-control-attribution{font-size:.66rem!important;background:rgba(255,255,255,.82)!important}
+.leaflet-control-zoom{
+  border:0!important;box-shadow:var(--shadow-soft)!important;border-radius:12px!important;overflow:hidden;
+}
+.leaflet-control-zoom a{border:0!important;color:var(--ink)!important;width:36px!important;height:36px!important;line-height:36px!important}
+.leaflet-control-zoom a+a{border-top:1px solid var(--line)!important}
+
+/* FLOATING TOP UI */
+.ui-stack{
+  position:fixed;left:18px;top:18px;z-index:1000;width:min(390px,calc(100vw - 36px));
+  display:flex;flex-direction:column;gap:10px;
+}
+.brand-card,.control-card,.filter-panel{
+  background:var(--panel);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(214,224,234,.9);box-shadow:var(--shadow);border-radius:var(--radius);
+}
+.brand-card{padding:16px 16px 14px}
+.brand-row{display:flex;align-items:center;gap:11px}
+.brand-mark{
+  width:38px;height:38px;display:grid;place-items:center;border-radius:12px;
+  background:linear-gradient(145deg,#1e63d7,#3b7ae0);color:#fff;box-shadow:0 7px 18px rgba(35,103,209,.25);
+}
+.brand-mark svg{width:21px;height:21px}
+.brand-title{min-width:0;flex:1}
+.brand-title h1{font-size:1rem;line-height:1.25;margin:0;font-weight:850;letter-spacing:.01em}
+.brand-title .sub{margin-top:2px;font-size:.69rem;color:var(--muted)}
+.font-controls{display:flex;gap:4px}
+.font-controls button{
+  width:32px;height:32px;border:1px solid var(--line);background:#fff;border-radius:9px;
+  color:var(--ink2);font-size:.72rem;font-weight:850;transition:.15s;
+}
+.font-controls button:hover:not(:disabled){background:var(--blue-50);border-color:#aecbf4;color:var(--blue)}
+.font-controls button:disabled{opacity:.35;cursor:not-allowed}
+
+.control-card{padding:10px}
+.profile-line{
+  display:flex;align-items:center;gap:8px;padding:3px 4px 10px;
+}
+.profile-icon{
+  width:30px;height:30px;border-radius:10px;display:grid;place-items:center;
+  background:var(--blue-50);color:var(--blue);flex:0 0 auto;
+}
+.profile-icon svg{width:17px;height:17px}
+.profile-copy{min-width:0;flex:1}
+.profile-copy small{display:block;font-size:.62rem;color:var(--muted);margin-bottom:1px}
+#profileText{
+  display:block;font-size:.78rem;line-height:1.35;font-weight:800;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.text-link{
+  border:0;background:transparent;color:var(--blue);font-size:.66rem;font-weight:800;padding:5px 4px;
+}
+.quick-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.quick-btn{
+  min-height:40px;border:1px solid var(--line);background:#fff;border-radius:11px;color:var(--ink2);
+  font-size:.72rem;font-weight:800;display:flex;align-items:center;justify-content:center;gap:5px;transition:.15s;
+}
+.quick-btn svg{width:15px;height:15px}
+.quick-btn:hover,.quick-btn.active{border-color:#a8c7ef;background:var(--blue-50);color:var(--blue)}
+.result-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:7px;padding:8px 5px 1px;
+  border-top:1px solid #edf1f5;
+}
+.result-count{display:flex;align-items:baseline;gap:4px;color:var(--muted);font-size:.7rem}
+#resultCount{font-size:1.12rem;color:var(--ink);font-weight:900}
+.result-btn{
+  border:0;background:var(--ink);color:#fff;border-radius:10px;min-height:34px;padding:0 12px;
+  font-size:.69rem;font-weight:850;box-shadow:0 5px 14px rgba(19,35,58,.16);transition:.15s;
+}
+.result-btn:hover{transform:translateY(-1px);background:#203653}
+
+/* FILTER PANEL */
+.filter-panel{padding:13px 13px 12px;max-height:min(61vh,560px);overflow:auto;animation:panelIn .16s ease-out}
+@keyframes panelIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.panel-head strong{font-size:.78rem}
+.close-mini{
+  border:0;background:#f3f6f9;color:var(--muted);border-radius:999px;width:28px;height:28px;font-size:.85rem
+}
+.field-label{display:block;font-size:.65rem;color:var(--muted);margin:0 0 5px}
+select{
+  width:100%;min-height:42px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);
+  padding:0 10px;font-size:.76rem;outline:none;
+}
+select:focus{border-color:#8bb7ec;box-shadow:0 0 0 3px rgba(35,103,209,.08)}
+
+.service-list{display:flex;flex-direction:column;gap:6px}
+.service-item{
+  display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:start;padding:9px 10px;border-radius:12px;
+  border:1px solid transparent;transition:.12s;
+}
+.service-item.sfaa{background:var(--blue-50)}
+.service-item.domha{background:var(--purple-50)}
+.service-item.ltc{background:var(--green-50)}
+.service-item:hover{filter:brightness(.985);transform:translateY(-1px)}
+.service-item input{width:17px;height:17px;margin:2px 0 0;accent-color:var(--blue)}
+.service-name{font-size:.73rem;line-height:1.4;font-weight:760;color:var(--ink)}
+.agency-chip{
+  display:inline-flex;align-items:center;padding:2px 6px;border-radius:999px;font-size:.58rem;font-weight:850;white-space:nowrap
+}
+.agency-chip.sfaa{background:var(--blue-100);color:#2159a7}
+.agency-chip.domha{background:var(--purple-100);color:#6847b1}
+.agency-chip.ltc{background:var(--green-100);color:#247458}
+.panel-foot{
+  margin-top:10px;padding-top:9px;border-top:1px solid #edf1f5;display:flex;align-items:center;justify-content:space-between;gap:8px
+}
+.mini-action{border:0;background:transparent;color:var(--blue);font-size:.65rem;font-weight:800;padding:4px}
+.segmented{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.seg{position:relative}
+.seg input{position:absolute;opacity:0}
+.seg span{
+  min-height:38px;border:1px solid var(--line);border-radius:10px;background:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:.68rem;color:var(--ink2)
+}
+.seg input:checked+span{background:var(--blue-50);border-color:#9dc0ee;color:var(--blue);font-weight:800}
+
+/* RESULT DRAWER */
+.drawer-backdrop{
+  position:fixed;inset:0;background:rgba(21,31,45,.16);z-index:1100;opacity:0;pointer-events:none;transition:.18s;
+}
+.drawer-backdrop.show{opacity:1;pointer-events:auto}
+.result-drawer{
+  position:fixed;right:18px;top:18px;bottom:18px;width:min(410px,calc(100vw - 36px));z-index:1200;
+  display:flex;flex-direction:column;background:rgba(255,255,255,.97);backdrop-filter:blur(18px);
+  border:1px solid rgba(214,224,234,.95);border-radius:22px;box-shadow:0 24px 70px rgba(31,51,77,.22);
+  transform:translateX(calc(100% + 40px));transition:transform .22s cubic-bezier(.2,.8,.2,1);
+}
+.result-drawer.open{transform:translateX(0)}
+.drawer-head{padding:15px 16px 12px;border-bottom:1px solid #edf1f5;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.drawer-title strong{display:block;font-size:.9rem}
+.drawer-title small{font-size:.65rem;color:var(--muted)}
+.drawer-close{border:0;background:#f2f5f8;width:32px;height:32px;border-radius:999px;color:var(--muted)}
+#resultList{padding:10px;overflow:auto;flex:1}
+.resource-card{
+  padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff;margin-bottom:8px;
+  transition:.14s;box-shadow:0 2px 0 rgba(31,51,77,.02)
+}
+.resource-card:hover{border-color:#b8cce4;box-shadow:var(--shadow-soft);transform:translateY(-1px)}
+.resource-card.sfaa{border-left:4px solid #5a91dc}
+.resource-card.domha{border-left:4px solid #9479d0}
+.resource-card.ltc{border-left:4px solid #61aa8d}
+.resource-name{font-size:.78rem;line-height:1.4;font-weight:850;color:var(--ink)}
+.resource-meta{font-size:.64rem;color:var(--muted);margin-top:3px}
+.card-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.service-pill{padding:3px 6px;border-radius:6px;font-size:.58rem;font-weight:760;line-height:1.3}
+.service-pill.sfaa{background:var(--blue-50);color:#315f9d}
+.service-pill.domha{background:var(--purple-50);color:#664ca3}
+.service-pill.ltc{background:var(--green-50);color:#2f755b}
+.card-actions{display:flex;gap:6px;margin-top:8px}
+.card-actions button{
+  min-height:32px;border:1px solid var(--line);background:#fff;border-radius:9px;color:var(--ink2);
+  padding:0 10px;font-size:.64rem;font-weight:800
+}
+.card-actions button.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* POPUP */
+.leaflet-popup-content-wrapper{
+  border-radius:18px!important;box-shadow:0 16px 48px rgba(31,51,77,.22)!important;padding:0!important;
+}
+.leaflet-popup-content{margin:0!important;width:auto!important}
+.leaflet-popup-tip-container{filter:drop-shadow(0 3px 2px rgba(31,51,77,.08))}
+.leaflet-popup-close-button{
+  width:28px!important;height:28px!important;line-height:26px!important;right:7px!important;top:7px!important;
+  border-radius:999px;background:#f1f4f7!important;color:#617084!important;font-size:18px!important;z-index:4
+}
+.popup-card{min-width:270px;max-width:340px;padding:15px}
+.popup-card h3{font-size:.92rem;line-height:1.35;margin:0 34px 8px 0;color:var(--ink);font-weight:880}
+.popup-top{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.type-badge,.fit-badge{
+  display:inline-flex;align-items:center;padding:3px 7px;border-radius:999px;font-size:.59rem;font-weight:850
+}
+.type-service{background:var(--blue-50);color:#215ca9}
+.type-contact{background:var(--amber-50);color:#946310}
+.fit-badge{background:#f2f5f8;color:#516277}
+.address-box{
+  padding:8px 9px;border-radius:10px;background:#f7f9fb;color:var(--ink2);
+  font-size:.68rem;line-height:1.45
+}
+.contact-warning{
+  margin-top:7px;padding:7px 9px;border-radius:10px;background:var(--amber-50);color:#8a5d16;
+  font-size:.64rem;line-height:1.45
+}
+.service-blocks{display:flex;flex-direction:column;gap:7px;margin-top:9px}
+.service-block{padding:9px 10px;border-radius:11px;border:1px solid var(--line);background:#fff}
+.service-block.sfaa{border-left:4px solid #5a91dc}
+.service-block.domha{border-left:4px solid #9479d0}
+.service-block.ltc{border-left:4px solid #61aa8d}
+.service-block-head{display:flex;align-items:start;justify-content:space-between;gap:6px}
+.service-block-head strong{font-size:.69rem;line-height:1.4}
+.service-detail{font-size:.63rem;line-height:1.5;color:var(--muted);margin-top:5px}
+.service-detail a{color:var(--blue);font-weight:800;text-decoration:none}
+.elig-details{margin-top:8px;border-top:1px solid #edf1f5}
+.elig-details summary{cursor:pointer;padding-top:8px;font-size:.64rem;color:var(--blue);font-weight:850}
+.elig-body{padding-top:5px;font-size:.62rem;line-height:1.5;color:var(--muted)}
+
+/* MARKERS & CLUSTERS */
+.leaflet-marker-icon.resource-click-target{
+  display:flex!important;align-items:center;justify-content:center;cursor:pointer;background:transparent!important;border:0!important
+}
+.leaflet-marker-icon.resource-click-target::before{
+  content:"";position:absolute;width:38px;height:38px;border-radius:50%;
+  background:rgba(35,103,209,0);transition:.12s;pointer-events:none
+}
+.leaflet-marker-icon.resource-click-target:hover::before{background:rgba(35,103,209,.11);box-shadow:0 0 0 1px rgba(35,103,209,.14)}
+.marker{width:15px;height:15px;border-radius:50%;position:relative;z-index:2;box-shadow:0 2px 7px rgba(19,35,58,.28)}
+.marker.service{background:#286ed8;border:3px solid white}
+.marker.contact{background:white;border:4px solid #e69216}
+.marker-cluster-small,.marker-cluster-medium,.marker-cluster-large{background:rgba(47,107,195,.16)!important}
+.marker-cluster div{
+  background:#fff!important;color:var(--ink)!important;font-weight:850!important;border:2px solid #91b6e4!important;
+  box-shadow:0 4px 12px rgba(31,51,77,.14)!important
+}
+
+/* ONBOARDING */
+#onboarding{
+  position:fixed;inset:0;z-index:3000;display:grid;place-items:center;padding:18px;
+  background:rgba(21,31,45,.38);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)
+}
+.onboard{
+  width:min(720px,100%);background:#fff;border:1px solid rgba(225,232,239,.95);border-radius:24px;
+  box-shadow:0 28px 90px rgba(21,31,45,.28);padding:24px
+}
+.step{font-size:.61rem;letter-spacing:.08em;font-weight:900;color:var(--blue)}
+.onboard h2{font-size:1.25rem;margin:4px 0 2px;letter-spacing:-.02em}
+.lead{font-size:.72rem;color:var(--muted);margin:0 0 17px}
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.choice{
+  min-height:145px;border:1px solid var(--line);background:#fff;border-radius:16px;padding:14px;text-align:left;
+  transition:.15s;color:var(--ink)
+}
+.choice:hover{border-color:#9ebfe9;background:#f8fbff;transform:translateY(-2px);box-shadow:var(--shadow-soft)}
+.choice-icon{
+  width:36px;height:36px;border-radius:11px;display:grid;place-items:center;margin-bottom:12px;background:#f3f6f9;color:var(--ink2)
+}
+.choice-icon svg{width:19px;height:19px}
+.choice b{display:block;font-size:.86rem}
+.choice small{display:block;margin-top:4px;font-size:.64rem;line-height:1.45;color:var(--muted)}
+.subchoices{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.subchoice{
+  min-height:60px;border:1px solid var(--line);background:#fff;border-radius:13px;padding:11px 12px;text-align:left;
+  font-size:.72rem;font-weight:750;color:var(--ink);transition:.14s
+}
+.subchoice:hover{border-color:#9ebfe9;background:var(--blue-50)}
+.back{border:0;background:transparent;color:var(--blue);font-size:.68rem;font-weight:800;padding:0 0 8px}
+
+/* CREDIT + DEV FALLBACK */
+#dataCredit{
+  position:fixed;right:10px;bottom:28px;z-index:700;background:rgba(255,255,255,.84);
+  border:1px solid rgba(218,227,235,.9);border-radius:8px;padding:4px 7px;color:#58677a;font-size:.62rem;
+  backdrop-filter:blur(8px);pointer-events:none
+}
+#csvFallback{
+  position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:1600;
+  display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow-soft);
+  border-radius:999px;padding:7px 9px 7px 12px;font-size:.67rem;color:var(--muted)
+}
+#csvFallback label{background:var(--ink);color:#fff;border-radius:999px;padding:6px 10px;font-weight:850;cursor:pointer}
+.dev-box{
+  position:fixed;left:18px;bottom:18px;z-index:2000;max-width:420px;background:#fff;border:1px solid var(--line);
+  border-radius:12px;padding:9px 10px;font-size:.62rem;color:#6b7280;box-shadow:var(--shadow-soft)
+}
+
+/* MOBILE */
+@media(max-width:760px){
+  .ui-stack{left:10px;top:10px;width:calc(100vw - 20px);gap:7px}
+  .brand-card{padding:11px 12px;border-radius:15px}
+  .brand-mark{width:34px;height:34px;border-radius:10px}
+  .brand-title h1{font-size:.9rem}
+  .brand-title .sub{display:none}
+  .control-card{border-radius:15px;padding:8px}
+  .profile-line{padding-bottom:8px}
+  .quick-row{gap:5px}
+  .quick-btn{min-height:38px}
+  .filter-panel{max-height:52vh;border-radius:15px;padding:11px}
+  .result-drawer{
+    top:auto;left:0;right:0;bottom:0;width:100%;max-height:76vh;border-radius:22px 22px 0 0;
+    transform:translateY(105%);transition:transform .22s cubic-bezier(.2,.8,.2,1)
+  }
+  .result-drawer.open{transform:translateY(0)}
+  #resultList{padding-bottom:22px}
+  #onboarding{align-items:end;padding:10px}
+  .onboard{padding:18px 15px;border-radius:22px 22px 12px 12px;max-height:88vh;overflow:auto}
+  .choices,.subchoices{grid-template-columns:1fr}
+  .choice{min-height:88px;display:grid;grid-template-columns:42px 1fr;column-gap:10px;align-items:center}
+  .choice-icon{margin:0;grid-row:1/3}
+  .choice b,.choice small{grid-column:2}
+  .choice small{margin-top:-8px}
+  #dataCredit{right:7px;bottom:28px;font-size:.56rem}
+}
+
+/* ===== V4 service information layer ===== */
+.service-info-btn{
+  width:28px;height:28px;border:0;border-radius:999px;background:rgba(255,255,255,.72);
+  color:var(--ink2);font-size:.72rem;font-weight:900;display:grid;place-items:center;padding:0;
+}
+.service-info-btn:hover{background:#fff;box-shadow:0 2px 8px rgba(31,51,77,.10)}
+.service-unmapped-note{
+  grid-column:2/4;margin-top:2px;font-size:.61rem;line-height:1.4;color:#8a651f;
+}
+.service-item.unmapped{
+  background:#fff9ec!important;border:1px solid #f1dfb8!important;
+}
+.info-modal-backdrop{
+  position:fixed;inset:0;z-index:2100;background:rgba(21,31,45,.26);backdrop-filter:blur(4px);
+  opacity:0;pointer-events:none;transition:.18s;
+}
+.info-modal-backdrop.show{opacity:1;pointer-events:auto}
+.info-modal{
+  position:fixed;left:50%;top:50%;z-index:2200;width:min(620px,calc(100vw - 28px));max-height:min(78vh,720px);
+  transform:translate(-50%,-48%) scale(.98);opacity:0;pointer-events:none;transition:.18s;
+  background:#fff;border:1px solid rgba(218,227,235,.95);border-radius:22px;
+  box-shadow:0 28px 90px rgba(21,31,45,.28);overflow:hidden;display:flex;flex-direction:column;
+}
+.info-modal.open{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
+.info-head{padding:16px 18px 12px;border-bottom:1px solid #edf1f5;display:flex;align-items:flex-start;gap:10px}
+.info-head-main{min-width:0;flex:1}
+.info-head h2{font-size:1rem;line-height:1.35;margin:0;color:var(--ink)}
+.info-head .info-agency{margin-top:5px}
+.info-close{border:0;background:#f2f5f8;border-radius:999px;width:32px;height:32px;color:var(--muted)}
+.info-body{padding:16px 18px 18px;overflow:auto}
+.info-section{margin-bottom:14px}
+.info-label{font-size:.62rem;color:var(--muted);font-weight:850;letter-spacing:.02em;margin-bottom:5px}
+.info-summary{
+  padding:11px 12px;border-radius:12px;background:#f7f9fb;color:var(--ink2);
+  font-size:.76rem;line-height:1.6;
+}
+.info-audience{
+  padding:9px 10px;border-radius:10px;background:#fff;border:1px solid var(--line);
+  font-size:.72rem;line-height:1.5;color:var(--ink2);
+}
+.info-privacy{
+  padding:10px 11px;border-radius:11px;background:#fff7e7;border:1px solid #f0dbad;
+  font-size:.7rem;line-height:1.55;color:#7f5b17;
+}
+.info-full{
+  margin-top:8px;border-top:1px solid #edf1f5;padding-top:10px;
+}
+.info-full summary{cursor:pointer;color:var(--blue);font-size:.7rem;font-weight:850}
+.info-full-text{margin-top:8px;font-size:.7rem;line-height:1.7;color:var(--ink2);white-space:pre-line}
+.info-link{
+  display:inline-flex;align-items:center;gap:4px;margin-top:8px;color:var(--blue);font-size:.68rem;font-weight:850;text-decoration:none;
+}
+.info-source{
+  margin-top:14px;padding-top:10px;border-top:1px solid #edf1f5;color:var(--muted);font-size:.61rem;line-height:1.5
+}
+.no-map-card{
+  padding:12px;border:1px solid #f0ddb3;border-radius:14px;background:#fffaf0;margin-bottom:8px;
+}
+.no-map-title{font-size:.8rem;font-weight:850;color:var(--ink)}
+.no-map-text{font-size:.66rem;color:#7b5b22;line-height:1.5;margin-top:4px}
+.no-map-actions{margin-top:8px}
+.no-map-actions button{
+  min-height:32px;border:1px solid #e3c98e;background:#fff;border-radius:9px;color:#775515;
+  padding:0 10px;font-size:.64rem;font-weight:850
+}
+@media(max-width:760px){
+  .info-modal{
+    left:0;right:0;top:auto;bottom:0;width:100%;max-height:82vh;
+    transform:translateY(105%);border-radius:22px 22px 0 0;
+  }
+  .info-modal.open{transform:translateY(0)}
+}
+
+
+/* ===== direct MapLibre vector map ===== */
+.maplibregl-ctrl-bottom-right{right:0;bottom:0}
+.maplibregl-ctrl-group{
+  border:0!important;box-shadow:var(--shadow-soft)!important;border-radius:12px!important;overflow:hidden
+}
+.maplibregl-ctrl-group button{width:36px!important;height:36px!important}
+.maplibregl-popup{z-index:900}
+.maplibregl-popup-content{
+  padding:0!important;border-radius:18px!important;box-shadow:0 16px 48px rgba(31,51,77,.22)!important
+}
+.maplibregl-popup-close-button{
+  width:28px;height:28px;right:7px;top:7px;border:0;border-radius:999px;background:#f1f4f7;
+  color:#617084;font-size:18px;z-index:4
+}
+.maplibregl-popup-tip{border-top-color:#fff!important}
+
+
+/* ===== v4.5 independent DOM marker overlay ===== */
+.dom-map-marker{
+  appearance:none;-webkit-appearance:none;
+  position:relative;width:44px;height:44px;border:0;background:transparent;padding:0;margin:0;
+  display:grid;place-items:center;cursor:pointer;border-radius:50%;
+}
+.dom-map-marker::after{
+  content:"";display:block;width:15px;height:15px;border-radius:50%;
+  box-shadow:0 2px 7px rgba(19,35,58,.28);
+}
+.dom-map-marker.service::after{background:#286ed8;border:3px solid #fff}
+.dom-map-marker.contact::after{background:#fff;border:4px solid #e69216}
+.dom-map-marker:hover,.dom-map-marker:focus-visible{
+  background:rgba(35,103,209,.12);outline:none;
+}
+.dom-map-cluster{
+  appearance:none;-webkit-appearance:none;
+  min-width:38px;height:38px;padding:0 8px;border-radius:999px;
+  background:#fff;border:2px solid #91b6e4;color:#13233a;font-size:.72rem;font-weight:900;
+  box-shadow:0 4px 14px rgba(31,51,77,.18);cursor:pointer;
+}
+.dom-map-cluster:hover,.dom-map-cluster:focus-visible{
+  background:#eef5ff;border-color:#5d97dc;outline:none;
+}
+
+
+/* ===== fixed popup positioning ===== */
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip{
+  border-top-color:#fff!important;
+}
+.maplibregl-popup{
+  z-index:1050;
+}
+.maplibregl-popup-content{
+  transform:none!important;
+}
+
+
+/* ===== v4.6 QA / resilience ===== */
+.result-limit-notice{
+  margin:10px 10px 0;padding:9px 10px;border:1px solid #dbe5ef;border-radius:11px;
+  background:#f7f9fb;color:#5b6b7e;font-size:.64rem;line-height:1.5;
+}
+.system-notice{
+  position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:2600;
+  width:min(560px,calc(100vw - 24px));display:flex;align-items:flex-start;gap:8px;
+  padding:10px 12px;border-radius:13px;background:#fff;border:1px solid #e6d29e;
+  box-shadow:0 12px 36px rgba(31,51,77,.18);color:#71521b;font-size:.7rem;line-height:1.5;
+}
+.system-notice.error{border-color:#efb7b7;background:#fff8f8;color:#8c2f2f}
+.system-notice button{
+  flex:0 0 auto;margin-left:auto;border:0;background:transparent;color:inherit;font-weight:900;
+  width:28px;height:28px;border-radius:999px;
+}
+.phone-raw{display:block;color:var(--ink2)}
+.phone-actions{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.phone-action{
+  display:inline-flex;align-items:center;min-height:29px;padding:0 8px;border:1px solid #b9d2ef;
+  border-radius:8px;background:#f5f9ff;color:#245fa8!important;text-decoration:none!important;
+  font-size:.62rem;font-weight:850;
+}
+@media(max-width:760px){
+  .system-notice{bottom:68px}
+}
+
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div class="ui-stack">
+  <section class="brand-card">
+    <div class="brand-row">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19V8.5a2 2 0 0 1 1.1-1.8l6-3a2 2 0 0 1 1.8 0l6 3A2 2 0 0 1 20 8.5V19"/>
+          <path d="M8 19v-5h8v5M9 9h6"/>
+        </svg>
+      </div>
+      <div class="brand-title">
+        <h1>精神支持服務地圖</h1>
+        <div class="sub">依目前情況，快速找到適合的服務。</div>
+      </div>
+      <div class="font-controls" aria-label="文字大小">
+        <button id="fontDecrease" aria-label="縮小文字">A−</button>
+        <button id="fontIncrease" aria-label="放大文字">A+</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="control-card">
+    <div class="profile-line">
+      <div class="profile-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="8" r="3"></circle><path d="M5 20c.8-4 3.2-6 7-6s6.2 2 7 6"></path>
+        </svg>
+      </div>
+      <div class="profile-copy">
+        <small>目前</small>
+        <strong id="profileText">尚未選擇</strong>
+      </div>
+      <button class="text-link" id="changeProfileBtn">變更</button>
+    </div>
+
+    <div class="quick-row">
+      <button class="quick-btn" data-panel="county">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s6-5.3 6-11a6 6 0 1 0-12 0c0 5.7 6 11 6 11z"/><circle cx="12" cy="10" r="2"/></svg>
+        地區
+      </button>
+      <button class="quick-btn" data-panel="service">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+        服務
+      </button>
+      <button class="quick-btn" data-panel="more">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+        更多
+      </button>
+    </div>
+
+    <div class="result-row">
+      <div class="result-count">找到 <strong id="resultCount">0</strong> 個資源</div>
+      <button id="openResultsBtn" class="result-btn">查看結果</button>
+    </div>
+  </section>
+
+  <section id="filterPanel" class="filter-panel hidden">
+    <div id="panelCounty" class="panel-view hidden">
+      <div class="panel-head"><strong>地區</strong><button class="close-mini" data-close-panel>×</button></div>
+      <label class="field-label" for="countyFilter">縣市</label>
+      <select id="countyFilter"><option value="all">全台灣所有縣市</option></select>
+    </div>
+
+    <div id="panelService" class="panel-view hidden">
+      <div class="panel-head"><strong>服務名稱</strong><button class="close-mini" data-close-panel>×</button></div>
+      <div id="serviceFilters" class="service-list"></div>
+      <div class="panel-foot">
+        <button id="clearServicesBtn" class="mini-action">清除選取</button>
+        <span id="serviceSelectedCount" style="font-size:.62rem;color:var(--muted)">未篩選</span>
+      </div>
+    </div>
+
+    <div id="panelMore" class="panel-view hidden">
+      <div class="panel-head"><strong>更多篩選</strong><button class="close-mini" data-close-panel>×</button></div>
+      <label class="field-label">地址類型</label>
+      <div class="segmented">
+        <label class="seg"><input type="radio" name="addressType" value="all" checked><span>全部</span></label>
+        <label class="seg"><input type="radio" name="addressType" value="服務據點"><span>服務據點</span></label>
+        <label class="seg"><input type="radio" name="addressType" value="聯絡地址"><span>聯絡地址</span></label>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="drawerBackdrop" class="drawer-backdrop"></div>
+<aside id="resultDrawer" class="result-drawer" aria-label="資源結果">
+  <header class="drawer-head">
+    <div class="drawer-title">
+      <strong>資源結果</strong>
+      <small id="drawerCount">0 個資源</small>
+    </div>
+    <button id="closeResultsBtn" class="drawer-close" aria-label="關閉">×</button>
+  </header>
+  <div id="resultLimitNotice" class="result-limit-notice hidden"></div>
+  <div id="resultList"></div>
+</aside>
+
+<div id="dataCredit">資料由衛福部心健司彙整提供　版本時間2026.10</div>
+
+
+<div id="systemNotice" class="system-notice hidden" role="status" aria-live="polite">
+  <span id="systemNoticeText"></span>
+  <button id="systemNoticeClose" type="button" aria-label="關閉通知">×</button>
+</div>
+
+<div id="csvFallback" class="hidden">
+  <span>資料未自動載入</span>
+  <label>載入 CSV<input id="csvFallbackInput" type="file" accept=".csv" hidden></label>
+</div>
+
+<div id="devBox" class="dev-box hidden">[[DEV：v4.6 secure]]</div>
+
+
+<div id="serviceInfoBackdrop" class="info-modal-backdrop"></div>
+<section id="serviceInfoModal" class="info-modal" aria-label="服務說明">
+  <header class="info-head">
+    <div class="info-head-main">
+      <h2 id="serviceInfoTitle"></h2>
+      <div id="serviceInfoAgency" class="info-agency"></div>
+    </div>
+    <button id="serviceInfoClose" class="info-close" aria-label="關閉">×</button>
+  </header>
+  <div id="serviceInfoBody" class="info-body"></div>
+</section>
+
+<div id="onboarding">
+  <div class="onboard">
+    <div id="roleStep">
+      <div class="step">STEP 1 / 2</div>
+      <h2>您想為誰找服務？</h2>
+      <p class="lead">選擇最接近您的情況。</p>
+      <div class="choices">
+        <button class="choice" data-role="self">
+          <span class="choice-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3"/><path d="M5 20c.8-4 3.2-6 7-6s6.2 2 7 6"/></svg>
+          </span>
+          <b>我自己</b><small>依目前證明、診斷或就醫情況找服務。</small>
+        </button>
+        <button class="choice" data-role="family">
+          <span class="choice-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M2.5 20c.5-4 2.5-6 5.5-6 1.6 0 2.9.5 3.8 1.4M12.2 15.4c.9-.9 2.2-1.4 3.8-1.4 3 0 5 2 5.5 6"/></svg>
+          </span>
+          <b>家人／照顧者</b><small>找給家人使用的服務，或找照顧者自己的支持。</small>
+        </button>
+        <button class="choice" data-role="helper">
+          <span class="choice-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 4v5c0 4.5-2.6 7.3-7 9-4.4-1.7-7-4.5-7-9V7l7-4z"/><path d="M9 12l2 2 4-4"/></svg>
+          </span>
+          <b>我是助人工作者</b><small>直接進入完整資源模式。</small>
+        </button>
+      </div>
+    </div>
+
+    <div id="selfStep" class="hidden">
+      <button class="back" data-back>← 回上一題</button>
+      <div class="step">STEP 2 / 2</div>
+      <h2>目前比較接近哪一種情況？</h2>
+      <p class="lead">選擇目前最接近的資格狀況。</p>
+      <div class="subchoices">
+        <button class="subchoice" data-self="disability">有身心障礙證明</button>
+        <button class="subchoice" data-self="diagnosis">有精神疾病診斷／正在接受精神醫療，但沒有身障證明</button>
+        <button class="subchoice" data-self="catastrophic">有重大傷病證明</button>
+        <button class="subchoice" data-self="unsure">不確定自己的資格</button>
+      </div>
+    </div>
+
+    <div id="familyStep" class="hidden">
+      <button class="back" data-back>← 回上一題</button>
+      <div class="step">STEP 2 / 2</div>
+      <h2>您主要想找哪一類協助？</h2>
+      <p class="lead">進入地圖後可再調整服務。</p>
+      <div class="subchoices">
+        <button class="subchoice" data-family="person">找給家人本人使用的服務</button>
+        <button class="subchoice" data-family="caregiver">找照顧者自己的支持服務</button>
+        <button class="subchoice" data-family="both">兩者都想看</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+window.APP_CONFIG={
+  csvUrl:"./community_support_map_data_v11.csv",
+  csv:{maxFileSize:5*1024*1024,maxRows:5000,maxStringLength:250,expectedHeaders:["resource_key","資源名稱","地址","地圖地址類別","服務類型","latitude","longitude"]},
+  analytics:{enabled:false,endpoint:"",respectDoNotTrack:true}
+};
+
+const DEV_MODE=new URLSearchParams(location.search).get("dev")==="1";
+const devBox=document.getElementById("devBox");
+if(DEV_MODE)devBox.classList.remove("hidden");
+
+
+const SERVICE_CATALOG={
+"社區居住":{
+  agency:"sfaa",agencyName:"社家署",audience:"精神障礙者",mapped:false,
+  summary:"由身心障礙福利機構或團體組成專業團隊，在一般社區住宅提供非機構式居住支持。服務包含日常生活、健康管理、社會支持、休閒與社區參與等。",
+  privacy:"據點是服務使用者實際居住場所，為維護安全與隱私，不公開地址。需要服務時請洽各縣市社會局處協助媒合。",
+  full:"1.社區居住服務係由身心障礙福利機構或團體組成專業服務團隊辦理，以一般社區住宅提供18歲以上、經需求評估具社區居住需求且需專業支持之身心障礙者非機構式居住服務，內容包括日常生活支持、居住環境規劃、健康管理、社會支持、休閒及社區參與、日間服務資源連結、權益維護及其他相關支持服務。\n2.另考量社區居住據點屬身心障礙者實際居住場所，為維護其安全及隱私，不公開其據點地址。如有使用該服務需求，請逕洽各縣市社會局處，以利媒合所需資源。連絡方式請參考網頁資訊。",
+  link:"https://dpws.sfaa.gov.tw/community-detail.jsp?serno=202408220005"
+},
+"社區日間作業設施":{
+  agency:"sfaa",agencyName:"社家署",audience:"",mapped:true,
+  summary:"以作業活動為主，搭配自立生活與休閒文康活動，提供無法進入庇護性就業場所的身心障礙者支持。",
+  full:"服務提供單位對無法進入庇護性就業服務場所之身心障礙者，提供服務以作業活動為主，自立生活及休閒文康為輔。"
+},
+"精神障礙者協作模式服務據點":{
+  agency:"sfaa",agencyName:"社家署",audience:"",mapped:true,
+  summary:"又稱精障會所。透過會員與工作人員共同參與會務與活動，建立社群支持、互助與日常生活能力。",
+  full:"精神障礙者協作模式服務(又稱精障會所)，有別於醫療模式服務，提供會員社區支持、學習與互助的環境，透過會務工作的設計，與工作人員共同維持會務的營運，並協助透過參與會務運作與活動的過程，發掘潛能與提升日常生活處理的能力，彼此建立社群支持網絡，維持人際互動及穩定情緒。"
+},
+"提供日間照顧之身心障礙福利機構":{
+  agency:"sfaa",agencyName:"社家署",audience:"",mapped:true,
+  summary:"提供日間作業活動、技藝訓練、生涯發展、社會人際與生活照顧等日間服務。",
+  full:"提供參與日間作業活動、技藝訓練、生涯發展、社會人際及生活照顧之日間照顧服務。"
+},
+"身心障礙者家庭托顧服務":{
+  agency:"sfaa",agencyName:"社家署",audience:"",mapped:false,
+  summary:"由家庭托顧服務員在其住所提供身體照顧、日常生活與安全照顧。",
+  privacy:"據點設於家庭托顧服務員住所，為維護服務員與使用者的安全、居住隱私及個人資料，不公開地址。需要服務時請洽各縣市社會局處協助媒合。",
+  full:"1.身心障礙者家庭托顧服務係指家庭托顧服務員於其住所提供服務對象身體、日常生活及安全性之照顧服務。\n2.另考量家庭托顧服務據點係設置於家庭托顧服務員住所，考量家庭托顧服務員及服務使用者之人身安全、居住隱私及個人資料保護，不宜公開據點地址。如有使用該服務需求，請逕洽各縣市社會局處，以利媒合所需資源。連絡方式請參考網頁資訊。",
+  link:"https://dpws.sfaa.gov.tw/community-detail.jsp?serno=202412030004"
+},
+"社區式日間照顧服務":{
+  agency:"sfaa",agencyName:"社家署",audience:"",mapped:true,
+  summary:"提供18歲以上、通過需求評估的身心障礙者日間支持，包括生活自理、人際社交、休閒、健康促進與社區適應。",
+  full:"社區式日間照顧服務提供年滿18歲以上且通過需求評估之身心障礙者即可於該場域中接受自立生活及休閒文康等服務，其服務內容適用身心障礙者個人照顧服務辦法第47條包括生活自理能力增進、人際關係及社交技巧訓練、休閒生活服務、健康促進服務、社區適應服務及其他社區式日間照顧服務。"
+},
+"自立生活支持服務":{
+  agency:"sfaa",agencyName:"社家署",audience:"",mapped:true,
+  summary:"協助經需求評估有自立生活需求的身心障礙者擬定自立生活計畫，提供同儕支持、個人助理、生活技巧訓練及資源連結。",
+  full:"1.提供經需求評估建議使用自立生活支持服務之身心障礙者自立生活概念培力、協助擬定自立生活計畫、提供同儕支持、個人助理協助、自立生活技巧訓練，以及社會資源諮詢及連結(包含無障礙居住環境、設備與輔具、無障礙交通等)，並定期檢視自立生活計畫之執行情形。\n2.另全國現有3處自立生活支持服務中心，其餘縣市屬方案性服務，爰無法提供地址。如有使用該服務需求，請逕洽各縣市社會局處，以利媒合所需資源。連絡方式請參考網頁資訊。",
+  link:"https://dpws.sfaa.gov.tw/community-detail.jsp?serno=202502240001"
+},
+"家庭照顧者支持服務":{
+  agency:"sfaa",agencyName:"社家署",audience:"精神障礙者之家庭照顧者",mapped:true,
+  summary:"以照顧者為主要服務對象，提供個案服務、照顧訓練、支持團體、心理協談、到宅專業服務及其他支持，協助減輕照顧負荷。",
+  full:"以照顧者為主要工作對象，發展並提供在地多元化支持服務，給予照顧者心理及情緒支持，增強其照顧知能，以減輕家庭照顧負荷，內容包含個案服務、辦理長照、身心障礙或精神病人之相關知識、照顧訓練或紓壓課程、情緒支持團體、照顧技巧訓練、支持團體、自助團體、被照顧者安全及陪伴(照顧者接受服務期間提供臨時性照顧服務)、心理協談、照顧技巧示範指導、到宅專業服務、手足、照顧者互助支持服務及其他有助於提升照顧者能力及其生活品質之服務。"
+},
+"家庭照顧者支持服務共融據點":{
+  agency:"ltc",agencyName:"長照司",audience:"",mapped:true,
+  summary:"提供長照與身心障礙者家庭照顧者個案服務、照顧安排諮詢、到宅技巧指導、心理支持、課程與支持團體等。",
+  full:"提供長照、身心障礙者(含精神障礙者)之家庭照顧者個案服務、照顧安排諮詢、到宅照技巧指導、轉介個別心理輔導、諮商服務、照顧知識課程、支持團體、志工關懷等服務。"
+},
+"精神病病人及家庭支持服務":{
+  agency:"domha",agencyName:"心健司",audience:"精神病人、精神障礙者及其家人",mapped:true,
+  summary:"提供精神病病人及其家庭諮詢、心理衛生教育、情緒支持，以及轉銜與喘息等資源連結。",
+  full:"提供精神病病人及其家庭諮詢、心理衛生教育、情緒支持等服務，並提供網絡轉銜及喘息服務之資源連結。"
+},
+"精神病病人社區居住服務":{
+  agency:"domha",agencyName:"心健司",audience:"精神病人、精神障礙者",mapped:true,
+  summary:"提供非機構式居住支持，包括社區居住、居住環境規劃與健康管理協助。",
+  full:"提供非機構式居住服務，包含社區居住、居住環境規劃、健康管理協助等。"
+},
+"精神病病人自立生活支持服務":{
+  agency:"domha",agencyName:"心健司",audience:"精神病人、精神障礙者",mapped:true,
+  summary:"提供居家生活協助，包含連結居家照顧服務資源與訓練參與社會活動。",
+  full:"提供精神病病人居家生活協助事項，包括：連結居家照顧服務資源、訓練參與社會活動。"
+}
+};
+
+const CANONICAL_SERVICES=Object.keys(SERVICE_CATALOG);
+const CANONICAL_SERVICE_SET=new Set(CANONICAL_SERVICES);
+
+const SERVICE_META=Object.fromEntries(
+  Object.entries(SERVICE_CATALOG).map(([k,v])=>[k,{
+    agency:v.agency,agencyName:v.agencyName,
+    audience:
+      k==="家庭照顧者支持服務"?"caregiver":
+      k==="家庭照顧者支持服務共融據點"?"caregiver":
+      k==="精神病病人及家庭支持服務"?"both":"person",
+    hint:v.summary
+  }])
+);
+
+const DISABILITY=new Set(["社區日間作業設施","社區式日間照顧服務","提供日間照顧之身心障礙福利機構","自立生活支持服務"]);
+const MENTAL=new Set(["精神病病人及家庭支持服務","精神病病人自立生活支持服務","精神病病人社區居住服務"]);
+const CAREGIVER=new Set(["家庭照顧者支持服務","家庭照顧者支持服務共融據點","精神病病人及家庭支持服務"]);
+
+let profile={role:null,selfStatus:null,familyGoal:null};
+let serviceRecords=[],resources=[],map,mapReady=false,currentPopup=null;
+let fontLevel=1;
+let currentFilteredRows=[];
+let mapMarkers=[];
+let markerRenderTimer=null;
+
+const profileText=document.getElementById("profileText");
+const resultCount=document.getElementById("resultCount");
+const drawerCount=document.getElementById("drawerCount");
+const countyFilter=document.getElementById("countyFilter");
+const serviceFilters=document.getElementById("serviceFilters");
+const serviceSelectedCount=document.getElementById("serviceSelectedCount");
+const filterPanel=document.getElementById("filterPanel");
+const resultDrawer=document.getElementById("resultDrawer");
+const drawerBackdrop=document.getElementById("drawerBackdrop");
+const resultList=document.getElementById("resultList");
+const csvFallback=document.getElementById("csvFallback");
+const csvFallbackInput=document.getElementById("csvFallbackInput");
+const systemNotice=document.getElementById("systemNotice");
+const systemNoticeText=document.getElementById("systemNoticeText");
+const resultLimitNotice=document.getElementById("resultLimitNotice");
+function showSystemNotice(message,key="general",kind="warn"){
+  systemNoticeText.textContent=message;
+  systemNotice.dataset.key=key;
+  systemNotice.classList.toggle("error",kind==="error");
+  systemNotice.classList.remove("hidden");
+}
+function clearSystemNotice(key){
+  if(!key||systemNotice.dataset.key===key){
+    systemNotice.classList.add("hidden");
+    systemNotice.dataset.key="";
+  }
+}
+document.getElementById("systemNoticeClose").addEventListener("click",()=>clearSystemNotice());
+
+
+function txt(v){return v==null?"":String(v).slice(0,window.APP_CONFIG.csv.maxStringLength)}
+
+function normalizeServiceNames(raw){
+  const value=txt(raw).trim();
+  if(!value)return [];
+  return [...new Set(value.split(/[｜|]/).map(s=>s.trim()).filter(s=>CANONICAL_SERVICE_SET.has(s)))];
+}
+function normalizeRow(row){
+  const lat=parseFloat(row["latitude"]),lng=parseFloat(row["longitude"]);
+  if(!Number.isFinite(lat)||!Number.isFinite(lng)||lat<20||lat>27||lng<117||lng>123.5)return null;
+  const names=normalizeServiceNames(row["服務類型"]);
+  if(!names.length)return null;
+  return{
+    recordId:txt(row["service_record_id"]),key:txt(row["resource_key"]),
+    name:txt(row["資源名稱"]||"未命名資源"),address:txt(row["地址"]),
+    addressType:txt(row["地圖地址類別"]||"服務據點"),serviceNames:names,
+    county:txt(row["服務縣市"]),area:txt(row["服務區域"]),phone:txt(row["電話"]),
+    lat,lng,source:txt(row["來源單位"]),precision:txt(row["定位精度"]),note:txt(row["地圖標示備註"])
+  };
+}
+function groupResources(records){
+  const grouped=new Map();
+  records.forEach(rec=>{
+    const key=rec.key||`ROW-${rec.recordId}`;
+    if(!grouped.has(key))grouped.set(key,{
+      key,name:rec.name,address:rec.address,addressType:rec.addressType,county:rec.county,
+      lat:rec.lat,lng:rec.lng,precision:rec.precision,note:rec.note,records:[]
+    });
+    grouped.get(key).records.push(rec);
+  });
+  return [...grouped.values()].map(item=>{
+    item.services=[...new Set(item.records.map(r=>r.service))];
+    return item;
+  });
+}
+function parseCSV(text,label){
+  if(typeof text!=="string"||text.length>window.APP_CONFIG.csv.maxFileSize*2){
+    if(DEV_MODE)devBox.textContent="[[DEV：CSV 內容大小異常]]";
+    return;
+  }
+
+  Papa.parse(text,{
+    header:true,
+    skipEmptyLines:"greedy",
+    transformHeader:h=>String(h||"").replace(/^\uFEFF/,"").trim(),
+    complete:r=>{
+      const fields=r.meta?.fields||[];
+      const missing=window.APP_CONFIG.csv.expectedHeaders.filter(h=>!fields.includes(h));
+      if(missing.length){
+        if(DEV_MODE)devBox.textContent=`[[DEV：CSV 缺少必要欄位：${missing.join("、")}]]`;
+        return;
+      }
+      if(r.errors?.length){
+        const fatal=r.errors.some(e=>e.type==="Quotes"||e.type==="Delimiter");
+        if(fatal){
+          if(DEV_MODE)devBox.textContent="[[DEV：CSV 解析失敗]]";
+          return;
+        }
+      }
+      if(r.data.length>window.APP_CONFIG.csv.maxRows){
+        if(DEV_MODE)devBox.textContent="[[DEV：CSV 筆數超過上限]]";
+        return;
+      }
+
+      const normalized=r.data.map(normalizeRow).filter(Boolean);
+      const expanded=normalized.flatMap(rec=>rec.serviceNames.map(service=>({...rec,service})));
+      serviceRecords=expanded;
+      resources=groupResources(expanded);
+      buildCounty();
+      buildServices();
+      render();
+      csvFallback.classList.add("hidden");
+      clearSystemNotice("data");
+      if(DEV_MODE)devBox.textContent=`[[DEV：${expanded.length} 筆服務資料，${resources.length} 個資源點，來源 ${label}]]`;
+    }
+  });
+}
+function loadCSV(){
+  fetch(window.APP_CONFIG.csvUrl,{cache:"no-store"})
+    .then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.text()})
+    .then(t=>parseCSV(t,"預設 CSV"))
+    .catch(()=>{
+      csvFallback.classList.remove("hidden");
+      showSystemNotice("資料無法自動載入。若您是直接開啟本機 HTML，請使用「載入 CSV」；若為網站版，請稍後重新整理。","data","warn");
+    });
+}
+csvFallbackInput.addEventListener("change",e=>{
+  const f=e.target.files?.[0];if(!f)return;
+  const name=String(f.name||"").toLowerCase();
+  const type=String(f.type||"").toLowerCase();
+  if(!name.endsWith(".csv"))return;
+  if(type&&![ "text/csv","application/vnd.ms-excel","text/plain" ].includes(type))return;
+  if(f.size<=0||f.size>APP_CONFIG.csv.maxFileSize)return;
+  f.text().then(t=>parseCSV(t,f.name)).catch(()=>{if(DEV_MODE)devBox.textContent="[[DEV：CSV 讀取失敗]]";});
+});
+
+function initMap(){
+  map=new maplibregl.Map({
+    container:"map",
+    style:"https://tiles.openfreemap.org/styles/liberty",
+    center:[120.96,23.7],
+    zoom:7.3,
+    minZoom:6.5,
+    maxZoom:19,
+    maxBounds:[[117,20],[123.5,27.5]],
+    attributionControl:true
+  });
+  map.addControl(new maplibregl.NavigationControl({showCompass:false}),"bottom-right");
+
+  const mapLoadTimer=window.setTimeout(()=>{
+    if(!mapReady)showSystemNotice("底圖載入逾時。請檢查網路後重新整理；若仍無法使用，請改用 NLSC EMAP6 版。","map","warn");
+  },12000);
+
+  map.on("load",()=>{
+    window.clearTimeout(mapLoadTimer);
+    mapReady=true;
+    clearSystemNotice("map");
+    render();
+    window.setTimeout(localizeMapLabels,0);
+  });
+
+  map.on("moveend",scheduleMarkerRender);
+  map.on("resize",scheduleMarkerRender);
+
+  let mapErrorCount=0;
+  map.on("error",e=>{
+    mapErrorCount++;
+    if(mapErrorCount>=3)showSystemNotice("底圖部分資源載入失敗，請檢查網路後重新整理；服務資料仍保留。","map","warn");
+    if(DEV_MODE&&e?.error)devBox.textContent="[[DEV：MapLibre："+String(e.error.message||e.error).slice(0,180)+"]]";
+  });
+}
+
+function localizeMapLabels(){
+  if(!mapReady)return;
+  const style=map.getStyle();
+  if(!style?.layers)return;
+  style.layers.forEach(layer=>{
+    if(layer.type!=="symbol")return;
+    const tf=layer.layout?.["text-field"];
+    if(tf==null)return;
+    const raw=JSON.stringify(tf);
+    if(!raw.includes("name"))return;
+    try{
+      map.setLayoutProperty(layer.id,"text-field",[
+        "coalesce",
+        ["get","name:zh-Hant"],
+        ["get","name:zh"],
+        ["get","name"],
+        ["get","name:en"],
+        ["get","name:latin"]
+      ]);
+    }catch(e){}
+  });
+}
+
+function scheduleMarkerRender(){
+  if(markerRenderTimer)window.clearTimeout(markerRenderTimer);
+  markerRenderTimer=window.setTimeout(renderMapMarkers,40);
+}
+
+function clearMapMarkers(){
+  mapMarkers.forEach(m=>{try{m.remove();}catch(e){}});
+  mapMarkers=[];
+}
+
+function makePointElement(item){
+  const el=document.createElement("button");
+  el.type="button";
+  el.className="dom-map-marker "+(item.addressType==="聯絡地址"?"contact":"service");
+  el.setAttribute("aria-label",item.name);
+  el.title=item.name;
+  el.addEventListener("click",e=>{
+    e.preventDefault();e.stopPropagation();
+    openResourcePopup(item);
+  });
+  return el;
+}
+
+function makeClusterElement(group){
+  const el=document.createElement("button");
+  el.type="button";
+  el.className="dom-map-cluster";
+  el.textContent=String(group.length);
+  el.setAttribute("aria-label",`${group.length} 個資源`);
+  el.addEventListener("click",e=>{
+    e.preventDefault();e.stopPropagation();
+    const lngs=group.map(x=>x.lng),lats=group.map(x=>x.lat);
+    if(group.length>1){
+      map.fitBounds(
+        [[Math.min(...lngs),Math.min(...lats)],[Math.max(...lngs),Math.max(...lats)]],
+        {padding:70,maxZoom:15,duration:450}
+      );
+    }else{
+      map.easeTo({center:[group[0].lng,group[0].lat],zoom:15,duration:450});
+    }
+  });
+  return el;
+}
+
+function getViewportRows(rows,padRatio=.12){
+  if(!mapReady||!map||!rows.length)return [];
+  const b=map.getBounds(),sw=b.getSouthWest(),ne=b.getNorthEast();
+  const lngPad=Math.max((ne.lng-sw.lng)*padRatio,.01);
+  const latPad=Math.max((ne.lat-sw.lat)*padRatio,.01);
+  return rows.filter(item=>
+    item.lng>=sw.lng-lngPad&&item.lng<=ne.lng+lngPad&&
+    item.lat>=sw.lat-latPad&&item.lat<=ne.lat+latPad
+  );
+}
+
+function renderMapMarkers(){
+  if(!mapReady||!map)return;
+  clearMapMarkers();
+
+  /* 只建立目前視窗附近的 DOM marker；平移/縮放結束後會重新計算。 */
+  const rows=getViewportRows(currentFilteredRows,.12);
+  if(!rows.length)return;
+
+  const zoom=map.getZoom();
+  const shouldCluster=zoom<14;
+  const cellSize=zoom<9?62:zoom<11?56:zoom<13?50:42;
+
+  if(!shouldCluster){
+    rows.forEach(item=>{
+      const marker=new maplibregl.Marker({element:makePointElement(item),anchor:"center"})
+        .setLngLat([item.lng,item.lat]).addTo(map);
+      mapMarkers.push(marker);
+    });
+    return;
+  }
+
+  const buckets=new Map();
+  rows.forEach(item=>{
+    const p=map.project([item.lng,item.lat]);
+    const key=`${Math.floor(p.x/cellSize)}:${Math.floor(p.y/cellSize)}`;
+    if(!buckets.has(key))buckets.set(key,[]);
+    buckets.get(key).push(item);
+  });
+
+  buckets.forEach(group=>{
+    if(group.length===1){
+      const item=group[0];
+      const marker=new maplibregl.Marker({element:makePointElement(item),anchor:"center"})
+        .setLngLat([item.lng,item.lat]).addTo(map);
+      mapMarkers.push(marker);
+      return;
+    }
+
+    const lng=group.reduce((s,x)=>s+x.lng,0)/group.length;
+    const lat=group.reduce((s,x)=>s+x.lat,0)/group.length;
+    const marker=new maplibregl.Marker({element:makeClusterElement(group),anchor:"center"})
+      .setLngLat([lng,lat]).addTo(map);
+    mapMarkers.push(marker);
+  });
+}
+
+function openResourcePopup(item){
+  if(!mapReady)return;
+  if(currentPopup)currentPopup.remove();
+
+  /* 固定資訊卡永遠顯示在點位上方，避免 MapLibre 自動切換 anchor 造成卡片位置跳動。 */
+  currentPopup=new maplibregl.Popup({
+    maxWidth:"360px",
+    anchor:"bottom",
+    offset:[0,-12],
+    closeButton:true,
+    closeOnClick:false,
+    focusAfterOpen:false
+  })
+    .setLngLat([item.lng,item.lat])
+    .setDOMContent(popupContent(item))
+    .addTo(map);
+
+  /* 點位靠近畫面邊緣時，只平移地圖，不改變 popup 方向。 */
+  window.requestAnimationFrame(()=>keepPopupVisible(item));
+}
+
+function keepPopupVisible(item){
+  if(!mapReady||!currentPopup)return;
+  const popupEl=currentPopup.getElement(),mapEl=map.getContainer();
+  if(!popupEl||!mapEl)return;
+
+  const pr=popupEl.getBoundingClientRect(),mr=mapEl.getBoundingClientRect();
+  const ui=document.querySelector(".ui-stack");
+  const ur=ui&&!ui.classList.contains("hidden")?ui.getBoundingClientRect():null;
+  const gap=12;
+  let dx=0,dy=0;
+
+  if(pr.left<mr.left+12)dx=pr.left-(mr.left+12);
+  else if(pr.right>mr.right-18)dx=pr.right-(mr.right-18);
+
+  if(pr.top<mr.top+12)dy=pr.top-(mr.top+12);
+  else if(pr.bottom>mr.bottom-32)dy=pr.bottom-(mr.bottom-32);
+
+  if(ur){
+    const overlaps=!(pr.right<ur.left-gap||pr.left>ur.right+gap||pr.bottom<ur.top-gap||pr.top>ur.bottom+gap);
+    if(overlaps){
+      /* 桌機優先將 popup 移到控制卡右側；手機控制卡橫跨畫面時則往下避開。 */
+      if(window.innerWidth>760){
+        dx=pr.left-(ur.right+gap);
+      }else{
+        dy=pr.top-(ur.bottom+gap);
+      }
+    }
+  }
+
+  if(dx||dy)map.panBy([dx,dy],{duration:320});
+}
+
+function openResourceOnMap(item){
+  if(!mapReady)return;
+  map.easeTo({center:[item.lng,item.lat],zoom:15,duration:500});
+  window.setTimeout(()=>openResourcePopup(item),520);
+}
+
+function agencyInfo(service){
+  const m=SERVICE_META[service]||{};
+  return{key:m.agency||"sfaa",name:m.agencyName||""};
+}
+function fitService(service){
+  if(!profile.role||profile.role==="helper")return{rank:2,label:""};
+  if(profile.role==="family"){
+    if(profile.familyGoal==="caregiver")return CAREGIVER.has(service)?{rank:0,label:"較符合"}:{rank:2,label:""};
+    if(profile.familyGoal==="person"){
+      const a=SERVICE_META[service]?.audience;
+      return a&&a!=="caregiver"?{rank:0,label:"較符合"}:{rank:2,label:""};
+    }
+    return{rank:1,label:""};
+  }
+  if(MENTAL.has(service))return{rank:0,label:"可優先洽詢"};
+  if(service==="精神障礙者協作模式服務據點"){
+    if(profile.selfStatus==="disability")return{rank:0,label:"較符合"};
+    if(profile.selfStatus==="diagnosis"||profile.selfStatus==="catastrophic")return{rank:1,label:"可先洽詢"};
+    return{rank:1,label:"可先洽詢"};
+  }
+  if(DISABILITY.has(service)){
+    if(profile.selfStatus==="disability")return{rank:0,label:"較符合"};
+    return{rank:2,label:""};
+  }
+  return{rank:2,label:""};
+}
+function fitResource(item){
+  return item.services.map(fitService).sort((a,b)=>a.rank-b.rank)[0]||{rank:2,label:""};
+}
+
+function buildCounty(){
+  countyFilter.innerHTML='<option value="all">全台灣所有縣市</option>';
+  [...new Set(resources.map(r=>r.county).filter(Boolean))].sort().forEach(c=>{
+    const o=document.createElement("option");o.value=c;o.textContent=c;countyFilter.appendChild(o);
+  });
+}
+function buildServices(){
+  serviceFilters.innerHTML="";
+  const fixedBottom=["社區居住","身心障礙者家庭托顧服務"];
+  const topServices=CANONICAL_SERVICES
+    .filter(s=>!fixedBottom.includes(s))
+    .sort((a,b)=>fitService(a).rank-fitService(b).rank||a.localeCompare(b,"zh-TW"));
+  const ordered=[...topServices,...fixedBottom.filter(s=>CANONICAL_SERVICE_SET.has(s))];
+
+  ordered.forEach(s=>{
+    const agency=agencyInfo(s),catalog=SERVICE_CATALOG[s];
+    const label=document.createElement("label");
+    label.className=`service-item ${agency.key}${catalog.mapped?"":" unmapped"}`;
+
+    const cb=document.createElement("input");
+    cb.type="checkbox";cb.value=s;cb.className="service-checkbox";
+
+    const name=document.createElement("span");
+    name.className="service-name";name.textContent=s;
+
+    const info=document.createElement("button");
+    info.type="button";info.className="service-info-btn";info.textContent="ⓘ";
+    info.setAttribute("aria-label",`查看${s}說明`);
+    info.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();openServiceInfo(s);});
+
+    label.append(cb,name,info);
+
+    if(!catalog.mapped){
+      const note=document.createElement("div");
+      note.className="service-unmapped-note";
+      note.textContent="無公開據點地址";
+      label.appendChild(note);
+    }
+
+    serviceFilters.appendChild(label);
+    cb.addEventListener("change",()=>{updateSelectedServiceCount();render();});
+  });
+  updateSelectedServiceCount();
+}
+function selectedServices(){
+  return [...document.querySelectorAll(".service-checkbox:checked")].map(x=>x.value);
+}
+function updateSelectedServiceCount(){
+  const n=selectedServices().length;
+  serviceSelectedCount.textContent=n?`已選 ${n} 項`:"未篩選";
+}
+function filteredResources(){
+  const selected=selectedServices();
+  const mappedSelected=selected.filter(s=>SERVICE_CATALOG[s]?.mapped);
+  const hasOnlyUnmapped=selected.length>0&&mappedSelected.length===0;
+  const type=document.querySelector('input[name="addressType"]:checked')?.value||"all";
+
+  if(hasOnlyUnmapped)return [];
+
+  return resources.filter(item=>{
+    if(countyFilter.value!=="all"&&item.county!==countyFilter.value)return false;
+    if(type!=="all"&&item.addressType!==type)return false;
+    if(mappedSelected.length&&!mappedSelected.some(s=>item.services.includes(s)))return false;
+    return true;
+  }).sort((a,b)=>fitResource(a).rank-fitResource(b).rank||a.county.localeCompare(b.county,"zh-TW")||a.name.localeCompare(b.name,"zh-TW"));
+}
+function relevantRecords(item){
+  const sel=selectedServices().filter(s=>SERVICE_CATALOG[s]?.mapped);
+  return sel.length?item.records.filter(r=>sel.includes(r.service)):item.records;
+}
+function groupedServiceDetails(item){
+  const map=new Map();
+  relevantRecords(item).forEach(r=>{
+    if(!map.has(r.service))map.set(r.service,{service:r.service,phones:[],areas:[],sources:[]});
+    const g=map.get(r.service);
+    if(r.phone&&!g.phones.includes(r.phone))g.phones.push(r.phone);
+    if(r.area&&!g.areas.includes(r.area))g.areas.push(r.area);
+    if(r.source&&!g.sources.includes(r.source))g.sources.push(r.source);
+  });
+  return [...map.values()];
+}
+function extractDialableNumbers(raw){
+  let text=String(raw||"").trim();
+  if(!text)return [];
+  /* 將「兩個完整號碼只用空白分隔」轉成可解析分隔符。 */
+  text=text.replace(/(\d)\s+(?=0\d)/g,"$1、");
+  const parts=text.split(/[、｜，,；;\n]+/);
+  const seen=new Set(),out=[];
+  const rePhone=/(?:\(\s*)?0\d{1,3}(?:\s*\))?(?:[-\s]*\d){5,8}/;
+  parts.forEach(part=>{
+    const m=part.match(rePhone);
+    if(!m)return;
+    const digits=m[0].replace(/\D/g,"");
+    if(digits.length<8||digits.length>10||seen.has(digits))return;
+    seen.add(digits);
+    out.push({display:m[0].trim(),href:`tel:${digits}`});
+  });
+  return out;
+}
+
+function popupContent(item){
+  const root=document.createElement("div");root.className="popup-card";
+  const h=document.createElement("h3");h.textContent=item.name;root.appendChild(h);
+
+  const top=document.createElement("div");top.className="popup-top";
+  const type=document.createElement("span");
+  type.className="type-badge "+(item.addressType==="聯絡地址"?"type-contact":"type-service");
+  type.textContent=item.addressType;top.appendChild(type);
+  const fit=fitResource(item);
+  if(fit.label){const f=document.createElement("span");f.className="fit-badge";f.textContent=fit.label;top.appendChild(f);}
+  root.appendChild(top);
+
+  const addr=document.createElement("div");addr.className="address-box";addr.textContent="📍 "+[item.county,item.address].filter(Boolean).join(" ");root.appendChild(addr);
+  if(item.addressType==="聯絡地址"){
+    const w=document.createElement("div");w.className="contact-warning";w.textContent="此為聯絡地址，請先電話確認服務地點。";root.appendChild(w);
+  }
+
+  const blocks=document.createElement("div");blocks.className="service-blocks";
+  groupedServiceDetails(item).forEach(g=>{
+    const agency=agencyInfo(g.service);
+    const block=document.createElement("section");block.className=`service-block ${agency.key}`;
+    const head=document.createElement("div");head.className="service-block-head";
+    const title=document.createElement("strong");title.textContent=g.service;
+    const chip=document.createElement("span");chip.className=`agency-chip ${agency.key}`;chip.textContent=agency.name;
+    const infoBtn=document.createElement("button");infoBtn.type="button";infoBtn.className="service-info-btn";infoBtn.textContent="ⓘ";
+    infoBtn.setAttribute("aria-label",`查看${g.service}說明`);
+    infoBtn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();openServiceInfo(g.service);});
+    head.append(title,chip,infoBtn);block.appendChild(head);
+
+    const detail=document.createElement("div");detail.className="service-detail";
+    if(g.areas.length){const d=document.createElement("div");d.textContent="服務區域："+g.areas.join("、");detail.appendChild(d);}
+    if(g.phones.length){
+      g.phones.forEach(p=>{
+        const d=document.createElement("div");
+        const raw=document.createElement("span");raw.className="phone-raw";raw.textContent="電話："+p;
+        d.appendChild(raw);
+
+        const dialables=extractDialableNumbers(p);
+        if(dialables.length){
+          const actions=document.createElement("div");actions.className="phone-actions";
+          dialables.forEach(phone=>{
+            const a=document.createElement("a");
+            a.className="phone-action";a.href=phone.href;
+            a.textContent="撥打 "+phone.display;
+            a.setAttribute("aria-label","撥打電話 "+phone.display);
+            actions.appendChild(a);
+          });
+          d.appendChild(actions);
+        }
+        detail.appendChild(d);
+      });
+    }
+    block.appendChild(detail);blocks.appendChild(block);
+  });
+  root.appendChild(blocks);
+
+  return root;
+}
+
+function render(){
+  const rows=filteredResources();
+  currentFilteredRows=rows;
+  if(mapReady)renderMapMarkers();
+
+  const unmappedSelected=selectedServices().filter(s=>SERVICE_CATALOG[s]&&!SERVICE_CATALOG[s].mapped);
+  resultCount.textContent=rows.length.toLocaleString("zh-TW");
+  drawerCount.textContent=unmappedSelected.length
+    ?`${rows.length.toLocaleString("zh-TW")} 個地圖資源＋${unmappedSelected.length} 項無公開據點服務`
+    :`${rows.length.toLocaleString("zh-TW")} 個資源`;
+  renderResults(rows);
+}
+function renderResults(rows){
+  resultList.innerHTML="";
+  const RESULT_LIST_LIMIT=120;
+  if(rows.length>RESULT_LIST_LIMIT){
+    resultLimitNotice.textContent=`目前符合條件共 ${rows.length.toLocaleString("zh-TW")} 個資源；結果清單僅列前 ${RESULT_LIST_LIMIT} 筆。地圖仍可瀏覽全部符合條件的資源，建議使用「地區」或「服務」縮小範圍。`;
+    resultLimitNotice.classList.remove("hidden");
+  }else{
+    resultLimitNotice.classList.add("hidden");
+    resultLimitNotice.textContent="";
+  }
+
+  selectedServices()
+    .filter(s=>SERVICE_CATALOG[s]&&!SERVICE_CATALOG[s].mapped)
+    .forEach(s=>{
+      const meta=SERVICE_CATALOG[s];
+      const card=document.createElement("article");card.className="no-map-card";
+      const title=document.createElement("div");title.className="no-map-title";title.textContent=s;card.appendChild(title);
+      const text=document.createElement("div");text.className="no-map-text";
+      text.textContent=meta.privacy||"此服務不公開據點地址。";card.appendChild(text);
+      const actions=document.createElement("div");actions.className="no-map-actions";
+      const btn=document.createElement("button");btn.textContent="查看服務說明";
+      btn.addEventListener("click",()=>openServiceInfo(s));
+      actions.appendChild(btn);card.appendChild(actions);
+      resultList.appendChild(card);
+    });
+
+  rows.slice(0,RESULT_LIST_LIMIT).forEach(item=>{
+    const shown=[...new Set(relevantRecords(item).map(r=>r.service))];
+    const agencies=[...new Set(shown.map(s=>agencyInfo(s).key))];
+    const primary=agencies.includes("domha")?"domha":agencies.includes("ltc")?"ltc":"sfaa";
+    const card=document.createElement("article");card.className=`resource-card ${primary}`;
+
+    const name=document.createElement("div");name.className="resource-name";name.textContent=item.name;card.appendChild(name);
+    const meta=document.createElement("div");meta.className="resource-meta";
+    meta.textContent=[item.county,item.addressType].filter(Boolean).join("・");card.appendChild(meta);
+
+    const tags=document.createElement("div");tags.className="card-tags";
+    shown.forEach(s=>{const a=agencyInfo(s),p=document.createElement("span");p.className=`service-pill ${a.key}`;p.textContent=s;tags.appendChild(p);});
+    card.appendChild(tags);
+
+    const actions=document.createElement("div");actions.className="card-actions";
+    const view=document.createElement("button");view.className="primary";view.textContent="在地圖查看";
+    view.addEventListener("click",()=>{
+      closeResults();
+      openResourceOnMap(item);
+    });
+    actions.appendChild(view);card.appendChild(actions);resultList.appendChild(card);
+  });
+}
+
+
+const serviceInfoBackdrop=document.getElementById("serviceInfoBackdrop");
+const serviceInfoModal=document.getElementById("serviceInfoModal");
+const serviceInfoTitle=document.getElementById("serviceInfoTitle");
+const serviceInfoAgency=document.getElementById("serviceInfoAgency");
+const serviceInfoBody=document.getElementById("serviceInfoBody");
+
+function openServiceInfo(service){
+  const meta=SERVICE_CATALOG[service];
+  if(!meta)return;
+
+  serviceInfoTitle.textContent=service;
+  serviceInfoAgency.innerHTML="";
+  const chip=document.createElement("span");
+  chip.className=`agency-chip ${meta.agency}`;chip.textContent=meta.agencyName;
+  serviceInfoAgency.appendChild(chip);
+
+  serviceInfoBody.innerHTML="";
+
+  if(meta.audience){
+    const sec=document.createElement("section");sec.className="info-section";
+    const label=document.createElement("div");label.className="info-label";label.textContent="對象";
+    const box=document.createElement("div");box.className="info-audience";box.textContent=meta.audience;
+    sec.append(label,box);serviceInfoBody.appendChild(sec);
+  }
+
+  const summarySec=document.createElement("section");summarySec.className="info-section";
+  const summaryLabel=document.createElement("div");summaryLabel.className="info-label";summaryLabel.textContent="服務簡介";
+  const summary=document.createElement("div");summary.className="info-summary";summary.textContent=meta.summary;
+  summarySec.append(summaryLabel,summary);serviceInfoBody.appendChild(summarySec);
+
+  if(meta.privacy){
+    const privacy=document.createElement("div");privacy.className="info-privacy";privacy.textContent=meta.privacy;
+    serviceInfoBody.appendChild(privacy);
+  }
+
+  if(meta.full){
+    const details=document.createElement("details");details.className="info-full";
+    const sum=document.createElement("summary");sum.textContent="查看完整服務說明";
+    const body=document.createElement("div");body.className="info-full-text";body.textContent=meta.full;
+    details.append(sum,body);serviceInfoBody.appendChild(details);
+  }
+
+  if(meta.link){
+    try{
+      const u=new URL(meta.link,location.href);
+      if(u.protocol==="https:"){
+        const link=document.createElement("a");link.className="info-link";link.href=u.href;link.target="_blank";
+        link.rel="noopener noreferrer";link.referrerPolicy="no-referrer";
+        link.textContent="查看聯絡資訊";
+        serviceInfoBody.appendChild(link);
+      }
+    }catch(e){}
+  }
+
+  const source=document.createElement("div");source.className="info-source";
+  source.textContent="資料來源：衛福部彙整｜資料時間：115年7月17日";
+  serviceInfoBody.appendChild(source);
+
+  serviceInfoBackdrop.classList.add("show");
+  serviceInfoModal.classList.add("open");
+}
+function closeServiceInfo(){
+  serviceInfoBackdrop.classList.remove("show");
+  serviceInfoModal.classList.remove("open");
+}
+document.getElementById("serviceInfoClose").addEventListener("click",closeServiceInfo);
+serviceInfoBackdrop.addEventListener("click",closeServiceInfo);
+
+function openPanel(name){
+  const panelIds={county:"panelCounty",service:"panelService",more:"panelMore"};
+  const already=!filterPanel.classList.contains("hidden")&&!document.getElementById(panelIds[name]).classList.contains("hidden");
+  document.querySelectorAll(".panel-view").forEach(x=>x.classList.add("hidden"));
+  document.querySelectorAll(".quick-btn").forEach(x=>x.classList.remove("active"));
+  if(already){filterPanel.classList.add("hidden");return;}
+  document.getElementById(panelIds[name]).classList.remove("hidden");
+  filterPanel.classList.remove("hidden");
+  document.querySelector(`.quick-btn[data-panel="${name}"]`).classList.add("active");
+}
+function closePanel(){
+  filterPanel.classList.add("hidden");
+  document.querySelectorAll(".quick-btn").forEach(x=>x.classList.remove("active"));
+}
+document.querySelectorAll(".quick-btn").forEach(b=>b.addEventListener("click",()=>openPanel(b.dataset.panel)));
+document.querySelectorAll("[data-close-panel]").forEach(b=>b.addEventListener("click",closePanel));
+document.getElementById("clearServicesBtn").addEventListener("click",()=>{
+  document.querySelectorAll(".service-checkbox").forEach(x=>x.checked=false);updateSelectedServiceCount();render();
+});
+countyFilter.addEventListener("change",()=>{
+  render();
+  const rows=filteredResources();
+  if(rows.length&&mapReady){
+    const lngs=rows.map(r=>r.lng),lats=rows.map(r=>r.lat);
+    map.fitBounds(
+      [[Math.min(...lngs),Math.min(...lats)],[Math.max(...lngs),Math.max(...lats)]],
+      {padding:40,maxZoom:12,duration:500}
+    );
+  }
+});
+document.querySelectorAll('input[name="addressType"]').forEach(x=>x.addEventListener("change",render));
+
+function openResults(){resultDrawer.classList.add("open");drawerBackdrop.classList.add("show")}
+function closeResults(){resultDrawer.classList.remove("open");drawerBackdrop.classList.remove("show")}
+document.getElementById("openResultsBtn").addEventListener("click",openResults);
+document.getElementById("closeResultsBtn").addEventListener("click",closeResults);
+drawerBackdrop.addEventListener("click",closeResults);
+
+/* five-level font scale */
+const FONT_LEVEL_SCALES={1:1,2:1.12,3:1.24,4:1.36,5:1.48};
+function applyFontLevel(level){
+  fontLevel=Math.max(1,Math.min(5,Number(level)||1));
+  document.documentElement.style.setProperty("--ui-scale",FONT_LEVEL_SCALES[fontLevel]);
+  document.getElementById("fontDecrease").disabled=fontLevel<=1;
+  document.getElementById("fontIncrease").disabled=fontLevel>=5;
+  try{localStorage.setItem("communityMapFontLevel",String(fontLevel))}catch(e){}
+}
+document.getElementById("fontDecrease").addEventListener("click",()=>applyFontLevel(fontLevel-1));
+document.getElementById("fontIncrease").addEventListener("click",()=>applyFontLevel(fontLevel+1));
+try{const n=Number(localStorage.getItem("communityMapFontLevel"));applyFontLevel(n>=1&&n<=5?n:1)}catch(e){applyFontLevel(1)}
+
+function renderProfile(){
+  if(profile.role==="self"){
+    const names={disability:"我自己｜有身心障礙證明",diagnosis:"我自己｜精神疾病診斷／接受精神醫療",catastrophic:"我自己｜有重大傷病證明",unsure:"我自己｜不確定資格"};
+    profileText.textContent=names[profile.selfStatus]||"我自己";
+  }else if(profile.role==="family"){
+    const names={person:"家人／照顧者｜找給家人使用",caregiver:"家人／照顧者｜找照顧者支持",both:"家人／照顧者｜兩者都看"};
+    profileText.textContent=names[profile.familyGoal]||"家人／照顧者";
+  }else if(profile.role==="helper"){
+    profileText.textContent="助人工作者｜完整資源";
+  }else profileText.textContent="尚未選擇";
+}
+function showRoleStep(){
+  document.getElementById("roleStep").classList.remove("hidden");
+  document.getElementById("selfStep").classList.add("hidden");
+  document.getElementById("familyStep").classList.add("hidden");
+}
+function finishProfile(){
+  document.getElementById("onboarding").classList.add("hidden");
+  renderProfile();
+  if(resources.length){buildServices();render();}
+}
+document.querySelectorAll("[data-role]").forEach(b=>b.addEventListener("click",()=>{
+  profile={role:b.dataset.role,selfStatus:null,familyGoal:null};
+  if(profile.role==="helper"){finishProfile();return}
+  document.getElementById("roleStep").classList.add("hidden");
+  document.getElementById(profile.role==="self"?"selfStep":"familyStep").classList.remove("hidden");
+}));
+document.querySelectorAll("[data-back]").forEach(b=>b.addEventListener("click",showRoleStep));
+document.querySelectorAll("[data-self]").forEach(b=>b.addEventListener("click",()=>{profile.selfStatus=b.dataset.self;finishProfile()}));
+document.querySelectorAll("[data-family]").forEach(b=>b.addEventListener("click",()=>{profile.familyGoal=b.dataset.family;finishProfile()}));
+document.getElementById("changeProfileBtn").addEventListener("click",()=>{showRoleStep();document.getElementById("onboarding").classList.remove("hidden")});
+
+function bootstrapApp(){
+  renderProfile();
+  const missing=[];
+  if(typeof maplibregl==="undefined")missing.push("MapLibre");
+  if(typeof Papa==="undefined")missing.push("PapaParse");
+
+  if(missing.length){
+    showSystemNotice("必要元件載入失敗（"+missing.join("、")+"）。請重新整理頁面；若仍無法使用，請改用 NLSC EMAP6 版。","dependency","error");
+    return;
+  }
+  try{
+    initMap();
+    loadCSV();
+  }catch(e){
+    showSystemNotice("地圖初始化失敗，請重新整理頁面或改用 NLSC EMAP6 版。","dependency","error");
+    if(DEV_MODE)devBox.textContent="[[DEV："+String(e?.message||e).slice(0,180)+"]]";
+  }
+}
+bootstrapApp();
+</script>
+</body>
+</html>
